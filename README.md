@@ -1,0 +1,2 @@
+# Elver
+Personal Discord Bot
