@@ -17,7 +17,7 @@ public class Main extends ListenerAdapter
                 .addEventListeners(new Main())
                 .build();
 
-        System.out.println("apple");
+        System.out.println("pear");
     }
 
     @Override
