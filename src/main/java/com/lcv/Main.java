@@ -16,6 +16,8 @@ public class Main extends ListenerAdapter
                 GatewayIntent.GUILD_MESSAGES)
                 .addEventListeners(new Main())
                 .build();
+
+        System.out.println("apple");
     }
 
     @Override
