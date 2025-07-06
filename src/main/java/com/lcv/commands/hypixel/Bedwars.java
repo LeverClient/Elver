@@ -48,9 +48,15 @@ public class Bedwars implements Command
         }
 
         HypixelPlayerData hypixelData = new HypixelPlayerData(hypixelJson);
+
+        if (!hypixelData.valid) {
+            event.reply("player no hypixel").queue();
+            return;
+        }
+
         JsonObject bwJson = hypixelData.stats.get("Bedwars").getAsJsonObject();
 
-        if (bwJson.get("kills_bedwars") == null ) {
+        if (bwJson == null || bwJson.get("kills_bedwars") == null ) {
             event.reply("player no bedwars stats").queue();
             return;
         }
