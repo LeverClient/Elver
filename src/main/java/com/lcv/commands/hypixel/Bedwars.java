@@ -49,6 +49,12 @@ public class Bedwars implements Command
 
         HypixelPlayerData hypixelData = new HypixelPlayerData(hypixelJson);
         JsonObject bwJson = hypixelData.stats.get("Bedwars").getAsJsonObject();
+
+        if (bwJson.get("kills_bedwars") == null ) {
+            event.reply("player no bedwars stats").queue();
+            return;
+        }
+
         double losses = bwJson.get("losses_bedwars").getAsDouble();
         double wins = bwJson.get("wins_bedwars").getAsDouble();
         double finalKills = bwJson.get("final_kills_bedwars").getAsDouble();
