@@ -1,11 +1,15 @@
 package com.lcv.commands.hypixel;
 
+import com.google.gson.JsonElement;
 import com.google.gson.JsonObject;
 import com.lcv.commands.Command;
+import com.lcv.commands.Embed;
 import com.lcv.util.HTTPRequest;
+import net.dv8tion.jda.api.EmbedBuilder;
 import net.dv8tion.jda.api.events.interaction.command.SlashCommandInteractionEvent;
 import net.dv8tion.jda.api.interactions.commands.build.SlashCommandData;
 
+import java.awt.*;
 import java.util.Arrays;
 import java.util.Objects;
 
@@ -33,7 +37,10 @@ public class Bedwars implements Command
         JsonObject mojangJson = HTTPRequest.getHTTPRequest("https://api.mojang.com/users/profiles/minecraft/" + name);
         if (mojangJson == null || mojangJson.isEmpty())
         {
-            event.reply("not real player").queue();
+            Embed embed = new Embed()
+                    .setTitle("Failed Operation :(")
+                    .setDescription("Mojang: No player found");
+            event.replyEmbeds(embed.get()).queue();
             return;
         }
 
@@ -43,21 +50,44 @@ public class Bedwars implements Command
         JsonObject hypixelJson = HTTPRequest.getHTTPRequest("https://api.hypixel.net/v2/player?key=" + key + "&uuid=" + UUID);
         if (hypixelJson == null || hypixelJson.isEmpty())
         {
-            event.reply("not real player").queue();
+            Embed embed = new Embed()
+                    .setTitle("Failed Operation :(")
+                    .setDescription("Hypixel: No player found");
+            event.replyEmbeds(embed.get()).queue();
             return;
         }
 
         HypixelPlayerData hypixelData = new HypixelPlayerData(hypixelJson);
 
-        if (!hypixelData.valid) {
-            event.reply("player no hypixel").queue();
+        if (!hypixelData.valid)
+        {
+            Embed embed = new Embed()
+                    .setTitle("Failed Operation :(")
+                    .setDescription("Hypixel: No player data found");
+            event.replyEmbeds(embed.get()).queue();
             return;
         }
 
-        JsonObject bwJson = hypixelData.stats.get("Bedwars").getAsJsonObject();
+        // might need to rewrite cause its kinda messy
+        JsonElement bwElement = hypixelData.stats.get("Bedwars");
 
-        if (bwJson == null || bwJson.get("kills_bedwars") == null ) {
-            event.reply("player no bedwars stats").queue();
+        if (bwElement == null)
+        {
+            Embed embed = new Embed()
+                    .setTitle("Failed Operation :(")
+                    .setDescription("Hypixel: No bedwars stats");
+            event.replyEmbeds(embed.get()).queue();
+            return;
+        }
+
+        JsonObject bwJson = bwElement.getAsJsonObject();
+
+        if (bwJson == null || bwJson.get("kills_bedwars") == null)
+        {
+            Embed embed = new Embed()
+                    .setTitle("Failed Operation :(")
+                    .setDescription("Hypixel: No bedwars stats");
+            event.replyEmbeds(embed.get()).queue();
             return;
         }
 
@@ -76,7 +106,16 @@ public class Bedwars implements Command
         int level = (int) getLevelForExp(xp);
         String levelSuffix = bedwarsPrestigeStars[Math.min((level - 100) / 1000, bedwarsPrestigeStars.length - 1)];
 
-        event.reply(String.format("%s is %s%s\n%.3fWLR\n%.3fFKDR\n%.3fKDR", name, level, levelSuffix, WL, fkdr, kdr)).queue();
+        Embed embed = new Embed()
+                .setTitle(String.format("Bedwars -> %s", hypixelData.player.get("displayname")))
+                .addField(String.format("%s%s", level, levelSuffix), "amount of xp till next pres?", true)
+                .addField("WLR: ", String.valueOf(WL), true)
+                .addField("FKDR: ", String.valueOf(fkdr), true)
+                .addField("KDR: ", String.valueOf(kdr), true);
+
+        event.replyEmbeds(embed.get()).queue();
+
+        //event.reply(String.format("%s is %s%s\n%.3fWLR\n%.3fFKDR\n%.3fKDR", name, level, levelSuffix, WL, fkdr, kdr)).queue();
         //event.reply(name + " is " + level + levelSuffix + "\n" + wins/losses + "WLR" + "\n" + finalKills/finalDeaths + "FKDR").queue();
     }
 
