@@ -2,14 +2,23 @@ package com.lcv.commands.hypixel;
 
 import com.google.gson.JsonElement;
 import com.google.gson.JsonObject;
+import com.lcv.Main;
 import com.lcv.commands.Command;
 import com.lcv.commands.Embed;
 import com.lcv.util.HTTPRequest;
 import net.dv8tion.jda.api.EmbedBuilder;
 import net.dv8tion.jda.api.events.interaction.command.SlashCommandInteractionEvent;
 import net.dv8tion.jda.api.interactions.commands.build.SlashCommandData;
+import net.dv8tion.jda.api.utils.FileUpload;
 
+import javax.imageio.ImageIO;
 import java.awt.*;
+import java.awt.image.BufferedImage;
+import java.io.ByteArrayInputStream;
+import java.io.ByteArrayOutputStream;
+import java.io.File;
+import java.io.IOException;
+import java.net.URISyntaxException;
 import java.util.Arrays;
 import java.util.Objects;
 
@@ -37,9 +46,7 @@ public class Bedwars implements Command
         JsonObject mojangJson = HTTPRequest.getHTTPRequest("https://api.mojang.com/users/profiles/minecraft/" + name);
         if (mojangJson == null || mojangJson.isEmpty())
         {
-            Embed embed = new Embed()
-                    .setTitle("Failed Operation :(")
-                    .setDescription("Mojang: No player found");
+            Embed embed = new Embed().setTitle("Failed Operation :(").setDescription("Mojang: No player found");
             event.replyEmbeds(embed.get()).queue();
             return;
         }
@@ -50,9 +57,7 @@ public class Bedwars implements Command
         JsonObject hypixelJson = HTTPRequest.getHTTPRequest("https://api.hypixel.net/v2/player?key=" + key + "&uuid=" + UUID);
         if (hypixelJson == null || hypixelJson.isEmpty())
         {
-            Embed embed = new Embed()
-                    .setTitle("Failed Operation :(")
-                    .setDescription("Hypixel: No player found");
+            Embed embed = new Embed().setTitle("Failed Operation :(").setDescription("Hypixel: No player found");
             event.replyEmbeds(embed.get()).queue();
             return;
         }
@@ -61,9 +66,7 @@ public class Bedwars implements Command
 
         if (!hypixelData.valid)
         {
-            Embed embed = new Embed()
-                    .setTitle("Failed Operation :(")
-                    .setDescription("Hypixel: No player data found");
+            Embed embed = new Embed().setTitle("Failed Operation :(").setDescription("Hypixel: No player data found");
             event.replyEmbeds(embed.get()).queue();
             return;
         }
@@ -73,9 +76,7 @@ public class Bedwars implements Command
 
         if (bwElement == null)
         {
-            Embed embed = new Embed()
-                    .setTitle("Failed Operation :(")
-                    .setDescription("Hypixel: No bedwars stats");
+            Embed embed = new Embed().setTitle("Failed Operation :(").setDescription("Hypixel: No bedwars stats");
             event.replyEmbeds(embed.get()).queue();
             return;
         }
@@ -84,9 +85,7 @@ public class Bedwars implements Command
 
         if (bwJson == null || bwJson.get("kills_bedwars") == null)
         {
-            Embed embed = new Embed()
-                    .setTitle("Failed Operation :(")
-                    .setDescription("Hypixel: No bedwars stats");
+            Embed embed = new Embed().setTitle("Failed Operation :(").setDescription("Hypixel: No bedwars stats");
             event.replyEmbeds(embed.get()).queue();
             return;
         }
@@ -98,22 +97,51 @@ public class Bedwars implements Command
         double kills = bwJson.get("kills_bedwars").getAsDouble();
         double deaths = bwJson.get("deaths_bedwars").getAsDouble();
 
-        double WL = wins/losses;
-        double fkdr = finalKills/finalDeaths;
-        double kdr = kills/deaths;
+        double WL = wins / losses;
+        double fkdr = finalKills / finalDeaths;
+        double kdr = kills / deaths;
 
         int xp = bwJson.get("Experience").getAsInt();
         int level = (int) getLevelForExp(xp);
         String levelSuffix = bedwarsPrestigeStars[Math.min((level - 100) / 1000, bedwarsPrestigeStars.length - 1)];
 
-        Embed embed = new Embed()
-                .setTitle(String.format("Bedwars -> %s", hypixelData.player.get("displayname")))
-                .addField(String.format("%s%s", level, levelSuffix), "amount of xp till next pres?", true)
-                .addField("WLR: ", String.valueOf(WL), true)
-                .addField("FKDR: ", String.valueOf(fkdr), true)
-                .addField("KDR: ", String.valueOf(kdr), true);
+        Embed embed = new Embed().setTitle(String.format("Bedwars -> %s", hypixelData.player.get("displayname").getAsString())).addField(String.format("%s%s", level, levelSuffix), "amount of xp till next pres?", true).addField("WLR: ", String.valueOf(WL), true).addField("FKDR: ", String.valueOf(fkdr), true).addField("KDR: ", String.valueOf(kdr), true);
 
-        event.replyEmbeds(embed.get()).queue();
+        event.deferReply().queue();
+
+        File background;
+        try
+        {
+            background = new File(Main.class.getClassLoader().getResource("images/bedwarsBackground.png").toURI());
+        }
+        catch (URISyntaxException e)
+        {
+            event.reply("getting image killed elver :sob:").queue();
+            return;
+        }
+
+        try
+        {
+            BufferedImage image = ImageIO.read(background);
+            Font minecraftFont = Font.createFont(Font.TRUETYPE_FONT, Main.class.getClassLoader().getResourceAsStream("fonts/minecraft.ttf"));
+            Graphics2D g2d = image.createGraphics();
+            g2d.setFont(minecraftFont.deriveFont(60f));
+
+            g2d.setColor(Color.BLACK);
+            g2d.drawString(hypixelData.player.get("displayname").getAsString(), 400, 400);
+
+            g2d.dispose();
+
+            ByteArrayOutputStream outputStream = new ByteArrayOutputStream();
+            ImageIO.write(image, "png", outputStream);
+            event.getHook().sendFiles(FileUpload.fromData(new ByteArrayInputStream(outputStream.toByteArray()), "bedwars.png")).queue();
+        }
+        catch (IOException | FontFormatException e)
+        {
+            throw new RuntimeException(e);
+        }
+
+        //event.replyEmbeds(embed.get()).queue();
 
         //event.reply(String.format("%s is %s%s\n%.3fWLR\n%.3fFKDR\n%.3fKDR", name, level, levelSuffix, WL, fkdr, kdr)).queue();
         //event.reply(name + " is " + level + levelSuffix + "\n" + wins/losses + "WLR" + "\n" + finalKills/finalDeaths + "FKDR").queue();

@@ -3,6 +3,7 @@ package com.lcv;
 import com.lcv.commands.Command;
 import com.lcv.commands.hypixel.Bedwars;
 import com.lcv.commands.misc.Hello;
+import com.lcv.commands.misc.Image;
 import net.dv8tion.jda.api.JDA;
 import net.dv8tion.jda.api.JDABuilder;
 import net.dv8tion.jda.api.events.interaction.command.CommandAutoCompleteInteractionEvent;
@@ -30,7 +31,8 @@ public class Main extends ListenerAdapter
 
         commands = List.of(
                 new Hello(),
-                new Bedwars()
+                new Bedwars(),
+                new Image()
         );
 
         List<SlashCommandData> slashData = new ArrayList<>();
