@@ -1,6 +1,8 @@
 package com.lcv.util;
 
 import org.json.JSONObject;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 import java.io.BufferedReader;
 import java.io.IOException;
@@ -11,6 +13,7 @@ import java.util.HashMap;
 
 public class HTTPRequest
 {
+    private static final Logger log = LoggerFactory.getLogger(HTTPRequest.class);
     public static HashMap<String, HttpRequestCache> cache = new HashMap<>();
 
     public static void purgeCache() {
@@ -57,7 +60,7 @@ public class HTTPRequest
         }
         catch(IOException e)
         {
-            System.err.println(e);
+            log.error("e: ", e);
             return null;
         }
     }
