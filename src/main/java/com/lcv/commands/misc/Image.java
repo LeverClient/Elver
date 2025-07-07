@@ -35,7 +35,7 @@ public class Image implements Command
     {
         try
         {
-            File image = new File(Main.class.getClassLoader().getResource("images/bedwarsBackground.png").toURI());
+            File image = new File(Main.class.getClassLoader().getResource("images/bedwarsBackground0.png").toURI());
             return image;
         }
         catch (URISyntaxException e)

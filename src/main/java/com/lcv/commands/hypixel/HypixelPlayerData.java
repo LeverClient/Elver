@@ -2,30 +2,31 @@ package com.lcv.commands.hypixel;
 
 import com.google.gson.JsonElement;
 import com.google.gson.JsonObject;
+import org.json.JSONObject;
 
 public class HypixelPlayerData
 {
-    protected JsonObject player;
+    protected JSONObject player;
 
-    protected JsonObject stats;
+    protected JSONObject stats;
 
     boolean valid = true;
 
-    public HypixelPlayerData(JsonObject json)
+    public HypixelPlayerData(JSONObject json)
     {
         if (!json.has("player")) {
             valid = false;
             return;
         }
 
-        player = json.get("player").getAsJsonObject();
+        player = json.getJSONObject("player");
 
         if (!player.has("stats")) {
             valid = false;
             return;
         }
 
-        stats = player.get("stats").getAsJsonObject();
+        stats = player.getJSONObject("stats");
         System.out.println("wow!");
 
     }

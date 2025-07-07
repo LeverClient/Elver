@@ -2,6 +2,7 @@ package com.lcv.util;
 
 import com.google.gson.JsonObject;
 import com.google.gson.JsonParser;
+import org.json.JSONObject;
 
 import java.io.BufferedReader;
 import java.io.IOException;
@@ -11,7 +12,7 @@ import java.net.URL;
 
 public class HTTPRequest
 {
-    public static JsonObject getHTTPRequest(String URL)
+    public static JSONObject getHTTPRequest(String URL)
     {
         try
         {
@@ -31,7 +32,7 @@ public class HTTPRequest
                 reader.close();
                 connection.disconnect();
 
-                return JsonParser.parseString(stringBuilder.toString()).getAsJsonObject();
+                return new JSONObject(stringBuilder.toString());
             }
             return null;
         }
