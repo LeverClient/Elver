@@ -1,7 +1,5 @@
 package com.lcv.commands.hypixel;
 
-import com.google.gson.JsonElement;
-import com.google.gson.JsonObject;
 import org.json.JSONObject;
 
 public class HypixelPlayerData
