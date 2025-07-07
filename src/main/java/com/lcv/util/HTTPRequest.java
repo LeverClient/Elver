@@ -1,7 +1,5 @@
 package com.lcv.util;
 
-import com.google.gson.JsonObject;
-import com.google.gson.JsonParser;
 import org.json.JSONObject;
 
 import java.io.BufferedReader;
@@ -9,11 +7,30 @@ import java.io.IOException;
 import java.io.InputStreamReader;
 import java.net.HttpURLConnection;
 import java.net.URL;
+import java.util.HashMap;
 
 public class HTTPRequest
 {
+    public static HashMap<String, HttpRequestCache> cache = new HashMap<>();
+
+    public static void purgeCache() {
+        cache.clear();
+    }
+
+    public static boolean purgeCache(String URL) {
+        return cache.remove(URL) != null;
+    }
+
     public static JSONObject getHTTPRequest(String URL)
     {
+        if (cache.containsKey(URL)) {
+            HttpRequestCache cached = cache.get(URL);
+            if (!cached.tryPurge()) {
+                return cached.result;
+            }
+        }
+
+
         try
         {
             URL url = new URL(URL);
@@ -32,13 +49,42 @@ public class HTTPRequest
                 reader.close();
                 connection.disconnect();
 
-                return new JSONObject(stringBuilder.toString());
+                JSONObject js = new JSONObject(stringBuilder.toString());
+                cache.put(URL, new HttpRequestCache(URL, js));
+                return js;
             }
             return null;
         }
         catch(IOException e)
         {
+            System.err.println(e);
             return null;
+        }
+    }
+
+    public static class HttpRequestCache {
+        static long cacheTime = 180;
+
+        public final JSONObject result;
+
+        public final String url;
+
+        public final long expireAt;
+
+
+        public HttpRequestCache(String URL, JSONObject result) {
+            this.url = URL;
+            this.result = result;
+            expireAt = System.currentTimeMillis() + cacheTime*1000;
+        }
+
+        public boolean tryPurge() {
+            if (System.currentTimeMillis() < this.expireAt) {
+                return false;
+            }
+
+            cache.remove(this.url);
+            return true;
         }
     }
 }
