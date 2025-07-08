@@ -16,6 +16,8 @@ import org.slf4j.LoggerFactory;
 import javax.imageio.ImageIO;
 import java.awt.*;
 import java.awt.image.BufferedImage;
+import java.awt.image.ColorModel;
+import java.awt.image.WritableRaster;
 import java.io.ByteArrayInputStream;
 import java.io.ByteArrayOutputStream;
 import java.io.File;
@@ -35,6 +37,7 @@ public class Bedwars implements Command
     Random rand = new Random();
     ArrayList<BufferedImage> backgroundImages;
     Font minecraftFont;
+
     public Bedwars() {
         try
         {
@@ -46,6 +49,15 @@ public class Bedwars implements Command
         }
 
         backgroundImages = getBackgrounds();
+    }
+
+    public static BufferedImage copyImage(BufferedImage image) {
+        BufferedImage clone = new BufferedImage(image.getWidth(),
+                image.getHeight(), image.getType());
+        Graphics2D g2d = clone.createGraphics();
+        g2d.drawImage(image, 0, 0, null);
+        g2d.dispose();
+        return clone;
     }
 
     int availableBackgrounds = 0;
@@ -153,7 +165,7 @@ public class Bedwars implements Command
         String levelSuffix = bedwarsPrestigeStars[Math.min((level - 100) / 1000, bedwarsPrestigeStars.length - 1)];
 
         int chosenBackground = availableBackgrounds <= 1 ? 0 : rand.nextInt(0, availableBackgrounds);
-        BufferedImage image = backgroundImages.get(chosenBackground);
+        BufferedImage image = copyImage(backgroundImages.get(chosenBackground));
 
         try
         {
