@@ -171,7 +171,7 @@ public class Bedwars implements Command
         {
             Graphics2D g2d = image.createGraphics();
             g2d.drawImage(ImageIO.read(new File(Main.class.getClassLoader().getResource("images/overlayNoText.png").toURI())), 0, 0, null);
-            FontRenderer fontRenderer = new FontRenderer(g2d, new Font[]{minecraftFont.deriveFont(150f)});
+            FontRenderer fontRenderer = new FontRenderer(g2d, new Font[]{minecraftFont.deriveFont(144f)});
 
             fontRenderer.drawString(hypixelData.player.getString("displayname"), 1440 - (g2d.getFontMetrics().stringWidth((hypixelData.player.getString("displayname"))) / 2), 300, true, Color.WHITE);
 

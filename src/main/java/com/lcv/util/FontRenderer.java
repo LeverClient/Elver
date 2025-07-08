@@ -182,11 +182,11 @@ public class FontRenderer {
         // draw shadow
         if (shadow) {
             int currentX = x;
-            int offset = selectedFont.getSize()/48;
+            int offset = (int) (selectedFont.getSize2D()/8);
             for (FontRenderSegment segment : renderSegments) {
                 if (segment == null) break;
 
-                currentX += segment.draw(currentX + offset, y +offset, true);
+                currentX += segment.draw(currentX + offset, y + offset, true);
             }
         }
 
@@ -225,11 +225,11 @@ public class FontRenderer {
             g2d.drawString(text, x, y);
 
             if (underline) {
-                g2d.fillRect(x, y + (int) (bounds.getMaxY()/2), width, fontSize/24);
+                g2d.fillRect(x, y + (int) (bounds.getMaxY()/2), width, fontSize/8);
             }
 
             if (strikethrough) {
-                g2d.fillRect(x, y + (int) (bounds.getCenterY()/1.2), width, fontSize/24);
+                g2d.fillRect(x, y + (int) (bounds.getCenterY()/1.2), width, fontSize/8);
             }
 
             return width;
