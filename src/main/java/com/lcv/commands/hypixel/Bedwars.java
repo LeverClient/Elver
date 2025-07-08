@@ -187,7 +187,7 @@ public class Bedwars implements Command
 
             ByteArrayOutputStream outputStream = new ByteArrayOutputStream();
             ImageIO.write(image, "png", outputStream);
-            FileUpload f =  FileUpload.fromData(new ByteArrayInputStream(outputStream.toByteArray()), "bedwars.png");
+            FileUpload f =  FileUpload.fromData(new ByteArrayInputStream(outputStream.toByteArray()), String.format("bedwars stats for %s meow.png", name));
             interactionHook.sendFiles(f).queue();
         }
         catch (IOException e)
