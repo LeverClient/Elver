@@ -58,10 +58,18 @@ public class Bedwars implements Command
         {
             for (;;availableBackgrounds++)
             {
-                URL resource = Main.class.getClassLoader().getResource(String.format("images/Backgrounds/bedwarsBackground%s.png", availableBackgrounds));
+                URL resource = Main.class.getResource(String.format("/images/Backgrounds/bedwarsBackground%s.png", availableBackgrounds));
                 if (resource == null) break;
+
                 File file = new File(resource.toURI());
                 BufferedImage image = ImageIO.read(file);
+
+                // draw overlay on background
+                Graphics2D g2d = image.createGraphics();
+                g2d.drawImage(ImageIO.read(new File(Objects.requireNonNull(Main.class.getResource("/images/overlayNoText.png")).toURI())), 0, 0, null);
+                g2d.dispose();
+
+                // save background
                 backgrounds.add(image);
             }
         }
@@ -168,7 +176,7 @@ public class Bedwars implements Command
             g2d.drawImage(Main.botProfileScaled, 25, 25, 226, 226, null);
 
             // draw overlay
-            g2d.drawImage(ImageIO.read(new File(Main.class.getClassLoader().getResource("images/overlayNoText.png").toURI())), 0, 0, null);
+            //g2d.drawImage(ImageIO.read(new File(Main.class.getClassLoader().getResource("images/overlayNoText.png").toURI())), 0, 0, null);
 
             // draw player name
             String nameWithRank = hypixelData.getPlayerNameRankFormat();
@@ -182,7 +190,7 @@ public class Bedwars implements Command
             FileUpload f =  FileUpload.fromData(new ByteArrayInputStream(outputStream.toByteArray()), "bedwars.png");
             interactionHook.sendFiles(f).queue();
         }
-        catch (IOException | URISyntaxException e)
+        catch (IOException e)
         {
             throw new RuntimeException(e);
         }
