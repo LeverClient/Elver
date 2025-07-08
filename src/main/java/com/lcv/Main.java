@@ -4,6 +4,7 @@ import com.lcv.commands.Command;
 import com.lcv.commands.hypixel.Bedwars;
 import com.lcv.commands.misc.Hello;
 import com.lcv.commands.misc.Image;
+import com.lcv.util.FontRenderer;
 import net.dv8tion.jda.api.JDA;
 import net.dv8tion.jda.api.JDABuilder;
 import net.dv8tion.jda.api.events.interaction.command.CommandAutoCompleteInteractionEvent;
@@ -22,6 +23,7 @@ import java.io.IOException;
 import java.net.URISyntaxException;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Objects;
 
 public class Main extends ListenerAdapter
 {
@@ -31,15 +33,20 @@ public class Main extends ListenerAdapter
 
     public static BufferedImage botProfileScaled;
 
-    public static void main(String[] args) throws URISyntaxException, IOException {
+    public static Font minecraftFont;
+
+    public static void main(String[] args) throws URISyntaxException, IOException, FontFormatException {
         // cache bot profile for faster image making
-        botProfile = ImageIO.read(new File(Main.class.getClassLoader().getResource("images/botProfile.png").toURI()));
+        botProfile = ImageIO.read(new File(Objects.requireNonNull(Main.class.getResource("/images/botProfile.png")).toURI()));
         botProfileScaled = new BufferedImage(226, 226, BufferedImage.TYPE_INT_ARGB);
         {
             Graphics2D g2d = botProfileScaled.createGraphics();
             g2d.drawImage(botProfile, 0, 0, 226, 226, null);
             g2d.dispose();
         }
+
+        // read font
+        minecraftFont = Font.createFont(Font.TRUETYPE_FONT, Objects.requireNonNull(Main.class.getResourceAsStream("/fonts/minecraft.ttf")));
 
         JDA jda = JDABuilder.create(
                 System.getenv("BOT_KEY"),

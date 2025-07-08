@@ -36,18 +36,8 @@ public class Bedwars implements Command
     private static final Logger log = LoggerFactory.getLogger(Bedwars.class);
     Random rand = new Random();
     ArrayList<BufferedImage> backgroundImages;
-    Font minecraftFont;
-
+    static FontRenderer fontRenderer = new FontRenderer(null, new Font[]{Main.minecraftFont.deriveFont(144f)});
     public Bedwars() {
-        try
-        {
-            minecraftFont = Font.createFont(Font.TRUETYPE_FONT, Main.class.getClassLoader().getResourceAsStream("fonts/minecraft.ttf"));
-        }
-        catch (FontFormatException | IOException e)
-        {
-            throw new RuntimeException(e);
-        }
-
         backgroundImages = getBackgrounds();
     }
 
@@ -170,16 +160,21 @@ public class Bedwars implements Command
         try
         {
             Graphics2D g2d = image.createGraphics();
+            // set up font renderer
+            fontRenderer.switchFont(0);
+            fontRenderer.setGraphics(g2d);
 
             // draw bot profile
             g2d.drawImage(Main.botProfileScaled, 25, 25, 226, 226, null);
 
+            // draw overlay
             g2d.drawImage(ImageIO.read(new File(Main.class.getClassLoader().getResource("images/overlayNoText.png").toURI())), 0, 0, null);
-            FontRenderer fontRenderer = new FontRenderer(g2d, new Font[]{minecraftFont.deriveFont(144f)});
 
+            // draw player name
             String nameWithRank = hypixelData.getPlayerNameRankFormat();
             fontRenderer.drawString(nameWithRank, 1440 - (g2d.getFontMetrics().stringWidth((FontRenderer.removeFormatting(nameWithRank))) / 2), 300, true, Color.WHITE);
 
+            // output and send image as response
             g2d.dispose();
 
             ByteArrayOutputStream outputStream = new ByteArrayOutputStream();
