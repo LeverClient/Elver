@@ -20,6 +20,8 @@ public class HypixelPlayerData
 
     public String uuid;
 
+    public String rankPrefix;
+
     boolean valid = true;
 
     public static HashMap<String, String> colorLookup = new HashMap<>();
@@ -66,8 +68,17 @@ public class HypixelPlayerData
         colorLookup.put("WHITE", "§f");
     }
 
-    static public String getPlayerNameRankFormat(String name, String rank, String plusColor, String monthlyRankColor) {
+    static public String getPlayerNameRankFormat(String name, String rank, String plusColor, String monthlyRankColor, String prefix) {
         StringBuilder nameFormatted = new StringBuilder();
+
+        if (prefix != null) {
+            nameFormatted.append(prefix);
+            nameFormatted.append(' ');
+            nameFormatted.append(name);
+
+            return nameFormatted.toString();
+        }
+
         String rankColor;
         if (rank.equals("SUPERSTAR")) {
             nameFormatted.append(rankColor = colorLookup.get(monthlyRankColor));
@@ -97,7 +108,7 @@ public class HypixelPlayerData
     }
 
     public String getPlayerNameRankFormat() {
-        return getPlayerNameRankFormat(name, rank, plusColor, monthlyRankColor);
+        return getPlayerNameRankFormat(name, rank, plusColor, monthlyRankColor, rankPrefix);
     }
 
     public HypixelPlayerData(JSONObject json)
@@ -116,6 +127,8 @@ public class HypixelPlayerData
 
         name = player.getString("displayname");
         uuid = player.getString("uuid");
+
+        rankPrefix = (player.has("prefix") && !player.isNull("prefix")) ? player.getString("prefix") : null;
 
         if (player.has("rank") && !player.isNull("rank")) {
             rank = player.getString("rank"); // staff
@@ -138,8 +151,6 @@ public class HypixelPlayerData
         if (player.has("monthlyRankColor") && !player.isNull("monthlyRankColor")) {
             monthlyRankColor = player.getString("monthlyRankColor"); // MVP++ color
         }
-
-        String rankName = getPlayerNameRankFormat(name, rank, plusColor, monthlyRankColor);
 
         stats = player.getJSONObject("stats");
         System.out.println("wow!");
