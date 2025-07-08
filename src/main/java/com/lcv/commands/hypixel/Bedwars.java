@@ -104,17 +104,16 @@ public class Bedwars implements Command
         InteractionHook interactionHook = event.getHook();
 
         String name = Objects.requireNonNull(event.getOption("name")).getAsString();
-//        JSONObject mojangJson = HTTPRequest.getHTTPRequest("https://api.mojang.com/users/profiles/minecraft/" + name);
-//        if (mojangJson == null || mojangJson.isEmpty())
-//        {
-//            Embed embed = new Embed().setTitle("Failed Operation :(").setDescription("Mojang: No player found");
-//            interactionHook.editOriginalEmbeds(embed.get()).queue();
-//            return;
-//        }
+        JSONObject mojangJson = HTTPRequest.getHTTPRequest("https://api.mojang.com/users/profiles/minecraft/" + name);
+        if (mojangJson == null || mojangJson.isEmpty())
+        {
+            Embed embed = new Embed().setTitle("Failed Operation :(").setDescription("Mojang: No player found");
+            interactionHook.editOriginalEmbeds(embed.get()).queue();
+            return;
+        }
 
         String key = System.getenv("HYPIXEL_KEY");
-        //String UUID = mojangJson.getString("id");
-        String UUID = "ddf13e43-6ccc-4790-bb49-912913bf7d77";
+        String UUID = mojangJson.getString("id");
 
         JSONObject hypixelJson = HTTPRequest.getHTTPRequest("https://api.hypixel.net/v2/player?key=" + key + "&uuid=" + UUID);
         if (hypixelJson == null || hypixelJson.isEmpty())
