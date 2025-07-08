@@ -142,7 +142,7 @@ public class Bedwars implements Command
 
         JSONObject bwJson = hypixelData.stats.getJSONObject("Bedwars");
 
-        if (bwJson == null || bwJson.get("kills_bedwars") == null)
+        if (bwJson == null || !bwJson.has("kills_bedwars") || bwJson.isNull("kills_bedwars"))
         {
             Embed embed = new Embed().setTitle("Failed Operation :(").setDescription("Hypixel: No bedwars stats");
             interactionHook.editOriginalEmbeds(embed.get()).queue();
