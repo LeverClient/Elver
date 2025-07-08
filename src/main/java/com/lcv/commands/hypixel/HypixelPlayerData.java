@@ -34,6 +34,9 @@ public class HypixelPlayerData
         rankLookup.put("MVP_PLUS", new String[]{"MVP", "+"});
         rankLookup.put("SUPERSTAR", new String[]{"MVP", "++"});
 
+        //rankLookup.put("STAFF", new String[]{"ዞ"}); // TODO: add this character to the font
+        rankLookup.put("STAFF", new String[]{"H"});
+        rankLookup.put("YOUTUBER", new String[]{"YOUTUBE"});
 
         // rank colors
         colorLookup.put("VIP", "§a");
@@ -41,6 +44,8 @@ public class HypixelPlayerData
         colorLookup.put("MVP", "§b");
         colorLookup.put("MVP_PLUS", "§b");
         colorLookup.put("SUPERSTAR", "-");
+        colorLookup.put("STAFF", "§c");
+        colorLookup.put("YOUTUBER", "§c");
 
         // just colors
         colorLookup.put("BLACK", "§0");
@@ -73,7 +78,9 @@ public class HypixelPlayerData
         String[] rankName = rankLookup.get(rank);
         if (rankName == null) rankName = new String[]{rank};
 
+        if (rank.equals("YOUTUBER")) nameFormatted.append("§c");
         nameFormatted.append('[');
+        if (rank.equals("YOUTUBER")) nameFormatted.append("§f");
 
         nameFormatted.append(rankName[0]);
         if (rankName.length > 1) {
@@ -82,6 +89,7 @@ public class HypixelPlayerData
             nameFormatted.append(rankColor);
         }
 
+        if (rank.equals("YOUTUBER")) nameFormatted.append("§c");
         nameFormatted.append("] ");
         nameFormatted.append(name);
 
@@ -109,14 +117,18 @@ public class HypixelPlayerData
         name = player.getString("displayname");
         uuid = player.getString("uuid");
 
-        if (player.has("monthlyPackageRank") && !player.isNull("monthlyPackageRank")) {
-            rank = player.getString("monthlyPackageRank");
+        if (player.has("rank") && !player.isNull("rank")) {
+            rank = player.getString("rank"); // staff
+        } else if (player.has("monthlyPackageRank") && !player.isNull("monthlyPackageRank")) {
+            rank = player.getString("monthlyPackageRank"); // MVP++
         }
 
-        if ((rank == null || rank.equals("NONE") || rank.equals("UNKNOWN")) && (player.has("newPackageRank") && !player.isNull("newPackageRank"))) {
-            rank = player.getString("newPackageRank");
-        } else if (player.has("packageRank") && !player.isNull("packageRank")) {
-            rank = player.getString("packageRank");
+        if ((rank == null || rank.equals("NONE") || rank.equals("UNKNOWN") || rank.equals("NORMAL"))) {
+            if (player.has("newPackageRank") && !player.isNull("newPackageRank")) {
+                rank = player.getString("newPackageRank"); // post-Eula
+            } else if (player.has("packageRank") && !player.isNull("packageRank")) {
+                rank = player.getString("packageRank"); // pre-Eula
+            }
         }
 
         if (player.has("rankPlusColor") && !player.isNull("rankPlusColor")) {
@@ -124,7 +136,7 @@ public class HypixelPlayerData
         }
 
         if (player.has("monthlyRankColor") && !player.isNull("monthlyRankColor")) {
-            monthlyRankColor = player.getString("monthlyRankColor");
+            monthlyRankColor = player.getString("monthlyRankColor"); // MVP++ color
         }
 
         String rankName = getPlayerNameRankFormat(name, rank, plusColor, monthlyRankColor);
