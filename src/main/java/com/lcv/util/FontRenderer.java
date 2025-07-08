@@ -47,6 +47,20 @@ public class FontRenderer {
         return shadow;
     }
 
+    public static String removeFormatting(String str) {
+        String[] segments = str.split("§");
+        StringBuilder withoutFormatting = new StringBuilder();
+
+        withoutFormatting.append(segments[0]);
+        for (int i = 1; i < segments.length; i++) {
+            String segment = segments[i];
+            if (segment.length() <= 1) continue;
+            withoutFormatting.append(segment.substring(1));
+        }
+
+        return withoutFormatting.toString();
+    }
+
     public FontRenderer(Graphics2D g2d, Font[] fonts) {
         this.g2d = g2d;
         this.fonts = fonts;
