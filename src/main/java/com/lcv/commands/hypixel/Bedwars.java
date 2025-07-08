@@ -3,6 +3,7 @@ package com.lcv.commands.hypixel;
 import com.lcv.Main;
 import com.lcv.commands.Command;
 import com.lcv.commands.Embed;
+import com.lcv.util.FontRenderer;
 import com.lcv.util.HTTPRequest;
 import net.dv8tion.jda.api.events.interaction.command.SlashCommandInteractionEvent;
 import net.dv8tion.jda.api.interactions.InteractionHook;
@@ -19,6 +20,7 @@ import java.io.ByteArrayInputStream;
 import java.io.ByteArrayOutputStream;
 import java.io.File;
 import java.io.IOException;
+import java.net.URISyntaxException;
 import java.net.URL;
 import java.util.ArrayList;
 import java.util.Arrays;
@@ -156,10 +158,10 @@ public class Bedwars implements Command
         try
         {
             Graphics2D g2d = image.createGraphics();
-            g2d.setFont(minecraftFont.deriveFont(60f));
+            g2d.drawImage(ImageIO.read(new File(Main.class.getClassLoader().getResource("images/overlayNoText.png").toURI())), 0, 0, null);
+            FontRenderer fontRenderer = new FontRenderer(g2d, new Font[]{minecraftFont.deriveFont(150f)});
 
-            g2d.setColor(Color.BLACK);
-            g2d.drawString(hypixelData.player.getString("displayname"), 400, 400);
+            fontRenderer.drawString(hypixelData.player.getString("displayname"), 1440 - (g2d.getFontMetrics().stringWidth((hypixelData.player.getString("displayname"))) / 2), 300, true, Color.WHITE);
 
             g2d.dispose();
 
@@ -168,7 +170,7 @@ public class Bedwars implements Command
             FileUpload f =  FileUpload.fromData(new ByteArrayInputStream(outputStream.toByteArray()), "bedwars.png");
             interactionHook.sendFiles(f).queue();
         }
-        catch (IOException e)
+        catch (IOException | URISyntaxException e)
         {
             throw new RuntimeException(e);
         }
