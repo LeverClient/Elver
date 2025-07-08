@@ -14,14 +14,33 @@ import net.dv8tion.jda.api.interactions.commands.build.SlashCommandData;
 import net.dv8tion.jda.api.requests.GatewayIntent;
 import org.jetbrains.annotations.NotNull;
 
+import javax.imageio.ImageIO;
+import java.awt.*;
+import java.awt.image.BufferedImage;
+import java.io.File;
+import java.io.IOException;
+import java.net.URISyntaxException;
 import java.util.ArrayList;
 import java.util.List;
 
 public class Main extends ListenerAdapter
 {
     private static List<Command> commands;
-    public static void main(String[] args)
-    {
+
+    public static BufferedImage botProfile;
+
+    public static BufferedImage botProfileScaled;
+
+    public static void main(String[] args) throws URISyntaxException, IOException {
+        // cache bot profile for faster image making
+        botProfile = ImageIO.read(new File(Main.class.getClassLoader().getResource("images/botProfile.png").toURI()));
+        botProfileScaled = new BufferedImage(226, 226, BufferedImage.TYPE_INT_ARGB);
+        {
+            Graphics2D g2d = botProfileScaled.createGraphics();
+            g2d.drawImage(botProfile, 0, 0, 226, 226, null);
+            g2d.dispose();
+        }
+
         JDA jda = JDABuilder.create(
                 System.getenv("BOT_KEY"),
                 GatewayIntent.MESSAGE_CONTENT,

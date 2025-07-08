@@ -172,8 +172,7 @@ public class Bedwars implements Command
             Graphics2D g2d = image.createGraphics();
 
             // draw bot profile
-            BufferedImage botImage = ImageIO.read(new File(Main.class.getClassLoader().getResource("images/botProfile.png").toURI()));
-            g2d.drawImage(botImage, 25, 25, 226, 226, null);
+            g2d.drawImage(Main.botProfileScaled, 25, 25, 226, 226, null);
 
             g2d.drawImage(ImageIO.read(new File(Main.class.getClassLoader().getResource("images/overlayNoText.png").toURI())), 0, 0, null);
             FontRenderer fontRenderer = new FontRenderer(g2d, new Font[]{minecraftFont.deriveFont(144f)});
