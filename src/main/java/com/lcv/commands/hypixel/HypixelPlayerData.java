@@ -12,14 +12,14 @@ public class HypixelPlayerData
 
     public HypixelPlayerData(JSONObject json)
     {
-        if (!json.has("player")) {
+        if (!json.has("player") || json.isNull("player")) {
             valid = false;
             return;
         }
 
         player = json.getJSONObject("player");
 
-        if (!player.has("stats")) {
+        if (!player.has("stats") || json.isNull("player")) {
             valid = false;
             return;
         }

@@ -121,7 +121,7 @@ public class Bedwars implements Command
         }
 
 
-        if (!hypixelData.stats.has("Bedwars"))
+        if (!hypixelData.stats.has("Bedwars") || hypixelData.stats.isNull("Bedwars"))
         {
             Embed embed = new Embed().setTitle("Failed Operation :(").setDescription("Hypixel: No bedwars stats");
             interactionHook.editOriginalEmbeds(embed.get()).queue();
