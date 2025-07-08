@@ -104,16 +104,17 @@ public class Bedwars implements Command
         InteractionHook interactionHook = event.getHook();
 
         String name = Objects.requireNonNull(event.getOption("name")).getAsString();
-        JSONObject mojangJson = HTTPRequest.getHTTPRequest("https://api.mojang.com/users/profiles/minecraft/" + name);
-        if (mojangJson == null || mojangJson.isEmpty())
-        {
-            Embed embed = new Embed().setTitle("Failed Operation :(").setDescription("Mojang: No player found");
-            interactionHook.editOriginalEmbeds(embed.get()).queue();
-            return;
-        }
+//        JSONObject mojangJson = HTTPRequest.getHTTPRequest("https://api.mojang.com/users/profiles/minecraft/" + name);
+//        if (mojangJson == null || mojangJson.isEmpty())
+//        {
+//            Embed embed = new Embed().setTitle("Failed Operation :(").setDescription("Mojang: No player found");
+//            interactionHook.editOriginalEmbeds(embed.get()).queue();
+//            return;
+//        }
 
         String key = System.getenv("HYPIXEL_KEY");
-        String UUID = mojangJson.getString("id");
+        //String UUID = mojangJson.getString("id");
+        String UUID = "ddf13e43-6ccc-4790-bb49-912913bf7d77";
 
         JSONObject hypixelJson = HTTPRequest.getHTTPRequest("https://api.hypixel.net/v2/player?key=" + key + "&uuid=" + UUID);
         if (hypixelJson == null || hypixelJson.isEmpty())
@@ -172,7 +173,8 @@ public class Bedwars implements Command
             Graphics2D g2d = image.createGraphics();
 
             // draw bot profile
-            g2d.drawImage(Main.botProfileScaled, 25, 25, null);
+            BufferedImage botImage = ImageIO.read(new File(Main.class.getClassLoader().getResource("images/botProfile.png").toURI()));
+            g2d.drawImage(botImage, 25, 25, 226, 226, null);
 
             g2d.drawImage(ImageIO.read(new File(Main.class.getClassLoader().getResource("images/overlayNoText.png").toURI())), 0, 0, null);
             FontRenderer fontRenderer = new FontRenderer(g2d, new Font[]{minecraftFont.deriveFont(144f)});
