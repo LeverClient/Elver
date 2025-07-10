@@ -3,7 +3,11 @@ package com.lcv.util;
 import java.awt.*;
 import java.awt.font.FontRenderContext;
 import java.awt.geom.Rectangle2D;
+import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.HashMap;
+import java.util.stream.Collectors;
+import java.util.stream.Stream;
 
 public class FontRenderer {
     public static Color[] colors = {
@@ -27,11 +31,25 @@ public class FontRenderer {
 
     public static HashMap<Color, Color> shadowCache = new HashMap<>();
 
+    public static int LeftAligned = 0b0001;
+
+    public static int CenterXAligned = 0b0010;
+
+    public static int RightAligned = 0b0011;
+
+    public static int TopAligned = 0b0100;
+
+    public static int CenterYAligned = 0b1000;
+
+    public static int BottomAligned = 0b1100;
+
     private Graphics2D g2d;
 
     private final Font[] fonts;
 
     private final Font[] extraFonts; // bold offset = 0, italic offset = 1, both offset = 2
+
+    private final HashMap<Font, FontMetrics> fontMetrics = new HashMap<>();
 
     private Font selectedFont;
 
@@ -62,7 +80,6 @@ public class FontRenderer {
     }
 
     public FontRenderer(Graphics2D g2d, Font[] fonts) {
-        this.g2d = g2d;
         this.fonts = fonts;
 
         if (fonts.length > 0) {
@@ -80,6 +97,14 @@ public class FontRenderer {
             extraFonts[i*3 + 1] = italic;
             extraFonts[i*3 + 2] = boldItalic;
         }
+
+        setGraphics(g2d);
+    }
+
+    private void cacheFontMetrics() {
+        if (g2d == null) throw new IllegalStateException("Can't cache font metrics without Graphics2D");
+
+        Stream.concat(Arrays.stream(fonts), Arrays.stream(extraFonts)).forEach((font) -> fontMetrics.put(font, g2d.getFontMetrics(font)));
     }
 
     public void switchFont(int font) {
@@ -105,38 +130,59 @@ public class FontRenderer {
     }
 
     public void setGraphics(Graphics2D g2d) {
+        if (g2d == null) return;
+
         this.g2d = g2d;
         g2d.setFont(selectedFont);
+        cacheFontMetrics();
     }
 
     public Graphics2D getGraphics() {
-       return g2d;
+        return g2d;
     }
 
-    public void drawString(String txt, int x, int y)
-    {
-        drawString(txt, x, y, true);
+    public void drawString(String txt, int x, int y) {
+        drawString(txt, x, y,  true, Color.white, TopAligned);
     }
 
-    public void drawString(String txt, int x, int y, boolean shadow)
-    {
-        drawString(txt, x, y, shadow, Color.WHITE);
+    public void drawString(String txt, int x, int y, int alignment) {
+        drawString(txt, x, y,  true, Color.white, alignment);
     }
 
-    public void drawString(String txt, int x, int y, boolean shadow, Color col) {
+    public void drawString(String txt, int x, int y, boolean shadow, Color col, int alignment) {
         if (g2d == null) throw new IllegalStateException("Attempt to DrawString without Graphics set");
 
-        Color originalColor = g2d.getColor();
-        if (col != null) {
-            g2d.setColor(col);
-        }
+        if (col == null) col = Color.white;
 
-        y+=g2d.getFontMetrics().getMaxAdvance();
-        System.out.println(txt + " " + y);
+        Color originalColor = g2d.getColor();
+        g2d.setColor(col);
 
         String[] segments = txt.split("§");
         FontRenderSegment[] renderSegments = new FontRenderSegment[segments.length];
         renderSegments[0] = new FontRenderSegment(segments[0], col, selectedFont);
+
+        int horizontalAlignment = alignment & 0b0011;
+        int verticalAlignment = (alignment >> 2);
+        String noFormat = removeFormatting(txt);
+        FontMetrics metrics = g2d.getFontMetrics(); //fontMetrics.get(selectedFont);
+        int height = metrics.getMaxAdvance();
+        int width = metrics.stringWidth(noFormat);
+
+        switch(horizontalAlignment) {
+            case 1 -> {} // LEFT
+
+            case 2 -> x += (width/2); // CENTER
+
+            case 3 -> x += width; // RIGHT
+        }
+
+        switch(verticalAlignment) {
+            case 1 -> y += height; // TOP
+
+            case 2 -> y += (height/2); // CENTER
+
+            case 3 -> {} // BOTTOM
+        }
 
         boolean bold = false;
         boolean italic = false;
@@ -210,7 +256,6 @@ public class FontRenderer {
 
             currentX += segment.draw(currentX, y, false);
         }
-
 
         g2d.setColor(originalColor);
     }
