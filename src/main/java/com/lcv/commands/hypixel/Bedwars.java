@@ -16,13 +16,10 @@ import org.slf4j.LoggerFactory;
 import javax.imageio.ImageIO;
 import java.awt.*;
 import java.awt.image.BufferedImage;
-import java.awt.image.ColorModel;
-import java.awt.image.WritableRaster;
 import java.io.ByteArrayInputStream;
 import java.io.ByteArrayOutputStream;
 import java.io.File;
 import java.io.IOException;
-import java.net.URISyntaxException;
 import java.net.URL;
 import java.text.DecimalFormat;
 import java.util.*;
@@ -34,7 +31,7 @@ public class Bedwars implements Command
     private static final Logger log = LoggerFactory.getLogger(Bedwars.class);
     Random rand = new Random();
     ArrayList<BufferedImage> backgroundImages;
-    static FontRenderer fontRenderer = new FontRenderer(null, new Font[]{Main.minecraftFont.deriveFont(144f), Main.minecraftFont.deriveFont(104f)});
+    static FontRenderer fontRenderer = new FontRenderer(null, new Font[]{Main.minecraftFont.deriveFont(144f), Main.minecraftFont.deriveFont(96f), Main.minecraftFont.deriveFont(36f)});
     public Bedwars() {
         backgroundImages = getBackgrounds();
     }
@@ -65,6 +62,10 @@ public class Bedwars implements Command
                 // draw overlay on background
                 Graphics2D g2d = image.createGraphics();
                 g2d.drawImage(ImageIO.read(new File(Objects.requireNonNull(Main.class.getResource("/images/overlayNoText.png")).toURI())), 0, 0, null);
+                g2d.drawImage(ImageIO.read(new File(Objects.requireNonNull(Main.class.getResource("/images/Resources/iron_ingot.png")).toURI())), 100, 1830, null);
+                g2d.drawImage(ImageIO.read(new File(Objects.requireNonNull(Main.class.getResource("/images/Resources/gold_ingot.png")).toURI())), 355, 1830, null);
+                g2d.drawImage(ImageIO.read(new File(Objects.requireNonNull(Main.class.getResource("/images/Resources/diamond.png")).toURI())), 610, 1820, null);
+                g2d.drawImage(ImageIO.read(new File(Objects.requireNonNull(Main.class.getResource("/images/Resources/emerald.png")).toURI())), 850, 1830, null);
                 g2d.dispose();
 
                 // save background
@@ -144,6 +145,10 @@ public class Bedwars implements Command
             interactionHook.editOriginalEmbeds(embed.get()).queue();
             return;
         }
+        int iron = bwJson.getInt("iron_resources_collected_bedwars");
+        int gold = bwJson.getInt("gold_resources_collected_bedwars");
+        int diamond = bwJson.getInt("diamond_resources_collected_bedwars");
+        int emerald = bwJson.getInt("emerald_resources_collected_bedwars");
 
         double losses = bwJson.getDouble("losses_bedwars");
         double wins = bwJson.getDouble("wins_bedwars");
@@ -151,10 +156,13 @@ public class Bedwars implements Command
         double finalDeaths = bwJson.getDouble("final_deaths_bedwars");
         double kills = bwJson.getDouble("kills_bedwars");
         double deaths = bwJson.getDouble("deaths_bedwars");
+        double bedsBroken = (bwJson.has("beds_broken_bedwars") ? bwJson.getDouble("beds_broken_bedwars") : 0);
+        double bedsLost = bwJson.getDouble("beds_lost_bedwars");
 
         double WL = wins / losses;
         double fkdr = finalKills / finalDeaths;
         double kdr = kills / deaths;
+        double bblr = bedsBroken / bedsLost;
 
         int xp = bwJson.getInt("Experience");
         int level = (int) getLevelForExp(xp);
@@ -175,13 +183,31 @@ public class Bedwars implements Command
 
             // draw player name
             String nameWithRank = hypixelData.getPlayerNameRankFormat();
-            fontRenderer.drawString(nameWithRank, 1440 - (g2d.getFontMetrics().stringWidth((FontRenderer.removeFormatting(nameWithRank))) / 2), 100);
+            fontRenderer.drawString(nameWithRank, 1440 - (g2d.getFontMetrics().stringWidth((FontRenderer.removeFormatting(nameWithRank))) / 2), 75);
 
             fontRenderer.switchFont(1);
-            fontRenderer.drawString(String.format(Locale.ENGLISH, "§aWins: %.0f", wins), 75, 325);
-            fontRenderer.drawString(String.format(Locale.ENGLISH,"§cLosses: %.0f", losses), 75, 500);
+            fontRenderer.drawString(String.format("§aWins: %.0f", wins), 75, 325);
+            fontRenderer.drawString(String.format("§cLosses: %.0f", losses), 75, 510);
             fontRenderer.drawString(String.format("§aW§cL§r: %.2f", WL), 75, 700);
-            fontRenderer.drawString("apple at 0, 0", 0, 0);
+
+            fontRenderer.drawString(String.format("§aBB: %.0f", bedsBroken), 75, 962);
+            fontRenderer.drawString(String.format("§cBL: %.0f", bedsLost), 75, 1147);
+            fontRenderer.drawString(String.format("§aBB§cLR§r: %.2f", bblr), 75, 1337);
+
+            fontRenderer.drawString(String.format("§aKills: %.0f", kills), 1875, 325);
+            fontRenderer.drawString(String.format("§cDeaths: %.0f", deaths), 1875, 510);
+            fontRenderer.drawString(String.format("§aK§cD§r: %.2f", kdr), 1875, 700);
+
+            fontRenderer.drawString(String.format("§aFK: %.0f", finalKills), 1875, 962);
+            fontRenderer.drawString(String.format("§cFD: %.0f", finalDeaths), 1875, 1147);
+            fontRenderer.drawString(String.format("§aFK§cDR§r: %.2f", fkdr), 1875, 1337);
+
+            fontRenderer.switchFont(2);
+            DecimalFormat df = new DecimalFormat("###, ###, ###");
+            fontRenderer.drawString(df.format(iron), 190 - (g2d.getFontMetrics().stringWidth(df.format(iron)) / 2), 2025);
+            fontRenderer.drawString(df.format(gold), 445 - (g2d.getFontMetrics().stringWidth(df.format(gold)) / 2), 2025);
+            fontRenderer.drawString(df.format(diamond), 700 - (g2d.getFontMetrics().stringWidth(df.format(diamond)) / 2), 2025);
+            fontRenderer.drawString(df.format(emerald), 940 - (g2d.getFontMetrics().stringWidth(df.format(emerald)) / 2), 2025);
 
             // output and send image as response
             g2d.dispose();

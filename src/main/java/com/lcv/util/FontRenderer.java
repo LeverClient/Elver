@@ -132,7 +132,6 @@ public class FontRenderer {
         }
 
         y+=g2d.getFontMetrics().getMaxAdvance();
-        System.out.println(txt + " " + y);
 
         String[] segments = txt.split("§");
         FontRenderSegment[] renderSegments = new FontRenderSegment[segments.length];

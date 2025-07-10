@@ -4,7 +4,6 @@ import com.lcv.commands.Command;
 import com.lcv.commands.hypixel.Bedwars;
 import com.lcv.commands.misc.Hello;
 import com.lcv.commands.misc.Image;
-import com.lcv.util.FontRenderer;
 import net.dv8tion.jda.api.JDA;
 import net.dv8tion.jda.api.JDABuilder;
 import net.dv8tion.jda.api.events.interaction.command.CommandAutoCompleteInteractionEvent;
