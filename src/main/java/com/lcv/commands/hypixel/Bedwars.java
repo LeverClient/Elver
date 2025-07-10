@@ -24,10 +24,8 @@ import java.io.File;
 import java.io.IOException;
 import java.net.URISyntaxException;
 import java.net.URL;
-import java.util.ArrayList;
-import java.util.Arrays;
-import java.util.Objects;
-import java.util.Random;
+import java.text.DecimalFormat;
+import java.util.*;
 
 import static net.dv8tion.jda.api.interactions.commands.OptionType.STRING;
 
@@ -36,7 +34,7 @@ public class Bedwars implements Command
     private static final Logger log = LoggerFactory.getLogger(Bedwars.class);
     Random rand = new Random();
     ArrayList<BufferedImage> backgroundImages;
-    static FontRenderer fontRenderer = new FontRenderer(null, new Font[]{Main.minecraftFont.deriveFont(144f)});
+    static FontRenderer fontRenderer = new FontRenderer(null, new Font[]{Main.minecraftFont.deriveFont(144f), Main.minecraftFont.deriveFont(104f)});
     public Bedwars() {
         backgroundImages = getBackgrounds();
     }
@@ -175,12 +173,15 @@ public class Bedwars implements Command
             // draw bot profile
             g2d.drawImage(Main.botProfileScaled, 25, 25, 226, 226, null);
 
-            // draw overlay
-            //g2d.drawImage(ImageIO.read(new File(Main.class.getClassLoader().getResource("images/overlayNoText.png").toURI())), 0, 0, null);
-
             // draw player name
             String nameWithRank = hypixelData.getPlayerNameRankFormat();
-            fontRenderer.drawString(nameWithRank, 1440 - (g2d.getFontMetrics().stringWidth((FontRenderer.removeFormatting(nameWithRank))) / 2), 300, true, Color.WHITE);
+            fontRenderer.drawString(nameWithRank, 1440 - (g2d.getFontMetrics().stringWidth((FontRenderer.removeFormatting(nameWithRank))) / 2), 100);
+
+            fontRenderer.switchFont(1);
+            fontRenderer.drawString(String.format(Locale.ENGLISH, "§aWins: %.0f", wins), 75, 325);
+            fontRenderer.drawString(String.format(Locale.ENGLISH,"§cLosses: %.0f", losses), 75, 500);
+            fontRenderer.drawString(String.format("§aW§cL§r: %.2f", WL), 75, 700);
+            fontRenderer.drawString("apple at 0, 0", 0, 0);
 
             // output and send image as response
             g2d.dispose();

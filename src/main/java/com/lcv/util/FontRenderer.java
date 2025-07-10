@@ -113,6 +113,16 @@ public class FontRenderer {
        return g2d;
     }
 
+    public void drawString(String txt, int x, int y)
+    {
+        drawString(txt, x, y, true);
+    }
+
+    public void drawString(String txt, int x, int y, boolean shadow)
+    {
+        drawString(txt, x, y, shadow, Color.WHITE);
+    }
+
     public void drawString(String txt, int x, int y, boolean shadow, Color col) {
         if (g2d == null) throw new IllegalStateException("Attempt to DrawString without Graphics set");
 
@@ -120,6 +130,9 @@ public class FontRenderer {
         if (col != null) {
             g2d.setColor(col);
         }
+
+        y+=g2d.getFontMetrics().getMaxAdvance();
+        System.out.println(txt + " " + y);
 
         String[] segments = txt.split("§");
         FontRenderSegment[] renderSegments = new FontRenderSegment[segments.length];
