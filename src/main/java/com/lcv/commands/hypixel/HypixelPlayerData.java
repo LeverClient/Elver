@@ -1,8 +1,10 @@
 package com.lcv.commands.hypixel;
 
+import com.lcv.commands.Embed;
 import org.json.JSONObject;
 
 import java.util.HashMap;
+import java.util.function.Function;
 
 public class HypixelPlayerData
 {
@@ -27,6 +29,8 @@ public class HypixelPlayerData
     public static HashMap<String, String> colorLookup = new HashMap<>();
 
     public static HashMap<String, String[]> rankLookup = new HashMap<>();
+
+    public static HashMap<String, Double> bedwarsStats = new HashMap<>();
 
     static {
         // ranks
@@ -156,8 +160,5 @@ public class HypixelPlayerData
 
         stats = player.getJSONObject("stats");
         System.out.println("wow!");
-
     }
-
-    // TODO: dedicated readers for each game here maybe?
 }

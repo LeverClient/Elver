@@ -23,6 +23,7 @@ import java.io.IOException;
 import java.net.URL;
 import java.text.DecimalFormat;
 import java.util.*;
+import java.util.function.Function;
 
 import static net.dv8tion.jda.api.interactions.commands.OptionType.STRING;
 
@@ -145,26 +146,30 @@ public class Bedwars implements Command
             interactionHook.editOriginalEmbeds(embed.get()).queue();
             return;
         }
-        int iron = bwJson.getInt("iron_resources_collected_bedwars");
-        int gold = bwJson.getInt("gold_resources_collected_bedwars");
-        int diamond = bwJson.getInt("diamond_resources_collected_bedwars");
-        int emerald = bwJson.getInt("emerald_resources_collected_bedwars");
 
-        double losses = bwJson.getDouble("losses_bedwars");
-        double wins = bwJson.getDouble("wins_bedwars");
-        double finalKills = bwJson.getDouble("final_kills_bedwars");
-        double finalDeaths = bwJson.getDouble("final_deaths_bedwars");
-        double kills = bwJson.getDouble("kills_bedwars");
-        double deaths = bwJson.getDouble("deaths_bedwars");
-        double bedsBroken = (bwJson.has("beds_broken_bedwars") ? bwJson.getDouble("beds_broken_bedwars") : 0);
-        double bedsLost = bwJson.getDouble("beds_lost_bedwars");
+        Function<String, Integer> getInt = s -> bwJson.has(s) && !bwJson.isNull(s) ? bwJson.getInt(s) : 0;
+        Function<String, Double> getDouble = s -> bwJson.has(s) && !bwJson.isNull(s) ? bwJson.getDouble(s) : 0;
+
+        int iron = getInt.apply("iron_resources_collected_bedwars");
+        int gold = getInt.apply("gold_resources_collected_bedwars");
+        int diamond = getInt.apply("diamond_resources_collected_bedwars");
+        int emerald = getInt.apply("emerald_resources_collected_bedwars");
+
+        double losses = getDouble.apply("losses_bedwars");
+        double wins = getDouble.apply("wins_bedwars");
+        double finalKills = getDouble.apply("final_kills_bedwars");
+        double finalDeaths = getDouble.apply("final_deaths_bedwars");
+        double kills = getDouble.apply("kills_bedwars");
+        double deaths = getDouble.apply("deaths_bedwars");
+        double bedsBroken = getDouble.apply("beds_broken_bedwars");
+        double bedsLost = getDouble.apply("beds_lost_bedwars");
 
         double WL = wins / losses;
         double fkdr = finalKills / finalDeaths;
         double kdr = kills / deaths;
         double bblr = bedsBroken / bedsLost;
 
-        int xp = bwJson.getInt("Experience");
+        int xp = getInt.apply("Experience");
         int level = (int) getLevelForExp(xp);
         String levelSuffix = bedwarsPrestigeStars[Math.min((level - 100) / 1000, bedwarsPrestigeStars.length - 1)];
 
