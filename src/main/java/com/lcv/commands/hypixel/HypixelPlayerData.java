@@ -1,8 +1,10 @@
 package com.lcv.commands.hypixel;
 
+import com.lcv.commands.Embed;
 import org.json.JSONObject;
 
 import java.util.HashMap;
+import java.util.function.Function;
 
 public class HypixelPlayerData
 {
@@ -28,6 +30,8 @@ public class HypixelPlayerData
 
     public static HashMap<String, String[]> rankLookup = new HashMap<>();
 
+    public static HashMap<String, Double> bedwarsStats = new HashMap<>();
+
     static {
         // ranks
         rankLookup.put("VIP", new String[]{"VIP"});
@@ -36,8 +40,7 @@ public class HypixelPlayerData
         rankLookup.put("MVP_PLUS", new String[]{"MVP", "+"});
         rankLookup.put("SUPERSTAR", new String[]{"MVP", "++"});
 
-        //rankLookup.put("STAFF", new String[]{"ዞ"}); // TODO: add this character to the font
-        rankLookup.put("STAFF", new String[]{"H"});
+        rankLookup.put("STAFF", new String[]{"ዞ"});
         rankLookup.put("YOUTUBER", new String[]{"YOUTUBE"});
 
         // rank colors
@@ -46,7 +49,7 @@ public class HypixelPlayerData
         colorLookup.put("MVP", "§b");
         colorLookup.put("MVP_PLUS", "§b");
         colorLookup.put("SUPERSTAR", "-");
-        colorLookup.put("STAFF", "§c");
+        colorLookup.put("STAFF", "§6");
         colorLookup.put("YOUTUBER", "§c");
 
         // just colors
@@ -89,9 +92,10 @@ public class HypixelPlayerData
         String[] rankName = rankLookup.get(rank);
         if (rankName == null) rankName = new String[]{rank};
 
-        if (rank.equals("YOUTUBER")) nameFormatted.append("§c");
+        if (rank.equals("YOUTUBER") || rank.equals("STAFF")) nameFormatted.append("§c");
         nameFormatted.append('[');
         if (rank.equals("YOUTUBER")) nameFormatted.append("§f");
+        if (rank.equals("STAFF")) nameFormatted.append("§6");
 
         nameFormatted.append(rankName[0]);
         if (rankName.length > 1) {
@@ -100,9 +104,11 @@ public class HypixelPlayerData
             nameFormatted.append(rankColor);
         }
 
-        if (rank.equals("YOUTUBER")) nameFormatted.append("§c");
+        if (rank.equals("YOUTUBER") || rank.equals("STAFF")) nameFormatted.append("§c");
         nameFormatted.append("] ");
         nameFormatted.append(name);
+
+        System.out.println(nameFormatted);
 
         return nameFormatted.toString();
     }
@@ -154,8 +160,5 @@ public class HypixelPlayerData
 
         stats = player.getJSONObject("stats");
         System.out.println("wow!");
-
     }
-
-    // TODO: dedicated readers for each game here maybe?
 }

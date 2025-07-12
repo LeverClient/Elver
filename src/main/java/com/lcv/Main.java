@@ -4,7 +4,6 @@ import com.lcv.commands.Command;
 import com.lcv.commands.hypixel.Bedwars;
 import com.lcv.commands.misc.Hello;
 import com.lcv.commands.misc.Image;
-import com.lcv.util.FontRenderer;
 import net.dv8tion.jda.api.JDA;
 import net.dv8tion.jda.api.JDABuilder;
 import net.dv8tion.jda.api.events.interaction.command.CommandAutoCompleteInteractionEvent;
@@ -46,7 +45,7 @@ public class Main extends ListenerAdapter
         }
 
         // read font
-        minecraftFont = Font.createFont(Font.TRUETYPE_FONT, Objects.requireNonNull(Main.class.getResourceAsStream("/fonts/minecraft.ttf")));
+        minecraftFont = Font.createFont(Font.TRUETYPE_FONT, Objects.requireNonNull(Main.class.getResourceAsStream("/fonts/test.ttf")));
 
         JDA jda = JDABuilder.create(
                 System.getenv("BOT_KEY"),
