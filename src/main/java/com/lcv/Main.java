@@ -45,7 +45,7 @@ public class Main extends ListenerAdapter
         }
 
         // read font
-        minecraftFont = Font.createFont(Font.TRUETYPE_FONT, Objects.requireNonNull(Main.class.getResourceAsStream("/fonts/minecraft.ttf")));
+        minecraftFont = Font.createFont(Font.TRUETYPE_FONT, Objects.requireNonNull(Main.class.getResourceAsStream("/fonts/test.ttf")));
 
         JDA jda = JDABuilder.create(
                 System.getenv("BOT_KEY"),

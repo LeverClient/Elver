@@ -207,6 +207,9 @@ public class Bedwars implements Command
             fontRenderer.drawString(String.format("§cFD: %.0f", finalDeaths), 1875, 1147);
             fontRenderer.drawString(String.format("§aFK§cDR§r: %.2f", fkdr), 1875, 1337);
 
+            fontRenderer.drawString(String.format("Level: [%s%s]", level, levelSuffix), 1155, 1500);
+            System.out.printf("Level: [%s%s]%n", level, levelSuffix);
+
             fontRenderer.switchFont(2);
             DecimalFormat df = new DecimalFormat("###, ###, ###");
             fontRenderer.drawString(df.format(iron), 190 - (g2d.getFontMetrics().stringWidth(df.format(iron)) / 2), 2025);
@@ -295,10 +298,16 @@ public class Bedwars implements Command
     };
 
     // bedwars stars. each index in the array corresponds to 1000 stars higher
-    public final static String[] bedwarsPrestigeStars = {
+    /*public final static String[] bedwarsPrestigeStars = {
             "✫",
             "✪",
             "⚝",
+            "✥"
+    };*/
+    public final static String[] bedwarsPrestigeStars = {
+            "✥",
+            "✥",
+            "✥",
             "✥"
     };
 
