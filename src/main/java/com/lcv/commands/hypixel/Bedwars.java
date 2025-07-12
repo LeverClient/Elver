@@ -30,15 +30,9 @@ import static net.dv8tion.jda.api.interactions.commands.OptionType.STRING;
 public class Bedwars implements Command
 {
     private static final Logger log = LoggerFactory.getLogger(Bedwars.class);
-    public static int levelProgressBarLength = 20;
     Random rand = new Random();
     ArrayList<BufferedImage> backgroundImages;
-    static FontRenderer fontRenderer = new FontRenderer(null, new Font[]{
-            Main.minecraftFont.deriveFont(144f),
-            Main.minecraftFont.deriveFont(96f),
-            Main.minecraftFont.deriveFont(72f),
-            Main.minecraftFont.deriveFont(36f)
-    });
+    static FontRenderer fontRenderer = new FontRenderer(null, new Font[]{Main.minecraftFont.deriveFont(144f), Main.minecraftFont.deriveFont(96f), Main.minecraftFont.deriveFont(36f)});
     public Bedwars() {
         backgroundImages = getBackgrounds();
     }
@@ -177,14 +171,8 @@ public class Bedwars implements Command
         double bblr = bedsBroken / bedsLost;
 
         int xp = getInt.apply("Experience");
-        double level_d = getLevelForExp(xp);
-        int level = (int) level_d;
-        int xpReq = getBWExpForLevel(level);
-        int xpPastLevel = (int) Math.round(((level_d - level) * 5000)/5)*5;
-        int levelProgressBars = xpPastLevel / (5000 / levelProgressBarLength);
-        String levelProgressBar = "|".repeat(levelProgressBars) + "§c" + "|".repeat(Math.max(0, levelProgressBarLength - levelProgressBars));
-        String formattedLevel = getFormattedLevel(level);
-        String formattedNextLevel = getFormattedLevel(level+1);
+        int level = (int) getLevelForExp(xp);
+        String levelSuffix = bedwarsPrestigeStars[Math.min((level - 100) / 1000, bedwarsPrestigeStars.length - 1)];
 
         int chosenBackground = availableBackgrounds <= 1 ? 0 : rand.nextInt(0, availableBackgrounds);
         BufferedImage image = copyImage(backgroundImages.get(chosenBackground));
@@ -220,14 +208,9 @@ public class Bedwars implements Command
             fontRenderer.drawString(String.format("§cFD: %s", bigFormat.format(finalDeaths)), 1875, 1147);
             fontRenderer.drawString(String.format("§aFK§cDR§r: %.2f", fkdr), 1875, 1337);
 
+            fontRenderer.drawString(String.format("Level: [%s%s]", level, levelSuffix), 1155, 1500);
+
             fontRenderer.switchFont(2);
-            fontRenderer.drawString(formattedLevel, image.getWidth()/2, 1275, FontRenderer.CenterXAligned);
-            fontRenderer.drawString(String.format("%d / %d", xpPastLevel, xpReq), image.getWidth()/2, 1275+148, FontRenderer.CenterXAligned);
-
-            // progress bar
-            fontRenderer.drawString(String.format("§a%s  §f>>>  %s", levelProgressBar, formattedNextLevel), 540, 1625-9, FontRenderer.CenterXAligned);
-
-            fontRenderer.switchFont(3);
             fontRenderer.drawString(bigFormat.format(iron), 190, 2025, FontRenderer.CenterXAligned);
             fontRenderer.drawString(bigFormat.format(gold), 445, 2025, FontRenderer.CenterXAligned);
             fontRenderer.drawString(bigFormat.format(diamond), 700, 2025, FontRenderer.CenterXAligned);
@@ -349,11 +332,6 @@ public class Bedwars implements Command
         groups[1] = suffix;
         for (int i = 0; i < levelLen; i++) {
             groups[i + 2] = levelStr.substring(i, i + 1);
-        }
-
-        // sob sob 5 digit sob
-        if (levelLen > 4) {
-            groups[3 + 2] = levelStr.substring(3);
         }
 
         // format the correct regex with each character.
