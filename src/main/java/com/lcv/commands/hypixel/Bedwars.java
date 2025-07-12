@@ -16,10 +16,7 @@ import org.slf4j.LoggerFactory;
 import javax.imageio.ImageIO;
 import java.awt.*;
 import java.awt.image.BufferedImage;
-import java.io.ByteArrayInputStream;
-import java.io.ByteArrayOutputStream;
-import java.io.File;
-import java.io.IOException;
+import java.io.*;
 import java.net.URL;
 import java.text.DecimalFormat;
 import java.util.*;
@@ -129,29 +126,53 @@ public class Bedwars implements Command
 
         HypixelPlayerData hypixelData = new HypixelPlayerData(hypixelJson);
 
-        if (!hypixelData.valid)
-        {
-            Embed embed = new Embed().setTitle("Failed Operation :(").setDescription("Hypixel: No player data found");
+        BufferedImage statsImage;
+        try {
+            statsImage = generateStatsImage(hypixelData);
+        } catch (IllegalArgumentException e) {
+            Embed embed = new Embed().setTitle("Failed Operation :(").setDescription(e.getMessage() ==  null ? "Unsure" : e.getMessage());
             interactionHook.editOriginalEmbeds(embed.get()).queue();
             return;
+        }
+
+        try
+        {
+            ByteArrayOutputStream outputStream = new ByteArrayOutputStream();
+            ImageIO.write(statsImage, "png", outputStream);
+            FileUpload f =  FileUpload.fromData(new ByteArrayInputStream(outputStream.toByteArray()), String.format("bedwars stats for %s meow.png", name));
+            interactionHook.sendFiles(f).queue();
+        }
+        catch (IOException e)
+        {
+            throw new RuntimeException(e);
+        }
+
+        //interactionHook.editOriginal((String.format("%s is %s%s\n%.3fWLR\n%.3fFKDR\n%.3fKDR", name, level, levelSuffix, WL, fkdr, kdr))).queue();
+    }
+
+    @Override
+    public void addFields(SlashCommandData data)
+    {
+        data.addOption(STRING, "name", "Name of Player", true);
+    }
+
+    public BufferedImage generateStatsImage(HypixelPlayerData hypixelData) throws IllegalArgumentException {
+        if (!hypixelData.valid)
+        {
+            throw new IllegalArgumentException("Hypixel: No player data found");
         }
 
 
         if (!hypixelData.stats.has("Bedwars") || hypixelData.stats.isNull("Bedwars"))
         {
-            Embed embed = new Embed().setTitle("Failed Operation :(").setDescription("Hypixel: No bedwars stats");
-            interactionHook.editOriginalEmbeds(embed.get()).queue();
-            return;
+            throw new IllegalArgumentException("Hypixel: No bedwars stats");
         }
 
         JSONObject bwJson = hypixelData.stats.getJSONObject("Bedwars");
-
-        if (bwJson == null || !bwJson.has("kills_bedwars") || bwJson.isNull("kills_bedwars"))
-        {
-            Embed embed = new Embed().setTitle("Failed Operation :(").setDescription("Hypixel: No bedwars stats");
-            interactionHook.editOriginalEmbeds(embed.get()).queue();
-            return;
-        }
+//        if (bwJson == null || !bwJson.has("kills_bedwars") || bwJson.isNull("kills_bedwars"))
+//        {
+//            throw new IllegalArgumentException("Hypixel: No bedwars stats");
+//        }
 
         Function<String, Integer> getInt = s -> bwJson.has(s) && !bwJson.isNull(s) ? bwJson.getInt(s) : 0;
         Function<String, Double> getDouble = s -> bwJson.has(s) && !bwJson.isNull(s) ? bwJson.getDouble(s) : 0;
@@ -189,69 +210,52 @@ public class Bedwars implements Command
         int chosenBackground = availableBackgrounds <= 1 ? 0 : rand.nextInt(0, availableBackgrounds);
         BufferedImage image = copyImage(backgroundImages.get(chosenBackground));
 
-        try
-        {
-            Graphics2D g2d = image.createGraphics();
-            // set up font renderer
-            fontRenderer.switchFont(0);
-            fontRenderer.setGraphics(g2d);
+        Graphics2D g2d = image.createGraphics();
+        // set up font renderer
+        fontRenderer.switchFont(0);
+        fontRenderer.setGraphics(g2d);
 
-            // draw bot profile
-            g2d.drawImage(Main.botProfileScaled, 25, 25, 226, 226, null);
+        // draw bot profile
+        g2d.drawImage(Main.botProfileScaled, 25, 25, 226, 226, null);
 
-            // draw player name
-            String nameWithRank = hypixelData.getPlayerNameRankFormat();
-            fontRenderer.drawString(nameWithRank, 1440 - (g2d.getFontMetrics().stringWidth((FontRenderer.removeFormatting(nameWithRank))) / 2), 75);
+        // draw player name
+        String nameWithRank = hypixelData.getPlayerNameRankFormat();
+        fontRenderer.drawString(nameWithRank, 1440 - (g2d.getFontMetrics().stringWidth((FontRenderer.removeFormatting(nameWithRank))) / 2), 75);
 
-            fontRenderer.switchFont(1);
-            fontRenderer.drawString(String.format("§aWins: %s", bigFormat.format(wins)), 75, 325);
-            fontRenderer.drawString(String.format("§cLosses: %s", bigFormat.format(losses)), 75, 510);
-            fontRenderer.drawString(String.format("§aW§cL§r: %.2f", WL), 75, 700);
+        fontRenderer.switchFont(1);
+        fontRenderer.drawString(String.format("§aWins: %s", bigFormat.format(wins)), 75, 325);
+        fontRenderer.drawString(String.format("§cLosses: %s", bigFormat.format(losses)), 75, 510);
+        fontRenderer.drawString(String.format("§aW§cL§r: %.2f", WL), 75, 700);
 
-            fontRenderer.drawString(String.format("§aBB: %s", bigFormat.format(bedsBroken)), 75, 962);
-            fontRenderer.drawString(String.format("§cBL: %s", bigFormat.format(bedsLost)), 75, 1147);
-            fontRenderer.drawString(String.format("§aBB§cLR§r: %.2f", bblr), 75, 1337);
+        fontRenderer.drawString(String.format("§aBB: %s", bigFormat.format(bedsBroken)), 75, 962);
+        fontRenderer.drawString(String.format("§cBL: %s", bigFormat.format(bedsLost)), 75, 1147);
+        fontRenderer.drawString(String.format("§aBB§cLR§r: %.2f", bblr), 75, 1337);
 
-            fontRenderer.drawString(String.format("§aKills: %s", bigFormat.format(kills)), 1875, 325);
-            fontRenderer.drawString(String.format("§cDeaths: %s", bigFormat.format(deaths)), 1875, 510);
-            fontRenderer.drawString(String.format("§aK§cD§r: %.2f", kdr), 1875, 700);
+        fontRenderer.drawString(String.format("§aKills: %s", bigFormat.format(kills)), 1875, 325);
+        fontRenderer.drawString(String.format("§cDeaths: %s", bigFormat.format(deaths)), 1875, 510);
+        fontRenderer.drawString(String.format("§aK§cD§r: %.2f", kdr), 1875, 700);
 
-            fontRenderer.drawString(String.format("§aFK: %s", bigFormat.format(finalKills)), 1875, 962);
-            fontRenderer.drawString(String.format("§cFD: %s", bigFormat.format(finalDeaths)), 1875, 1147);
-            fontRenderer.drawString(String.format("§aFK§cDR§r: %.2f", fkdr), 1875, 1337);
+        fontRenderer.drawString(String.format("§aFK: %s", bigFormat.format(finalKills)), 1875, 962);
+        fontRenderer.drawString(String.format("§cFD: %s", bigFormat.format(finalDeaths)), 1875, 1147);
+        fontRenderer.drawString(String.format("§aFK§cDR§r: %.2f", fkdr), 1875, 1337);
 
-            fontRenderer.switchFont(2);
-            fontRenderer.drawString(formattedLevel, image.getWidth()/2, 1275, FontRenderer.CenterXAligned);
-            fontRenderer.drawString(String.format("%d / %d", xpPastLevel, xpReq), image.getWidth()/2, 1275+148, FontRenderer.CenterXAligned);
+        fontRenderer.switchFont(2);
+        fontRenderer.drawString(formattedLevel, image.getWidth()/2, 1275, FontRenderer.CenterXAligned);
+        fontRenderer.drawString(String.format("§a%d §f/ §c%d", xpPastLevel, xpReq), image.getWidth()/2, 1275+148, FontRenderer.CenterXAligned);
 
-            // progress bar
-            fontRenderer.drawString(String.format("§a%s  §f>>>  %s", levelProgressBar, formattedNextLevel), 540, 1625-9, FontRenderer.CenterXAligned);
+        // progress bar
+        fontRenderer.drawString(String.format("§a%s  §f>>>  %s", levelProgressBar, formattedNextLevel), 540, 1625-9, FontRenderer.CenterXAligned);
 
-            fontRenderer.switchFont(3);
-            fontRenderer.drawString(bigFormat.format(iron), 190, 2025, FontRenderer.CenterXAligned);
-            fontRenderer.drawString(bigFormat.format(gold), 445, 2025, FontRenderer.CenterXAligned);
-            fontRenderer.drawString(bigFormat.format(diamond), 700, 2025, FontRenderer.CenterXAligned);
-            fontRenderer.drawString(bigFormat.format(emerald), 940, 2025, FontRenderer.CenterXAligned);
+        fontRenderer.switchFont(3);
+        fontRenderer.drawString(bigFormat.format(iron), 190, 2025, FontRenderer.CenterXAligned);
+        fontRenderer.drawString(bigFormat.format(gold), 445, 2025, FontRenderer.CenterXAligned);
+        fontRenderer.drawString(bigFormat.format(diamond), 700, 2025, FontRenderer.CenterXAligned);
+        fontRenderer.drawString(bigFormat.format(emerald), 940, 2025, FontRenderer.CenterXAligned);
 
-            // output and send image as response
-            g2d.dispose();
-            ByteArrayOutputStream outputStream = new ByteArrayOutputStream();
-            ImageIO.write(image, "png", outputStream);
-            FileUpload f =  FileUpload.fromData(new ByteArrayInputStream(outputStream.toByteArray()), String.format("bedwars stats for %s meow.png", name));
-            interactionHook.sendFiles(f).queue();
-        }
-        catch (IOException e)
-        {
-            throw new RuntimeException(e);
-        }
+        // output and return image
+        g2d.dispose();
 
-        //interactionHook.editOriginal((String.format("%s is %s%s\n%.3fWLR\n%.3fFKDR\n%.3fKDR", name, level, levelSuffix, WL, fkdr, kdr))).queue();
-    }
-
-    @Override
-    public void addFields(SlashCommandData data)
-    {
-        data.addOption(STRING, "name", "Name of Player", true);
+        return image;
     }
 
     // bedwars stars. %x$s = (x+3)th character of the level. including star. 0 = full string, 1 = full level, 2 = star. (i think)
