@@ -17,6 +17,7 @@ import javax.imageio.ImageIO;
 import java.awt.*;
 import java.awt.image.BufferedImage;
 import java.io.*;
+import java.net.URISyntaxException;
 import java.net.URL;
 import java.text.DecimalFormat;
 import java.util.*;
@@ -60,8 +61,7 @@ public class Bedwars implements Command
                 URL resource = Main.class.getResource(String.format("/images/Backgrounds/bedwarsBackground%s.png", availableBackgrounds));
                 if (resource == null) break;
 
-                File file = new File(resource.toURI());
-                BufferedImage image = ImageIO.read(file);
+                BufferedImage image = ImageIO.read(new File(resource.toURI()));
 
                 // draw overlay on background
                 Graphics2D g2d = image.createGraphics();
@@ -176,6 +176,8 @@ public class Bedwars implements Command
 
         Function<String, Integer> getInt = s -> bwJson.has(s) && !bwJson.isNull(s) ? bwJson.getInt(s) : 0;
         Function<String, Double> getDouble = s -> bwJson.has(s) && !bwJson.isNull(s) ? bwJson.getDouble(s) : 0;
+        Function<String, String> getString = s -> bwJson.has(s) && !bwJson.isNull(s) ? bwJson.getString(s) : null;
+
         DecimalFormat bigFormat = new DecimalFormat("###,###");
 
         int iron = getInt.apply("iron_resources_collected_bedwars");
@@ -198,14 +200,20 @@ public class Bedwars implements Command
         double bblr = bedsBroken / bedsLost;
 
         int xp = getInt.apply("Experience");
+
         double level_d = getLevelForExp(xp);
         int level = (int) level_d;
+
         int xpReq = getBWExpForLevel(level);
         int xpPastLevel = (int) Math.round(((level_d - level) * 5000)/5)*5;
         int levelProgressBars = xpPastLevel / (5000 / levelProgressBarLength);
         String levelProgressBar = "|".repeat(levelProgressBars) + "§c" + "|".repeat(Math.max(0, levelProgressBarLength - levelProgressBars));
+
         String formattedLevel = getFormattedLevel(level);
         String formattedNextLevel = getFormattedLevel(level+1);
+
+        String favoriteSlotsString = getString.apply("favorite_slots");
+        String quickBuy = getString.apply("favourites_2"); // favourites! definitely not worrying that this has _2 on it.. (foreshadowing)
 
         int chosenBackground = availableBackgrounds <= 1 ? 0 : rand.nextInt(0, availableBackgrounds);
         BufferedImage image = copyImage(backgroundImages.get(chosenBackground));
@@ -252,10 +260,111 @@ public class Bedwars implements Command
         fontRenderer.drawString(bigFormat.format(diamond), 700, 2025, FontRenderer.CenterXAligned);
         fontRenderer.drawString(bigFormat.format(emerald), 940, 2025, FontRenderer.CenterXAligned);
 
+        // quick buy
+        // 1850, 1574; Size 980x537 980/(21/3) = 140px per slot horizontal
+        // 358/3 = 119.3334px per slot vertical
+        // ^ 358 because we're including quick buy and adding padding space for it
+
+        // 980/9 = 108.8889px per quick buy item
+
+        // 20px padding between each item?
+        String[] quickBuys = quickBuy.split(",");
+        String[] favoriteSlots = favoriteSlotsString.split(",");
+
+        double quickBuyItemSpacingX = 140;
+        double quickBuyItemSpacingY = 140;
+        int quickBuyItemSize = (int) quickBuyItemSpacingX-10;
+
+        double slotItemSpacingX = 110;
+        int slotItemSize = (int) slotItemSpacingX-10;
+
+        System.out.println("I wanna die");
+
+        URL testResource = Main.class.getResource("/images/Resources/iron_ingot.png");
+        BufferedImage testItem;
+        try {
+            assert testResource != null;
+            testItem = ImageIO.read(new File(testResource.toURI()));
+        } catch (Exception e) {
+            throw new RuntimeException(e);
+        }
+
+        for (int y = 0; y < 3; y++) {
+            for (int x = 0; x < 7; x++) {
+                int i = y*7 + x;
+                String item = quickBuys[i];
+                String itemIcon = item;
+                switch(item) {
+                    case "stick_(knockback_i)" -> itemIcon = "stick";
+                    case "bow_(power_i)" -> itemIcon = "bow_POW1";
+                    case "bow_(punch_i)" -> itemIcon = "bow_PUN1";
+
+                    case "wooden_pickaxe" -> itemIcon = "wood_pickaxe";
+                    case "wooden_axe" -> itemIcon = "wood_axe";
+
+                    case "wool" -> itemIcon = "wool_colored_white";
+                    case "oak_wood_planks" -> itemIcon = "planks_oak";
+
+                    case "speed_ii_potion_(45_seconds)" -> itemIcon = "potion_bottle_speed";
+                    case "jump_v_potion_(45_seconds)" -> itemIcon = "potion_bottle_jump";
+                    case "invisibility_potion_(30_seconds)" -> itemIcon = "potion_bottle_invis";
+
+                    case "bridge_egg" -> itemIcon = "egg";
+                    case "water_bucket" -> itemIcon = "bucket_water";
+                    case "magic_milk" -> itemIcon = "bucket_milk";
+                    case "golden_apple" -> itemIcon = "apple_golden";
+                    case "dream_defender" -> itemIcon = "golem_egg";
+                }
+
+                BufferedImage itemImage = loadItemImage(itemIcon);
+
+                g2d.drawImage(itemImage, 1850 + (int) (x*quickBuyItemSpacingX), 1574 + (int) (y*quickBuyItemSpacingY), quickBuyItemSize, quickBuyItemSize, null);
+            }
+        }
+
+        for (int x = 0; x < 9; x++) {
+            String slotType = favoriteSlots[x];
+            if (Objects.equals(slotType, "null")) continue;
+            String slotIcon = "";
+            switch(slotType) {
+                case "Melee" -> slotIcon = "wood_sword";
+                case "Utility" -> slotIcon = "fireball";
+                case "Tools" -> slotIcon = "wood_pickaxe";
+                case "Blocks" -> slotIcon = "wool_colored_white"; // TODO: wool block? annoying though
+            }
+
+            BufferedImage itemImage = loadItemImage(slotIcon);
+            g2d.drawImage(itemImage, 1850 + (int) (x*slotItemSpacingX), 2110 - slotItemSize, slotItemSize, slotItemSize, null);
+        }
+
         // output and return image
         g2d.dispose();
 
         return image;
+    }
+
+    public HashMap<String, BufferedImage> itemIconCache = new HashMap<>();
+    public BufferedImage loadItemImage(String item) {
+        if (itemIconCache.containsKey(item)) return itemIconCache.get(item);
+
+        URL itemIconResource = Main.class.getResource("/images/Items/" + item + ".png");
+        if (itemIconResource == null) {
+            itemIconResource = Main.class.getResource("/images/Blocks/" + item + ".png");
+            if (itemIconResource == null) {
+                System.err.println("Couldn't find texture for " + item);
+                return Main.nullTexture;
+            }
+        }
+
+        try {
+            BufferedImage image = ImageIO.read(new File(itemIconResource.toURI()));
+            itemIconCache.put(item, image);
+
+            return image;
+        } catch (IOException | URISyntaxException e) {
+            e.printStackTrace(System.err);
+            return Main.nullTexture;
+        }
     }
 
     // bedwars stars. %x$s = (x+3)th character of the level. including star. 0 = full string, 1 = full level, 2 = star. (i think)

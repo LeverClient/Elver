@@ -17,7 +17,6 @@ import net.dv8tion.jda.api.interactions.commands.build.Commands;
 import net.dv8tion.jda.api.interactions.commands.build.SlashCommandData;
 import net.dv8tion.jda.api.requests.GatewayIntent;
 import net.dv8tion.jda.api.utils.FileUpload;
-import net.dv8tion.jda.internal.entities.GuildImpl;
 import org.jetbrains.annotations.NotNull;
 import org.json.JSONObject;
 
@@ -26,8 +25,6 @@ import java.awt.*;
 import java.awt.image.BufferedImage;
 import java.io.*;
 import java.net.URISyntaxException;
-import java.nio.file.Files;
-import java.nio.file.Path;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Objects;
@@ -42,7 +39,12 @@ public class Main extends ListenerAdapter
 
     public static Font minecraftFont;
 
+    public static BufferedImage nullTexture;
+
     public static void main(String[] args) throws URISyntaxException, IOException, FontFormatException, InterruptedException {
+        // null texture
+        nullTexture = ImageIO.read(new File(Objects.requireNonNull(Main.class.getResource("/images/null.png")).toURI()));
+
         // cache bot profile for faster image making
         botProfile = ImageIO.read(new File(Objects.requireNonNull(Main.class.getResource("/images/botProfile.png")).toURI()));
         botProfileScaled = new BufferedImage(226, 226, BufferedImage.TYPE_INT_ARGB);
