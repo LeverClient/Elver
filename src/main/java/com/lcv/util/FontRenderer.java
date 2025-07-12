@@ -3,10 +3,8 @@ package com.lcv.util;
 import java.awt.*;
 import java.awt.font.FontRenderContext;
 import java.awt.geom.Rectangle2D;
-import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.HashMap;
-import java.util.stream.Collectors;
 import java.util.stream.Stream;
 
 public class FontRenderer {
@@ -171,9 +169,9 @@ public class FontRenderer {
         switch(horizontalAlignment) {
             case 1 -> {} // LEFT
 
-            case 2 -> x += (width/2); // CENTER
+            case 2 -> x -= (width/2); // CENTER
 
-            case 3 -> x += width; // RIGHT
+            case 3 -> x -= width; // RIGHT
         }
 
         switch(verticalAlignment) {
