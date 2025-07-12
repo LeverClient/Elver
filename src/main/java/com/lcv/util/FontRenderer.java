@@ -127,6 +127,14 @@ public class FontRenderer {
         return selectedFont;
     }
 
+    public int getFontHeight(int font) {
+        return fontMetrics.get(fonts[font]).getMaxAdvance();
+    }
+
+    public int getFontHeight() {
+        return fontMetrics.get(selectedFont).getMaxAdvance();
+    }
+
     public void setGraphics(Graphics2D g2d) {
         if (g2d == null) return;
 
