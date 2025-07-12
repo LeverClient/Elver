@@ -8,9 +8,9 @@ import java.util.function.Function;
 
 public class HypixelPlayerData
 {
-    protected JSONObject player;
+    public JSONObject player;
 
-    protected JSONObject stats;
+    public JSONObject stats;
 
     public String rank = "UNKNOWN";
 
