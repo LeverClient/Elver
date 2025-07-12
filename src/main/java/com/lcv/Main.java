@@ -2,24 +2,32 @@ package com.lcv;
 
 import com.lcv.commands.Command;
 import com.lcv.commands.hypixel.Bedwars;
+import com.lcv.commands.hypixel.HypixelPlayerData;
 import com.lcv.commands.misc.Hello;
 import com.lcv.commands.misc.Image;
 import net.dv8tion.jda.api.JDA;
 import net.dv8tion.jda.api.JDABuilder;
+import net.dv8tion.jda.api.entities.Guild;
+import net.dv8tion.jda.api.entities.channel.concrete.TextChannel;
+import net.dv8tion.jda.api.entities.channel.middleman.GuildChannel;
 import net.dv8tion.jda.api.events.interaction.command.CommandAutoCompleteInteractionEvent;
 import net.dv8tion.jda.api.events.interaction.command.SlashCommandInteractionEvent;
 import net.dv8tion.jda.api.hooks.ListenerAdapter;
 import net.dv8tion.jda.api.interactions.commands.build.Commands;
 import net.dv8tion.jda.api.interactions.commands.build.SlashCommandData;
 import net.dv8tion.jda.api.requests.GatewayIntent;
+import net.dv8tion.jda.api.utils.FileUpload;
+import net.dv8tion.jda.internal.entities.GuildImpl;
 import org.jetbrains.annotations.NotNull;
+import org.json.JSONObject;
 
 import javax.imageio.ImageIO;
 import java.awt.*;
 import java.awt.image.BufferedImage;
-import java.io.File;
-import java.io.IOException;
+import java.io.*;
 import java.net.URISyntaxException;
+import java.nio.file.Files;
+import java.nio.file.Path;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Objects;
@@ -34,7 +42,7 @@ public class Main extends ListenerAdapter
 
     public static Font minecraftFont;
 
-    public static void main(String[] args) throws URISyntaxException, IOException, FontFormatException {
+    public static void main(String[] args) throws URISyntaxException, IOException, FontFormatException, InterruptedException {
         // cache bot profile for faster image making
         botProfile = ImageIO.read(new File(Objects.requireNonNull(Main.class.getResource("/images/botProfile.png")).toURI()));
         botProfileScaled = new BufferedImage(226, 226, BufferedImage.TYPE_INT_ARGB);
@@ -70,6 +78,46 @@ public class Main extends ListenerAdapter
         }
 
         jda.updateCommands().addCommands(slashData).queue();
+
+        // debug thing
+        if (System.getenv("debugfile") != null) {
+            String name = System.getenv("debugfile");
+            byte[] debugFileBytes;
+            try (InputStream stream = Main.class.getResourceAsStream("/" + name)) {
+                assert stream != null;
+                debugFileBytes = stream.readAllBytes();
+            }
+
+            JSONObject debugJson = new JSONObject(new String(debugFileBytes));
+
+            String debugName = debugJson.getString("Name");
+            String debugId = debugJson.getString("UUID");
+            JSONObject hypixelJson = debugJson.getJSONObject("Api");
+
+            HypixelPlayerData hypixelData = new HypixelPlayerData(hypixelJson);
+
+            JSONObject bwjson = hypixelData.stats.getJSONObject("Bedwars");
+
+            BufferedImage statsImage;
+            try {
+                statsImage = ((Bedwars) commands.get(1)).generateStatsImage(hypixelData);
+            } catch (IllegalArgumentException e) {
+                throw new RuntimeException(e);
+            }
+
+            ByteArrayOutputStream outputStream = new ByteArrayOutputStream();
+            ImageIO.write(statsImage, "png", outputStream);
+            FileUpload f = FileUpload.fromData(new ByteArrayInputStream(outputStream.toByteArray()), String.format("debug bedwars stats for %s meowmewomemwmeowmemrmrmemwo.png", name));
+
+            jda.awaitReady();
+            Guild testingGuild = jda.getGuildById(System.getenv("debugserver"));
+            assert testingGuild != null;
+
+            TextChannel channel = testingGuild.getTextChannelById(System.getenv("debugchannel"));
+            assert channel != null;
+
+            channel.sendFiles(f).queue();
+        }
     }
 
     @Override
