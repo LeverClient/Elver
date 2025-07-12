@@ -149,6 +149,7 @@ public class Bedwars implements Command
 
         Function<String, Integer> getInt = s -> bwJson.has(s) && !bwJson.isNull(s) ? bwJson.getInt(s) : 0;
         Function<String, Double> getDouble = s -> bwJson.has(s) && !bwJson.isNull(s) ? bwJson.getDouble(s) : 0;
+        DecimalFormat bigFormat = new DecimalFormat("###,###");
 
         int iron = getInt.apply("iron_resources_collected_bedwars");
         int gold = getInt.apply("gold_resources_collected_bedwars");
@@ -191,35 +192,32 @@ public class Bedwars implements Command
             fontRenderer.drawString(nameWithRank, 1440 - (g2d.getFontMetrics().stringWidth((FontRenderer.removeFormatting(nameWithRank))) / 2), 75);
 
             fontRenderer.switchFont(1);
-            fontRenderer.drawString(String.format("§aWins: %.0f", wins), 75, 325);
-            fontRenderer.drawString(String.format("§cLosses: %.0f", losses), 75, 510);
+            fontRenderer.drawString(String.format("§aWins: %s", bigFormat.format(wins)), 75, 325);
+            fontRenderer.drawString(String.format("§cLosses: %s", bigFormat.format(losses)), 75, 510);
             fontRenderer.drawString(String.format("§aW§cL§r: %.2f", WL), 75, 700);
 
-            fontRenderer.drawString(String.format("§aBB: %.0f", bedsBroken), 75, 962);
-            fontRenderer.drawString(String.format("§cBL: %.0f", bedsLost), 75, 1147);
+            fontRenderer.drawString(String.format("§aBB: %s", bigFormat.format(bedsBroken)), 75, 962);
+            fontRenderer.drawString(String.format("§cBL: %s", bigFormat.format(bedsLost)), 75, 1147);
             fontRenderer.drawString(String.format("§aBB§cLR§r: %.2f", bblr), 75, 1337);
 
-            fontRenderer.drawString(String.format("§aKills: %.0f", kills), 1875, 325);
-            fontRenderer.drawString(String.format("§cDeaths: %.0f", deaths), 1875, 510);
+            fontRenderer.drawString(String.format("§aKills: %s", bigFormat.format(kills)), 1875, 325);
+            fontRenderer.drawString(String.format("§cDeaths: %s", bigFormat.format(deaths)), 1875, 510);
             fontRenderer.drawString(String.format("§aK§cD§r: %.2f", kdr), 1875, 700);
 
-            fontRenderer.drawString(String.format("§aFK: %.0f", finalKills), 1875, 962);
-            fontRenderer.drawString(String.format("§cFD: %.0f", finalDeaths), 1875, 1147);
+            fontRenderer.drawString(String.format("§aFK: %s", bigFormat.format(finalKills)), 1875, 962);
+            fontRenderer.drawString(String.format("§cFD: %s", bigFormat.format(finalDeaths)), 1875, 1147);
             fontRenderer.drawString(String.format("§aFK§cDR§r: %.2f", fkdr), 1875, 1337);
 
             fontRenderer.drawString(String.format("Level: [%s%s]", level, levelSuffix), 1155, 1500);
-            System.out.printf("Level: [%s%s]%n", level, levelSuffix);
 
             fontRenderer.switchFont(2);
-            DecimalFormat df = new DecimalFormat("###, ###, ###");
-            fontRenderer.drawString(df.format(iron), 190 - (g2d.getFontMetrics().stringWidth(df.format(iron)) / 2), 2025);
-            fontRenderer.drawString(df.format(gold), 445 - (g2d.getFontMetrics().stringWidth(df.format(gold)) / 2), 2025);
-            fontRenderer.drawString(df.format(diamond), 700 - (g2d.getFontMetrics().stringWidth(df.format(diamond)) / 2), 2025);
-            fontRenderer.drawString(df.format(emerald), 940 - (g2d.getFontMetrics().stringWidth(df.format(emerald)) / 2), 2025);
+            fontRenderer.drawString(bigFormat.format(iron), 190, 2025, FontRenderer.CenterXAligned);
+            fontRenderer.drawString(bigFormat.format(gold), 445, 2025, FontRenderer.CenterXAligned);
+            fontRenderer.drawString(bigFormat.format(diamond), 700, 2025, FontRenderer.CenterXAligned);
+            fontRenderer.drawString(bigFormat.format(emerald), 940, 2025, FontRenderer.CenterXAligned);
 
             // output and send image as response
             g2d.dispose();
-
             ByteArrayOutputStream outputStream = new ByteArrayOutputStream();
             ImageIO.write(image, "png", outputStream);
             FileUpload f =  FileUpload.fromData(new ByteArrayInputStream(outputStream.toByteArray()), String.format("bedwars stats for %s meow.png", name));
