@@ -140,13 +140,14 @@ public class FontRenderer {
     }
 
     public void drawString(String txt, int x, int y) {
-        drawString(txt, x, y,  true, Color.white, TopAligned);
+        drawString(txt, x, y,  true, Color.white, 0);
     }
 
     public void drawString(String txt, int x, int y, int alignment) {
         drawString(txt, x, y,  true, Color.white, alignment);
     }
 
+    // draws a string with minecraft formatting, and aligned to the top left by default
     public void drawString(String txt, int x, int y, boolean shadow, Color col, int alignment) {
         if (g2d == null) throw new IllegalStateException("Attempt to DrawString without Graphics set");
 
@@ -175,7 +176,7 @@ public class FontRenderer {
         }
 
         switch(verticalAlignment) {
-            case 1 -> y += height; // TOP
+            case 0, 1 -> y += height; // TOP
 
             case 2 -> y += (height/2); // CENTER
 
