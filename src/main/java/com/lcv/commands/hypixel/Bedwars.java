@@ -426,16 +426,10 @@ public class Bedwars implements Command
     };
 
     // bedwars stars. each index in the array corresponds to 1000 stars higher
-    /*public final static String[] bedwarsPrestigeStars = {
+    public final static String[] bedwarsPrestigeStars = {
             "✫",
             "✪",
             "⚝",
-            "✥"
-    };*/
-    public final static String[] bedwarsPrestigeStars = {
-            "✥",
-            "✥",
-            "✥",
             "✥"
     };
 
