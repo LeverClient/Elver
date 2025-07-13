@@ -5,11 +5,11 @@ import com.lcv.commands.hypixel.Bedwars;
 import com.lcv.commands.hypixel.HypixelPlayerData;
 import com.lcv.commands.misc.Hello;
 import com.lcv.commands.misc.Image;
+import com.lcv.window.GLFWHandler;
 import net.dv8tion.jda.api.JDA;
 import net.dv8tion.jda.api.JDABuilder;
 import net.dv8tion.jda.api.entities.Guild;
 import net.dv8tion.jda.api.entities.channel.concrete.TextChannel;
-import net.dv8tion.jda.api.entities.channel.middleman.GuildChannel;
 import net.dv8tion.jda.api.events.interaction.command.CommandAutoCompleteInteractionEvent;
 import net.dv8tion.jda.api.events.interaction.command.SlashCommandInteractionEvent;
 import net.dv8tion.jda.api.hooks.ListenerAdapter;
@@ -56,6 +56,21 @@ public class Main extends ListenerAdapter
 
         // read font
         minecraftFont = Font.createFont(Font.TRUETYPE_FONT, Objects.requireNonNull(Main.class.getResourceAsStream("/fonts/test.ttf")));
+
+        if (true) {
+            new Thread(() -> {
+                GLFWHandler glfwHandler = new GLFWHandler();
+
+                try {
+                    glfwHandler.init(576, 432);
+                } catch (IOException e) {
+                    throw new RuntimeException(e);
+                }
+                glfwHandler.loop();
+            }).start();
+
+            //return;
+        }
 
         JDA jda = JDABuilder.create(
                 System.getenv("BOT_KEY"),
