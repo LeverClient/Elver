@@ -359,30 +359,32 @@ public class Bedwars implements Command
             for (int x = 0; x < 7; x++) {
                 int i = y*7 + x;
                 String item = quickBuys[i];
-                String itemIcon = item;
-                switch(item) {
-                    case "stick_(knockback_i)" -> itemIcon = "stick";
-                    case "bow_(power_i)" -> itemIcon = "bow_POW1";
-                    case "bow_(punch_i)" -> itemIcon = "bow_PUN1";
+                String itemIcon = switch(item) {
+                    case "stick_(knockback_i)" -> "stick";
+                    case "bow_(power_i)" -> "bow_POW1";
+                    case "bow_(punch_i)" -> "bow_PUN1";
 
-                    case "wooden_pickaxe" -> itemIcon = "wood_pickaxe";
-                    case "wooden_axe" -> itemIcon = "wood_axe";
+                    case "wooden_pickaxe" -> "wood_pickaxe";
+                    case "wooden_axe" -> "wood_axe";
 
-                    case "wool" -> itemIcon = "wool_colored_white";
-                    case "oak_wood_planks" -> itemIcon = "planks_oak";
+                    case "wool" -> "wool_colored_white";
+                    case "oak_wood_planks" -> "planks_oak";
+                    case "blast-proof_glass" -> "glass_white";
 
-                    case "speed_ii_potion_(45_seconds)" -> itemIcon = "potion_bottle_speed";
-                    case "jump_v_potion_(45_seconds)" -> itemIcon = "potion_bottle_jump";
-                    case "invisibility_potion_(30_seconds)" -> itemIcon = "potion_bottle_invis";
+                    case "speed_ii_potion_(45_seconds)" -> "potion_bottle_speed";
+                    case "jump_v_potion_(45_seconds)" -> "potion_bottle_jump";
+                    case "invisibility_potion_(30_seconds)" -> "potion_bottle_invis";
 
-                    case "bridge_egg" -> itemIcon = "egg";
-                    case "water_bucket" -> itemIcon = "bucket_water";
-                    case "magic_milk" -> itemIcon = "bucket_milk";
-                    case "golden_apple" -> itemIcon = "apple_golden";
-                    case "dream_defender" -> itemIcon = "golem_egg";
-                    case "compact_pop-up_tower" -> itemIcon = "popup_tower";
-                    case "null" -> itemIcon = "no_item";
-                }
+                    case "bridge_egg" -> "egg";
+                    case "water_bucket" -> "bucket_water";
+                    case "magic_milk" -> "bucket_milk";
+                    case "golden_apple" -> "apple_golden";
+                    case "dream_defender" -> "golem_egg";
+                    case "compact_pop-up_tower" -> "popup_tower";
+
+                    case "", " ", "null" -> "no_item";
+                    default -> item;
+                };
 
                 BufferedImage itemImage = loadItemImage(itemIcon);
                 g2d.drawImage(itemImage, 1850 + (int) (x*quickBuyItemSpacingX), 1574 + (int) (y*quickBuyItemSpacingY), quickBuyItemSize, quickBuyItemSize, null);
@@ -394,6 +396,7 @@ public class Bedwars implements Command
             String slotIcon = "";
             switch(slotType) {
                 case "Melee" -> slotIcon = "wood_sword";
+                case "Ranged" -> slotIcon = "bow";
                 case "Utility" -> slotIcon = "fireball";
                 case "Tools" -> slotIcon = "wood_pickaxe";
                 case "Blocks" -> slotIcon = "wool_colored_white";
