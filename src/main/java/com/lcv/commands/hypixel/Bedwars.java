@@ -318,11 +318,12 @@ public class Bedwars implements Command
             }
             return String.format("%.2f%s", num, arr[i]);
         };
+
         fontRenderer.switchFont(3);
-        fontRenderer.drawString(numAbbrev.apply(iron), 190, 2025, FontRenderer.CenterXAligned);
-        fontRenderer.drawString(numAbbrev.apply(gold), 445, 2025, FontRenderer.CenterXAligned);
-        fontRenderer.drawString(numAbbrev.apply(diamond), 700, 2025, FontRenderer.CenterXAligned);
-        fontRenderer.drawString(numAbbrev.apply(emerald), 940, 2025, FontRenderer.CenterXAligned);
+        fontRenderer.drawString(numAbbrev.apply(iron), 180, 2025, FontRenderer.CenterXAligned);
+        fontRenderer.drawString(numAbbrev.apply(gold), 435, 2025, FontRenderer.CenterXAligned);
+        fontRenderer.drawString(numAbbrev.apply(diamond), 690, 2025, FontRenderer.CenterXAligned);
+        fontRenderer.drawString(numAbbrev.apply(emerald), 930, 2025, FontRenderer.CenterXAligned);
 
         // quick buy
         // 1850, 1574; Size 980x537 980/(21/3) = 140px per slot horizontal
@@ -385,7 +386,7 @@ public class Bedwars implements Command
                 case "Melee" -> slotIcon = "wood_sword";
                 case "Utility" -> slotIcon = "fireball";
                 case "Tools" -> slotIcon = "wood_pickaxe";
-                case "Blocks" -> slotIcon = "wool_colored_white"; // TODO: wool block? annoying though
+                case "Blocks" -> slotIcon = "wool_colored_white";
                 case "null" -> slotIcon = "no_Slot";
             }
 
