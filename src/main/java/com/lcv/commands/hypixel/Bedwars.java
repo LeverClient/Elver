@@ -17,7 +17,6 @@ import javax.imageio.ImageIO;
 import java.awt.*;
 import java.awt.image.BufferedImage;
 import java.io.*;
-import java.net.MalformedURLException;
 import java.net.URISyntaxException;
 import java.net.URL;
 import java.text.DecimalFormat;
@@ -29,7 +28,10 @@ import static net.dv8tion.jda.api.interactions.commands.OptionType.STRING;
 public class Bedwars implements Command
 {
     private static final Logger log = LoggerFactory.getLogger(Bedwars.class);
-    public static int levelProgressBarLength = 20;
+
+    public static int prestigeProgressBarLength = 20;
+    public static double xpPerPrestige = getXpForPrestige(1);
+
     Random rand = new Random();
     ArrayList<BufferedImage> backgroundImages;
     static FontRenderer fontRenderer = new FontRenderer(null, new Font[]{
@@ -202,16 +204,22 @@ public class Bedwars implements Command
 
         int xp = getInt.apply("Experience");
 
+
         double level_d = getLevelForExp(xp);
         int level = (int) level_d;
+        int nextLevel = level + 1;
+        int currentPrestige = (int) Math.floor(level_d / 100)*100;
+        int nextPrestige = (int) Math.ceil(level_d / 100)*100;
 
         int xpReq = getBWExpForLevel(level);
         int xpPastLevel = (int) Math.round(((level_d - level) * 5000)/5)*5;
-        int levelProgressBars = xpPastLevel / (5000 / levelProgressBarLength);
-        String levelProgressBar = "|".repeat(levelProgressBars) + "§c" + "|".repeat(Math.max(0, levelProgressBarLength - levelProgressBars));
+        double xpUntilPrestige = getXpForPrestige(level_d - currentPrestige);
+        int levelProgressBars = (int) ((xpPerPrestige - xpUntilPrestige) / (xpPerPrestige / prestigeProgressBarLength)); //xpPastLevel / (xpPastLevel / prestigeProgressBarLength);
+        String levelProgressBar = "|".repeat(levelProgressBars) + "§c" + "|".repeat(Math.max(0, prestigeProgressBarLength - levelProgressBars));
 
         String formattedLevel = getFormattedLevel(level);
         String formattedNextLevel = getFormattedLevel(level+1);
+        String formattedNextPrestige = getFormattedLevel(nextPrestige);
 
         String favoriteSlotsString = getString.apply("favorite_slots");
         String quickBuy = getString.apply("favourites_2"); // favourites! definitely not worrying that this has _2 on it.. (foreshadowing)
@@ -281,7 +289,7 @@ public class Bedwars implements Command
         fontRenderer.drawString(String.format("§a%d §f/ §c%d", xpPastLevel, xpReq), image.getWidth()/2, 1275+148, FontRenderer.CenterXAligned);
 
         // progress bar
-        fontRenderer.drawString(String.format("§a%s  §f>>>  %s", levelProgressBar, formattedNextLevel), 540, 1625-9, FontRenderer.CenterXAligned);
+        fontRenderer.drawString(String.format("§a%s  §f>>>  %s", levelProgressBar, formattedNextPrestige), 540, 1625-9, FontRenderer.CenterXAligned);
 
         Function<Double, String> numAbbrev = num ->
         {
@@ -319,15 +327,6 @@ public class Bedwars implements Command
         int slotItemSize = (int) slotItemSpacingX-10;
 
         System.out.println("I wanna die");
-
-        URL testResource = Main.class.getResource("/images/Resources/iron_ingot.png");
-        BufferedImage testItem;
-        try {
-            assert testResource != null;
-            testItem = ImageIO.read(new File(testResource.toURI()));
-        } catch (Exception e) {
-            throw new RuntimeException(e);
-        }
 
         for (int y = 0; y < 3; y++) {
             for (int x = 0; x < 7; x++) {
@@ -517,6 +516,24 @@ public class Bedwars implements Command
         }
     }
 
+    public static int getXpForPrestige(double level) {
+        int levelInt = (int) level;
+        int respectPrestige = getLevelRespectingPrestige(levelInt);
+        int levelXp = (int) ((level - levelInt)*5000);
+
+        if (respectPrestige > 4) {
+            return (100 - levelInt) * 5000 - levelXp;
+        }
+
+        int extraXpNeeded = 0;
+
+        for (int i = respectPrestige; i < 5; i++) {
+            extraXpNeeded += getBWExpForLevel(i);
+        }
+
+        return (100 - 4) * 5000 + extraXpNeeded - levelXp;
+    }
+
     // stole this code from plancke's github. i don't know how it works
     // actually i might've found it on the hypixel forums, but it's originally from here. i don't remember if i ported it to java myself
     // https://github.com/Plancke/hypixel-php/blob/2303c4bdedb650acc8315393885284dba59fdd79/src/util/games/bedwars/ExpCalculator.php
@@ -560,7 +577,7 @@ public class Bedwars implements Command
             level++;
             expWithoutPrestiges -= expForEasyLevel;
         }
-        //returns players bedwars level, remove the Math.floor if you want the exact bedwars level returned
+
         return level + (double) expWithoutPrestiges / 5000;
     }
 }
