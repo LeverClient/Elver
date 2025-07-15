@@ -8,7 +8,7 @@ import java.util.HashMap;
 import java.util.stream.Stream;
 
 public class FontRenderer {
-    public static Color[] colors = {
+    public static Color[] defaultColors = {
             new Color(0x000000), // 0
             new Color(0x0000AA), // 1
             new Color(0x00AA00), // 2
@@ -19,13 +19,17 @@ public class FontRenderer {
             new Color(0xAAAAAA), // 7
             new Color(0x555555), // 8
             new Color(0x5555FF), // 9
-            new Color(0x55FF55), // a
-            new Color(0x55FFFF), // b
-            new Color(0xFF5555), // c
-            new Color(0xFF55FF), // d
-            new Color(0xFFFF55), // e
-            new Color(0xFFFFFF), // f
+            new Color(0x55FF55), // a, 10
+            new Color(0x55FFFF), // b, 11
+            new Color(0xFF5555), // c, 12
+            new Color(0xFF55FF), // d, 13
+            new Color(0xFFFF55), // e, 14
+            new Color(0xFFFFFF), // f, 15
     };
+
+    public static int color_default = defaultColors.length - 1;
+
+    public Color[] appliedColors = defaultColors;
 
     public static HashMap<Color, Color> shadowCache = new HashMap<>();
 
@@ -148,18 +152,18 @@ public class FontRenderer {
     }
 
     public void drawString(String txt, int x, int y) {
-        drawString(txt, x, y,  true, Color.white, 0);
+        drawString(txt, x, y,  true, appliedColors[color_default], 0);
     }
 
     public void drawString(String txt, int x, int y, int alignment) {
-        drawString(txt, x, y,  true, Color.white, alignment);
+        drawString(txt, x, y,  true, appliedColors[color_default], alignment);
     }
 
     // draws a string with minecraft formatting, and aligned to the top left by default
     public void drawString(String txt, int x, int y, boolean shadow, Color col, int alignment) {
         if (g2d == null) throw new IllegalStateException("Attempt to DrawString without Graphics set");
 
-        if (col == null) col = Color.white;
+        if (col == null) col = appliedColors[color_default];
 
         Color originalColor = g2d.getColor();
         g2d.setColor(col);
@@ -232,7 +236,7 @@ public class FontRenderer {
                 default -> {
                     int colorCode = "0123456789abcdef".indexOf(code);
                     if (colorCode != -1) {
-                        renderSegment.color = colors[colorCode];
+                        renderSegment.color = appliedColors[colorCode];
                     }
                 }
             }

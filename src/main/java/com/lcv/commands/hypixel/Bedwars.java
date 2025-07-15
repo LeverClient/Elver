@@ -5,6 +5,7 @@ import com.lcv.commands.Command;
 import com.lcv.commands.Embed;
 import com.lcv.util.FontRenderer;
 import com.lcv.util.HTTPRequest;
+import com.lcv.util.StatsSkins;
 import net.dv8tion.jda.api.events.interaction.command.SlashCommandInteractionEvent;
 import net.dv8tion.jda.api.interactions.InteractionHook;
 import net.dv8tion.jda.api.interactions.commands.build.SlashCommandData;
@@ -235,9 +236,18 @@ public class Bedwars implements Command
         Graphics2D g2d = image.createGraphics();
         g2d.setRenderingHint(RenderingHints.KEY_ANTIALIASING, RenderingHints.VALUE_ANTIALIAS_ON);
         g2d.setRenderingHint(RenderingHints.KEY_TEXT_ANTIALIASING, RenderingHints.VALUE_TEXT_ANTIALIAS_ON);
+
         // set up font renderer
         fontRenderer.switchFont(0);
         fontRenderer.setGraphics(g2d);
+
+        // apply skin (if we should)
+        StatsSkins.Skin userSpecificSkin = StatsSkins.userSkins.get(hypixelData.uuid);
+        if (userSpecificSkin == null) {
+            StatsSkins.none.apply(fontRenderer);
+        } else {
+            userSpecificSkin.apply(fontRenderer);
+        }
 
         // draw bot profile
         g2d.drawImage(Main.botProfileScaled, 25, 25, 226, 226, null);
@@ -250,7 +260,7 @@ public class Bedwars implements Command
                 renderType = "mojavatar";
             }
 
-            BufferedImage player = ImageIO.read(new URL(String.format("https://starlightskins.lunareclipse.studio/render/%s/%s/full", renderType, hypixelData.name)));
+            BufferedImage player = ImageIO.read(new URL(String.format("https://starlightskins.lunareclipse.studio/render/%s/%s/full", renderType, hypixelData.uuid)));
 
             double playerWidth = player.getWidth();
             double playerHeight = player.getHeight();
