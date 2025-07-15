@@ -17,6 +17,7 @@ import javax.imageio.ImageIO;
 import java.awt.*;
 import java.awt.image.BufferedImage;
 import java.io.*;
+import java.net.MalformedURLException;
 import java.net.URISyntaxException;
 import java.net.URL;
 import java.text.DecimalFormat;
@@ -35,7 +36,7 @@ public class Bedwars implements Command
             Main.minecraftFont.deriveFont(144f),
             Main.minecraftFont.deriveFont(96f),
             Main.minecraftFont.deriveFont(72f),
-            Main.minecraftFont.deriveFont(36f)
+            Main.minecraftFont.deriveFont(40f)
     });
     public Bedwars() {
         backgroundImages = getBackgrounds();
@@ -180,10 +181,10 @@ public class Bedwars implements Command
 
         DecimalFormat bigFormat = new DecimalFormat("###,###");
 
-        int iron = getInt.apply("iron_resources_collected_bedwars");
-        int gold = getInt.apply("gold_resources_collected_bedwars");
-        int diamond = getInt.apply("diamond_resources_collected_bedwars");
-        int emerald = getInt.apply("emerald_resources_collected_bedwars");
+        double iron = getDouble.apply("iron_resources_collected_bedwars");
+        double gold = getDouble.apply("gold_resources_collected_bedwars");
+        double diamond = getDouble.apply("diamond_resources_collected_bedwars");
+        double emerald = getDouble.apply("emerald_resources_collected_bedwars");
 
         double losses = getDouble.apply("losses_bedwars");
         double wins = getDouble.apply("wins_bedwars");
@@ -219,12 +220,40 @@ public class Bedwars implements Command
         BufferedImage image = copyImage(backgroundImages.get(chosenBackground));
 
         Graphics2D g2d = image.createGraphics();
+        g2d.setRenderingHint(RenderingHints.KEY_ANTIALIASING, RenderingHints.VALUE_ANTIALIAS_ON);
+        g2d.setRenderingHint(RenderingHints.KEY_TEXT_ANTIALIASING, RenderingHints.VALUE_TEXT_ANTIALIAS_ON);
         // set up font renderer
         fontRenderer.switchFont(0);
         fontRenderer.setGraphics(g2d);
 
         // draw bot profile
         g2d.drawImage(Main.botProfileScaled, 25, 25, 226, 226, null);
+
+        try
+        {
+            String[] renderList = {"default", "marching", "walking", "crouching", "crossed", "criss_cross", "ultimate", "cheering", "relaxing", "trudging", "cowering", "pointing", "lunging", "dungeons", "facepalm", "sleeping", "archer", "kicking", "mojavatar", "reading"};
+            BufferedImage player = ImageIO.read(new URL(String.format("https://starlightskins.lunareclipse.studio/render/%s/%s/full", renderList[rand.nextInt(0, renderList.length)], hypixelData.name)));
+            double playerWidth = player.getWidth();
+            double playerHeight = player.getHeight();
+            double areaWidth = 670;
+            double areaHeight = 850;
+            double ratio;
+            if ((areaWidth / playerWidth) * playerHeight < areaHeight)
+            {
+                ratio = (areaWidth / playerWidth);
+            }
+            else
+            {
+                ratio = (areaHeight / playerHeight);
+            }
+            int width = (int) (playerWidth * ratio);
+            int height = (int) (playerHeight * ratio);
+            g2d.drawImage(player, 1440 - (width / 2), 325 + ((850 - height) / 2), width, height, null);
+        }
+        catch (IOException e)
+        {
+            throw new RuntimeException(e);
+        }
 
         // draw player name
         String nameWithRank = hypixelData.getPlayerNameRankFormat();
@@ -254,11 +283,22 @@ public class Bedwars implements Command
         // progress bar
         fontRenderer.drawString(String.format("§a%s  §f>>>  %s", levelProgressBar, formattedNextLevel), 540, 1625-9, FontRenderer.CenterXAligned);
 
+        Function<Double, String> numAbbrev = num ->
+        {
+            String[] arr = {"", "K", "M", "B", "T"};
+            int i = 0;
+            while(num > 999)
+            {
+                i++;
+                num /= 1000;
+            }
+            return String.format("%.2f%s", num, arr[i]);
+        };
         fontRenderer.switchFont(3);
-        fontRenderer.drawString(bigFormat.format(iron), 190, 2025, FontRenderer.CenterXAligned);
-        fontRenderer.drawString(bigFormat.format(gold), 445, 2025, FontRenderer.CenterXAligned);
-        fontRenderer.drawString(bigFormat.format(diamond), 700, 2025, FontRenderer.CenterXAligned);
-        fontRenderer.drawString(bigFormat.format(emerald), 940, 2025, FontRenderer.CenterXAligned);
+        fontRenderer.drawString(numAbbrev.apply(iron), 190, 2025, FontRenderer.CenterXAligned);
+        fontRenderer.drawString(numAbbrev.apply(gold), 445, 2025, FontRenderer.CenterXAligned);
+        fontRenderer.drawString(numAbbrev.apply(diamond), 700, 2025, FontRenderer.CenterXAligned);
+        fontRenderer.drawString(numAbbrev.apply(emerald), 940, 2025, FontRenderer.CenterXAligned);
 
         // quick buy
         // 1850, 1574; Size 980x537 980/(21/3) = 140px per slot horizontal
@@ -314,23 +354,24 @@ public class Bedwars implements Command
                     case "magic_milk" -> itemIcon = "bucket_milk";
                     case "golden_apple" -> itemIcon = "apple_golden";
                     case "dream_defender" -> itemIcon = "golem_egg";
+                    case "compact_pop-up_tower" -> itemIcon = "popup_tower";
+                    case "null" -> itemIcon = "no_item";
                 }
 
                 BufferedImage itemImage = loadItemImage(itemIcon);
-
                 g2d.drawImage(itemImage, 1850 + (int) (x*quickBuyItemSpacingX), 1574 + (int) (y*quickBuyItemSpacingY), quickBuyItemSize, quickBuyItemSize, null);
             }
         }
 
         for (int x = 0; x < 9; x++) {
             String slotType = favoriteSlots[x];
-            if (Objects.equals(slotType, "null")) continue;
             String slotIcon = "";
             switch(slotType) {
                 case "Melee" -> slotIcon = "wood_sword";
                 case "Utility" -> slotIcon = "fireball";
                 case "Tools" -> slotIcon = "wood_pickaxe";
                 case "Blocks" -> slotIcon = "wool_colored_white"; // TODO: wool block? annoying though
+                case "null" -> slotIcon = "no_Slot";
             }
 
             BufferedImage itemImage = loadItemImage(slotIcon);
@@ -351,8 +392,12 @@ public class Bedwars implements Command
         if (itemIconResource == null) {
             itemIconResource = Main.class.getResource("/images/Blocks/" + item + ".png");
             if (itemIconResource == null) {
-                System.err.println("Couldn't find texture for " + item);
-                return Main.nullTexture;
+                itemIconResource = Main.class.getResource("/images/" + item + ".png");
+                if (itemIconResource == null)
+                {
+                    System.err.println("Couldn't find texture for " + item);
+                    return Main.nullTexture;
+                }
             }
         }
 
@@ -484,9 +529,6 @@ public class Bedwars implements Command
         if (level == 0) return 0;
 
         int respectedLevel = getLevelRespectingPrestige(level);
-        if (respectedLevel > EASY_LEVELS) {
-            return 5000;
-        }
 
         return switch (respectedLevel) {
             case 1 -> 500;
@@ -498,11 +540,13 @@ public class Bedwars implements Command
     }
 
     public static int getLevelRespectingPrestige(int level) {
-        if (level > HIGHEST_PRESTIGE * LEVELS_PER_PRESTIGE) {
+        /*if (level > HIGHEST_PRESTIGE * LEVELS_PER_PRESTIGE) {
             return level - HIGHEST_PRESTIGE * LEVELS_PER_PRESTIGE;
         } else {
             return level % LEVELS_PER_PRESTIGE;
-        }
+        }*/
+
+        return level % LEVELS_PER_PRESTIGE;
     }
 
     public static double getLevelForExp(int exp) {
