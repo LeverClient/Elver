@@ -393,15 +393,15 @@ public class Bedwars implements Command
 
         for (int x = 0; x < 9; x++) {
             String slotType = favoriteSlots[x];
-            String slotIcon = "";
-            switch(slotType) {
-                case "Melee" -> slotIcon = "wood_sword";
-                case "Ranged" -> slotIcon = "bow";
-                case "Utility" -> slotIcon = "fireball";
-                case "Tools" -> slotIcon = "wood_pickaxe";
-                case "Blocks" -> slotIcon = "wool_colored_white";
-                case "null" -> slotIcon = "no_Slot";
-            }
+            String slotIcon = switch(slotType) {
+                case "Melee" -> "wood_sword";
+                case "Ranged" -> "bow";
+                case "Utility" -> "fireball";
+                case "Tools" -> "wood_pickaxe";
+                case "Blocks" -> "wool_colored_white";
+
+                default -> "no_Slot";
+            };
 
             BufferedImage itemImage = loadItemImage(slotIcon);
             g2d.drawImage(itemImage, 1850 + (int) (x*slotItemSpacingX), 2110 - slotItemSize, slotItemSize, slotItemSize, null);
