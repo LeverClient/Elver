@@ -245,12 +245,19 @@ public class Bedwars implements Command
         try
         {
             String[] renderList = {"default", "marching", "walking", "crouching", "crossed", "criss_cross", "ultimate", "cheering", "relaxing", "trudging", "cowering", "pointing", "lunging", "dungeons", "facepalm", "sleeping", "archer", "kicking", "mojavatar", "reading"};
-            BufferedImage player = ImageIO.read(new URL(String.format("https://starlightskins.lunareclipse.studio/render/%s/%s/full", renderList[rand.nextInt(0, renderList.length)], hypixelData.name)));
+            String renderType = renderList[rand.nextInt(0, renderList.length)];
+            if (hypixelData.uuid.equals("ddf13e436ccc4790bb49912913bf7d77")) {
+                renderType = "mojavatar";
+            }
+
+            BufferedImage player = ImageIO.read(new URL(String.format("https://starlightskins.lunareclipse.studio/render/%s/%s/full", renderType, hypixelData.name)));
+
             double playerWidth = player.getWidth();
             double playerHeight = player.getHeight();
             double areaWidth = 670;
             double areaHeight = 850;
             double ratio;
+
             if ((areaWidth / playerWidth) * playerHeight < areaHeight)
             {
                 ratio = (areaWidth / playerWidth);
@@ -259,6 +266,7 @@ public class Bedwars implements Command
             {
                 ratio = (areaHeight / playerHeight);
             }
+
             int width = (int) (playerWidth * ratio);
             int height = (int) (playerHeight * ratio);
             g2d.drawImage(player, 1440 - (width / 2), 325 + ((850 - height) / 2), width, height, null);
