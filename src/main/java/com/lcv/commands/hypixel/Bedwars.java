@@ -30,6 +30,7 @@ public class Bedwars implements Command
     private static final Logger log = LoggerFactory.getLogger(Bedwars.class);
 
     public static int prestigeProgressBarLength = 20;
+    public static int levelProgressBarLength = 30;
     public static double xpPerPrestige = getXpForPrestige(1);
 
     Random rand = new Random();
@@ -212,10 +213,14 @@ public class Bedwars implements Command
         int nextPrestige = (int) Math.ceil(level_d / 100)*100;
 
         int xpReq = getBWExpForLevel(level);
-        int xpPastLevel = (int) Math.round(((level_d - level) * 5000)/5)*5;
+        int xpPastLevel = (int) Math.round(((level_d - level) * xpReq)/5)*5;
+
+        int levelProgressBars = xpPastLevel / (xpReq / levelProgressBarLength);
+        String levelProgressBarString = "|".repeat(levelProgressBars) + "§c" + "|".repeat(Math.max(0, levelProgressBarLength - levelProgressBars));
+
         double xpUntilPrestige = getXpForPrestige(level_d - currentPrestige);
-        int levelProgressBars = (int) ((xpPerPrestige - xpUntilPrestige) / (xpPerPrestige / prestigeProgressBarLength)); //xpPastLevel / (xpPastLevel / prestigeProgressBarLength);
-        String levelProgressBar = "|".repeat(levelProgressBars) + "§c" + "|".repeat(Math.max(0, prestigeProgressBarLength - levelProgressBars));
+        int prestigeProgressBars = (int) ((xpPerPrestige - xpUntilPrestige) / (xpPerPrestige / prestigeProgressBarLength));
+        String prestigeProgressBarString = "|".repeat(prestigeProgressBars) + "§c" + "|".repeat(Math.max(0, prestigeProgressBarLength - prestigeProgressBars));
 
         String formattedLevel = getFormattedLevel(level);
         String formattedNextLevel = getFormattedLevel(level+1);
@@ -284,12 +289,15 @@ public class Bedwars implements Command
         fontRenderer.drawString(String.format("§cFD: %s", bigFormat.format(finalDeaths)), 1875, 1147);
         fontRenderer.drawString(String.format("§aFK§cDR§r: %.2f", fkdr), 1875, 1337);
 
+        // level info
         fontRenderer.switchFont(2);
         fontRenderer.drawString(formattedLevel, image.getWidth()/2, 1275, FontRenderer.CenterXAligned);
-        fontRenderer.drawString(String.format("§a%d §f/ §c%d", xpPastLevel, xpReq), image.getWidth()/2, 1275+148, FontRenderer.CenterXAligned);
+        //fontRenderer.drawString(String.format("§a%d §f/ §c%d", xpPastLevel, xpReq), image.getWidth()/2, 1275+148, FontRenderer.CenterXAligned);
+        fontRenderer.drawString(String.format("§a%s", levelProgressBarString), image.getWidth()/2, 1275+148, FontRenderer.CenterXAligned);
+        fontRenderer.drawString(formattedNextLevel, image.getWidth()/2, 1275+148*2, FontRenderer.CenterXAligned);
 
         // progress bar
-        fontRenderer.drawString(String.format("§a%s  §f>>>  %s", levelProgressBar, formattedNextPrestige), 540, 1625-9, FontRenderer.CenterXAligned);
+        fontRenderer.drawString(String.format("§a%s  §f>>>  %s", prestigeProgressBarString, formattedNextPrestige), 540, 1625-9, FontRenderer.CenterXAligned);
 
         Function<Double, String> numAbbrev = num ->
         {
