@@ -34,7 +34,7 @@ public class Bedwars implements Command
     public static int levelProgressBarLength = 30;
     public static double xpPerPrestige = getXpForPrestige(1);
 
-    Random rand = new Random();
+    private static final Random rand = new Random();
     ArrayList<BufferedImage> backgroundImages;
     static FontRenderer fontRenderer = new FontRenderer(null, new Font[]{
             Main.minecraftFont.deriveFont(144f),
@@ -151,8 +151,6 @@ public class Bedwars implements Command
         {
             throw new RuntimeException(e);
         }
-
-        //interactionHook.editOriginal((String.format("%s is %s%s\n%.3fWLR\n%.3fFKDR\n%.3fKDR", name, level, levelSuffix, WL, fkdr, kdr))).queue();
     }
 
     @Override
@@ -205,7 +203,9 @@ public class Bedwars implements Command
         double bblr = bedsBroken / bedsLost;
 
         int xp = getInt.apply("Experience");
+        double networkXP = hypixelData.player.has("networkExp") && !hypixelData.player.isNull("networkExp") ? hypixelData.player.getInt("networkExp") : 0;
 
+        int networkLevel = (int) (1 + ((-8750 + Math.sqrt(8750 * 8750 + 5000 * networkXP)) / 2500));
 
         double level_d = getLevelForExp(xp);
         int level = (int) level_d;
@@ -224,7 +224,7 @@ public class Bedwars implements Command
         String prestigeProgressBarString = "|".repeat(prestigeProgressBars) + "§c" + "|".repeat(Math.max(0, prestigeProgressBarLength - prestigeProgressBars));
 
         String formattedLevel = getFormattedLevel(level);
-        String formattedNextLevel = getFormattedLevel(level+1);
+        String formattedNextLevel = getFormattedLevel(nextLevel);
         String formattedNextPrestige = getFormattedLevel(nextPrestige);
 
         String favoriteSlotsString = getString.apply("favorite_slots");
@@ -286,6 +286,27 @@ public class Bedwars implements Command
             throw new RuntimeException(e);
         }
 
+        try
+        {
+            String[] renderList = {"default", "crossed", "ultimate", "dungeons"};
+            String renderType = renderList[rand.nextInt(0, renderList.length)];
+
+            BufferedImage player = ImageIO.read(new URL(String.format("https://starlightskins.lunareclipse.studio/render/%s/%s/bust", renderType, hypixelData.uuid)));
+
+            double playerWidth = player.getWidth();
+            double playerHeight = player.getHeight();
+            double areaHeight = 300;
+            double ratio = areaHeight / playerHeight;
+            int width = (int) (playerWidth * ratio);
+            int height = (int) (playerHeight * ratio);
+
+            g2d.drawImage(player, 1155, 1785, width, height, null);
+        }
+        catch (IOException e)
+        {
+            throw new RuntimeException(e);
+        }
+
         // draw player name
         String nameWithRank = hypixelData.getPlayerNameRankFormat();
         fontRenderer.drawString(nameWithRank, 1440 - (g2d.getFontMetrics().stringWidth((FontRenderer.removeFormatting(nameWithRank))) / 2), 75);
@@ -309,10 +330,14 @@ public class Bedwars implements Command
 
         // level info
         fontRenderer.switchFont(2);
-        fontRenderer.drawString(formattedLevel, image.getWidth()/2, 1275, FontRenderer.CenterXAligned);
+        fontRenderer.drawString(formattedLevel, image.getWidth()/2, 1350, FontRenderer.CenterXAligned);
         //fontRenderer.drawString(String.format("§a%d §f/ §c%d", xpPastLevel, xpReq), image.getWidth()/2, 1275+148, FontRenderer.CenterXAligned);
-        fontRenderer.drawString(String.format("§a%s", levelProgressBarString), image.getWidth()/2, 1275+148, FontRenderer.CenterXAligned);
-        fontRenderer.drawString(formattedNextLevel, image.getWidth()/2, 1275+148*2, FontRenderer.CenterXAligned);
+        fontRenderer.drawString(String.format("§a%s", levelProgressBarString), image.getWidth()/2, 1350+148, FontRenderer.CenterXAligned);
+        //fontRenderer.drawString(formattedNextLevel, image.getWidth()/2, 1275+148*2, FontRenderer.CenterXAligned);
+
+
+        fontRenderer.drawString("Level:", 1440, 1785);
+        fontRenderer.drawString(String.valueOf(networkLevel), 1440, 1890);
 
         // progress bar
         fontRenderer.drawString(String.format("§a%s  §f>>>  %s", prestigeProgressBarString, formattedNextPrestige), 540, 1625-9, FontRenderer.CenterXAligned);
