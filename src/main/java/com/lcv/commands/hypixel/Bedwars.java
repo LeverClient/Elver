@@ -387,7 +387,7 @@ public class Bedwars implements Command
                 String itemIcon = switch(item) {
                     case "stick_(knockback_i)" -> "stick";
                     case "bow_(power_i)" -> "bow_POW1";
-                    case "bow_(punch_i)" -> "bow_PUN1";
+                    case "bow_(power_i__punch_i)" -> "bow_PUN1";
 
                     case "wooden_pickaxe" -> "wood_pickaxe";
                     case "wooden_axe" -> "wood_axe";
