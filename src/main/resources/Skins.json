@@ -1,0 +1,30 @@
+{
+  "mizukii": {
+    "Users": [
+      ["ddf13e436ccc4790bb49912913bf7d77", "syl127 (me)"],
+      ["3c317aaf84ef466d92454e53ee49ba96", "VIVACE (akiyama_mizukii)"]
+    ],
+
+    "Primary": [250, 190, 210],
+    "Secondary": 15,
+    "Default": null
+  },
+
+  "blue": {
+    "Users": [
+      ["c57dd50dab654726a5e3cbae94cc7b53", "ds105"]
+    ],
+
+    "Primary": [7, 211, 242],
+    "Secondary": 15
+  },
+
+  "elver": {
+    "Users": [
+      ["f7a757d51d6d408eb54ea7230b95ae15", "lever client"]
+    ],
+
+    "Primary": 11,
+    "Secondary": 8
+  }
+}
