@@ -314,29 +314,29 @@ public class Bedwars implements Command
         fontRenderer.switchFont(1);
         fontRenderer.drawString(String.format("§aWins: %s", bigFormat.format(wins)), 75, 325);
         fontRenderer.drawString(String.format("§cLosses: %s", bigFormat.format(losses)), 75, 510);
-        fontRenderer.drawString(String.format("§aW§cL§r: %.2f", WL), 75, 700);
+        fontRenderer.drawString(String.format("§aW§cL: §r%.2f", WL), 75, 700);
 
         fontRenderer.drawString(String.format("§aBB: %s", bigFormat.format(bedsBroken)), 75, 962);
         fontRenderer.drawString(String.format("§cBL: %s", bigFormat.format(bedsLost)), 75, 1147);
-        fontRenderer.drawString(String.format("§aBB§cLR§r: %.2f", bblr), 75, 1337);
+        fontRenderer.drawString(String.format("§aBB§cLR: §r%.2f", bblr), 75, 1337);
 
         fontRenderer.drawString(String.format("§aKills: %s", bigFormat.format(kills)), 1875, 325);
         fontRenderer.drawString(String.format("§cDeaths: %s", bigFormat.format(deaths)), 1875, 510);
-        fontRenderer.drawString(String.format("§aK§cD§r: %.2f", kdr), 1875, 700);
+        fontRenderer.drawString(String.format("§aK§cD: §r%.2f", kdr), 1875, 700);
 
         fontRenderer.drawString(String.format("§aFK: %s", bigFormat.format(finalKills)), 1875, 962);
         fontRenderer.drawString(String.format("§cFD: %s", bigFormat.format(finalDeaths)), 1875, 1147);
-        fontRenderer.drawString(String.format("§aFK§cDR§r: %.2f", fkdr), 1875, 1337);
+        fontRenderer.drawString(String.format("§aFK§cDR: §r%.2f", fkdr), 1875, 1337);
 
         // level info
         fontRenderer.switchFont(2);
-        fontRenderer.drawString(formattedLevel, image.getWidth()/2, 1350, FontRenderer.CenterXAligned);
-        //fontRenderer.drawString(String.format("§a%d §f/ §c%d", xpPastLevel, xpReq), image.getWidth()/2, 1275+148, FontRenderer.CenterXAligned);
-        fontRenderer.drawString(String.format("§a%s", levelProgressBarString), image.getWidth()/2, 1350+148, FontRenderer.CenterXAligned);
+        fontRenderer.drawString(formattedLevel, image.getWidth()/2, 1275, FontRenderer.CenterXAligned); // 1350
+        fontRenderer.drawString(String.format("§a%s", levelProgressBarString), image.getWidth()/2, 1275+148, FontRenderer.CenterXAligned);
+        fontRenderer.drawString(String.format("§a%d §f/ §c%d", xpPastLevel, xpReq), image.getWidth()/2, 1275+148*2, FontRenderer.CenterXAligned);
         //fontRenderer.drawString(formattedNextLevel, image.getWidth()/2, 1275+148*2, FontRenderer.CenterXAligned);
 
 
-        fontRenderer.drawString("Level:", 1440, 1785);
+        fontRenderer.drawString("§aLevel:", 1440, 1785);
         fontRenderer.drawString(String.valueOf(networkLevel), 1440, 1890);
 
         // progress bar
