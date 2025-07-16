@@ -5,6 +5,7 @@ import com.lcv.commands.Command;
 import com.lcv.commands.Embed;
 import com.lcv.util.FontRenderer;
 import com.lcv.util.HTTPRequest;
+import com.lcv.util.ImageUtil;
 import com.lcv.util.StatsSkins;
 import net.dv8tion.jda.api.events.interaction.command.SlashCommandInteractionEvent;
 import net.dv8tion.jda.api.interactions.InteractionHook;
@@ -30,30 +31,20 @@ public class Bedwars implements Command
 {
     private static final Logger log = LoggerFactory.getLogger(Bedwars.class);
 
-    public static int prestigeProgressBarLength = 20;
-    public static int levelProgressBarLength = 30;
+    public static final int PRESTIGE_PROGRESS_BAR_LENGTH = 20;
+    public static final int LEVEL_PROGRESS_BAR_LENGTH = 30;
     public static double xpPerPrestige = getXpForPrestige(1);
 
+    private static final String API_KEY_HYPIXEL = System.getenv("API_KEY_HYPIXEL");
+
     private static final Random rand = new Random();
-    ArrayList<BufferedImage> backgroundImages;
+    ArrayList<BufferedImage> backgroundImages = getBackgrounds();
     static FontRenderer fontRenderer = new FontRenderer(null, new Font[]{
             Main.minecraftFont.deriveFont(144f),
             Main.minecraftFont.deriveFont(96f),
             Main.minecraftFont.deriveFont(72f),
             Main.minecraftFont.deriveFont(40f)
     });
-    public Bedwars() {
-        backgroundImages = getBackgrounds();
-    }
-
-    public static BufferedImage copyImage(BufferedImage image) {
-        BufferedImage clone = new BufferedImage(image.getWidth(),
-                image.getHeight(), image.getType());
-        Graphics2D g2d = clone.createGraphics();
-        g2d.drawImage(image, 0, 0, null);
-        g2d.dispose();
-        return clone;
-    }
 
     int availableBackgrounds = 0;
     public ArrayList<BufferedImage> getBackgrounds()
@@ -66,21 +57,19 @@ public class Bedwars implements Command
                 URL resource = Main.class.getResource(String.format("/images/Backgrounds/bedwarsBackground%s.png", availableBackgrounds));
                 if (resource == null) break;
 
-                BufferedImage image = ImageIO.read(new File(resource.toURI()));
+                BufferedImage image = ImageIO.read(resource);
 
                 // draw overlay on background
                 Graphics2D g2d = image.createGraphics();
 
-                g2d.drawImage(ImageIO.read(new File(Objects.requireNonNull(Main.class.getResource("/images/overlay_separate_hotbar.png")).toURI())), 0, 0, null);
-                //g2d.fillRect(1850, 1995, 980, 5);
+                g2d.drawImage(ImageIO.read(Main.class.getResource("/images/overlay_separate_hotbar.png")), 0, 0, null);
 
-                g2d.drawImage(ImageIO.read(new File(Objects.requireNonNull(Main.class.getResource("/images/Resources/iron_ingot.png")).toURI())), 100, 1830, null);
-                g2d.drawImage(ImageIO.read(new File(Objects.requireNonNull(Main.class.getResource("/images/Resources/gold_ingot.png")).toURI())), 355, 1830, null);
-                g2d.drawImage(ImageIO.read(new File(Objects.requireNonNull(Main.class.getResource("/images/Resources/diamond.png")).toURI())), 610, 1820, null);
-                g2d.drawImage(ImageIO.read(new File(Objects.requireNonNull(Main.class.getResource("/images/Resources/emerald.png")).toURI())), 850, 1830, null);
+                g2d.drawImage(ImageIO.read(Main.class.getResource("/images/Resources/iron_ingot.png")), 100, 1830, null);
+                g2d.drawImage(ImageIO.read(Main.class.getResource("/images/Resources/gold_ingot.png")), 355, 1830, null);
+                g2d.drawImage(ImageIO.read(Main.class.getResource("/images/Resources/diamond.png")), 610, 1820, null);
+                g2d.drawImage(ImageIO.read(Main.class.getResource("/images/Resources/emerald.png")), 850, 1830, null);
 
                 g2d.dispose();
-
 
                 // save background
                 backgrounds.add(image);
@@ -110,27 +99,25 @@ public class Bedwars implements Command
     @Override
     public void execute(SlashCommandInteractionEvent event)
     {
-
         event.deferReply().queue();
         InteractionHook interactionHook = event.getHook();
 
-        String name = Objects.requireNonNull(event.getOption("name")).getAsString();
+        String name = event.getOption("name").getAsString();
         JSONObject mojangJson = HTTPRequest.getHTTPRequest("https://api.mojang.com/users/profiles/minecraft/" + name);
         if (mojangJson == null || mojangJson.isEmpty())
         {
             Embed embed = new Embed().setTitle("Failed Operation :(").setDescription("Mojang: No player found");
-            interactionHook.editOriginalEmbeds(embed.get()).queue();
+            interactionHook.sendMessageEmbeds(embed.get()).queue();
             return;
         }
 
-        String key = System.getenv("HYPIXEL_KEY");
         String UUID = mojangJson.getString("id");
 
-        JSONObject hypixelJson = HTTPRequest.getHTTPRequest("https://api.hypixel.net/v2/player?key=" + key + "&uuid=" + UUID);
+        JSONObject hypixelJson = HTTPRequest.getHTTPRequest("https://api.hypixel.net/v2/player?key=" + API_KEY_HYPIXEL + "&uuid=" + UUID);
         if (hypixelJson == null || hypixelJson.isEmpty())
         {
             Embed embed = new Embed().setTitle("Failed Operation :(").setDescription("Hypixel: No player found");
-            interactionHook.editOriginalEmbeds(embed.get()).queue();
+            interactionHook.sendMessageEmbeds(embed.get()).queue();
             return;
         }
 
@@ -140,17 +127,17 @@ public class Bedwars implements Command
         try {
             statsImage = generateStatsImage(hypixelData);
         } catch (IllegalArgumentException e) {
-            Embed embed = new Embed().setTitle("Failed Operation :(").setDescription(e.getMessage() ==  null ? "Unsure" : e.getMessage());
-            interactionHook.editOriginalEmbeds(embed.get()).queue();
+            Embed embed = new Embed().setTitle("Failed Operation :(").setDescription(e.getMessage() == null ? "Unsure" : e.getMessage());
+            interactionHook.sendMessageEmbeds(embed.get()).queue();
             return;
         }
 
         try
         {
-            ByteArrayOutputStream outputStream = new ByteArrayOutputStream();
-            ImageIO.write(statsImage, "png", outputStream);
-            FileUpload f =  FileUpload.fromData(new ByteArrayInputStream(outputStream.toByteArray()), String.format("bedwars stats for %s meow.png", name));
-            interactionHook.sendFiles(f).queue();
+            ByteArrayOutputStream baos = new ByteArrayOutputStream();
+            ImageIO.write(statsImage, "png", baos);
+            FileUpload file =  FileUpload.fromData(new ByteArrayInputStream(baos.toByteArray()), String.format("bedwars stats for %s meow.png", name));
+            interactionHook.sendFiles(file).queue();
         }
         catch (IOException e)
         {
@@ -179,10 +166,6 @@ public class Bedwars implements Command
         }
 
         JSONObject bwJson = hypixelData.stats.getJSONObject("Bedwars");
-//        if (bwJson == null || !bwJson.has("kills_bedwars") || bwJson.isNull("kills_bedwars"))
-//        {
-//            throw new IllegalArgumentException("Hypixel: No bedwars stats");
-//        }
 
         Function<String, Integer> getInt = s -> bwJson.has(s) && !bwJson.isNull(s) ? bwJson.getInt(s) : 0;
         Function<String, Double> getDouble = s -> bwJson.has(s) && !bwJson.isNull(s) ? bwJson.getDouble(s) : 0;
@@ -223,12 +206,12 @@ public class Bedwars implements Command
         int xpReq = getBWExpForLevel(level);
         int xpPastLevel = (int) Math.round(((level_d - level) * xpReq)/5)*5;
 
-        int levelProgressBars = xpPastLevel / (xpReq / levelProgressBarLength);
-        String levelProgressBarString = "|".repeat(levelProgressBars) + "§c" + "|".repeat(Math.max(0, levelProgressBarLength - levelProgressBars));
+        int levelProgressBars = xpPastLevel / (xpReq / LEVEL_PROGRESS_BAR_LENGTH);
+        String levelProgressBarString = "|".repeat(levelProgressBars) + "§c" + "|".repeat(Math.max(0, LEVEL_PROGRESS_BAR_LENGTH - levelProgressBars));
 
         double xpUntilPrestige = getXpForPrestige(level_d - currentPrestige);
-        int prestigeProgressBars = (int) ((xpPerPrestige - xpUntilPrestige) / (xpPerPrestige / prestigeProgressBarLength));
-        String prestigeProgressBarString = "|".repeat(prestigeProgressBars) + "§c" + "|".repeat(Math.max(0, prestigeProgressBarLength - prestigeProgressBars));
+        int prestigeProgressBars = (int) ((xpPerPrestige - xpUntilPrestige) / (xpPerPrestige / PRESTIGE_PROGRESS_BAR_LENGTH));
+        String prestigeProgressBarString = "|".repeat(prestigeProgressBars) + "§c" + "|".repeat(Math.max(0, PRESTIGE_PROGRESS_BAR_LENGTH - prestigeProgressBars));
 
         String formattedLevel = getFormattedLevel(level);
         String formattedNextLevel = getFormattedLevel(nextLevel);
@@ -238,7 +221,7 @@ public class Bedwars implements Command
         String quickBuy = getString.apply("favourites_2"); // favourites! definitely not worrying that this has _2 on it.. (foreshadowing)
 
         int chosenBackground = availableBackgrounds <= 1 ? 0 : rand.nextInt(0, availableBackgrounds);
-        BufferedImage image = copyImage(backgroundImages.get(chosenBackground));
+        BufferedImage image = ImageUtil.copyImage(backgroundImages.get(chosenBackground));
 
         Graphics2D g2d = image.createGraphics();
         g2d.setRenderingHint(RenderingHints.KEY_ANTIALIASING, RenderingHints.VALUE_ANTIALIAS_ON);
@@ -317,6 +300,8 @@ public class Bedwars implements Command
         // draw player name
         String nameWithRank = hypixelData.getPlayerNameRankFormat();
         fontRenderer.drawString(nameWithRank, 1440 - (g2d.getFontMetrics().stringWidth((FontRenderer.removeFormatting(nameWithRank))) / 2), 75);
+        fontRenderer.drawString(formattedLevel, image.getWidth()/2, 1275, FontRenderer.CenterXAligned); // 1350
+
 
         fontRenderer.switchFont(1);
         fontRenderer.drawString(String.format("§aWins: %s", bigFormat.format(wins)), 75, 325);
@@ -337,7 +322,7 @@ public class Bedwars implements Command
 
         // level info
         fontRenderer.switchFont(2);
-        fontRenderer.drawString(formattedLevel, image.getWidth()/2, 1275, FontRenderer.CenterXAligned); // 1350
+
         fontRenderer.drawString(String.format("§a%s", levelProgressBarString), image.getWidth()/2, 1275+148, FontRenderer.CenterXAligned);
         fontRenderer.drawString(String.format("§a%d §r/ §c%d", xpPastLevel, xpReq), image.getWidth()/2, 1275+148*2, FontRenderer.CenterXAligned);
         //fontRenderer.drawString(formattedNextLevel, image.getWidth()/2, 1275+148*2, FontRenderer.CenterXAligned);
