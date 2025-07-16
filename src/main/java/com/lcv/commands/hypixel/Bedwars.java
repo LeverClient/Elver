@@ -70,12 +70,17 @@ public class Bedwars implements Command
 
                 // draw overlay on background
                 Graphics2D g2d = image.createGraphics();
-                g2d.drawImage(ImageIO.read(new File(Objects.requireNonNull(Main.class.getResource("/images/overlayNoText.png")).toURI())), 0, 0, null);
+
+                g2d.drawImage(ImageIO.read(new File(Objects.requireNonNull(Main.class.getResource("/images/overlay_separate_hotbar.png")).toURI())), 0, 0, null);
+                //g2d.fillRect(1850, 1995, 980, 5);
+
                 g2d.drawImage(ImageIO.read(new File(Objects.requireNonNull(Main.class.getResource("/images/Resources/iron_ingot.png")).toURI())), 100, 1830, null);
                 g2d.drawImage(ImageIO.read(new File(Objects.requireNonNull(Main.class.getResource("/images/Resources/gold_ingot.png")).toURI())), 355, 1830, null);
                 g2d.drawImage(ImageIO.read(new File(Objects.requireNonNull(Main.class.getResource("/images/Resources/diamond.png")).toURI())), 610, 1820, null);
                 g2d.drawImage(ImageIO.read(new File(Objects.requireNonNull(Main.class.getResource("/images/Resources/emerald.png")).toURI())), 850, 1830, null);
+
                 g2d.dispose();
+
 
                 // save background
                 backgrounds.add(image);
@@ -337,7 +342,7 @@ public class Bedwars implements Command
 
 
         fontRenderer.drawString("§aLevel:", 1440, 1785);
-        fontRenderer.drawString(String.valueOf(networkLevel), 1440, 1890);
+        fontRenderer.drawString("§c" + networkLevel, 1440, 1890);
 
         // progress bar
         fontRenderer.drawString(String.format("§a%s  §f>>>  %s", prestigeProgressBarString, formattedNextPrestige), 540, 1625-9, FontRenderer.CenterXAligned);
@@ -371,7 +376,7 @@ public class Bedwars implements Command
         String[] quickBuys = quickBuy.split(",");
         String[] favoriteSlots = favoriteSlotsString.split(",");
 
-        double quickBuyItemSpacingX = 140;
+        double quickBuyItemSpacingX = 141.42;
         double quickBuyItemSpacingY = 140;
         int quickBuyItemSize = (int) quickBuyItemSpacingX-10;
 
@@ -412,7 +417,13 @@ public class Bedwars implements Command
                 };
 
                 BufferedImage itemImage = loadItemImage(itemIcon);
-                g2d.drawImage(itemImage, 1850 + (int) (x*quickBuyItemSpacingX), 1574 + (int) (y*quickBuyItemSpacingY), quickBuyItemSize, quickBuyItemSize, null);
+
+                int iconX = 1850 + (int) (x*quickBuyItemSpacingX);
+                int iconY = 1562 + (int) (y*quickBuyItemSpacingY);
+
+                g2d.setColor(new Color(36, 36, 36, 128));
+                g2d.fillRoundRect(iconX, iconY, quickBuyItemSize, quickBuyItemSize, 36, 36);
+                g2d.drawImage(itemImage, iconX, iconY, quickBuyItemSize, quickBuyItemSize, null);
             }
         }
 
@@ -429,7 +440,13 @@ public class Bedwars implements Command
             };
 
             BufferedImage itemImage = loadItemImage(slotIcon);
-            g2d.drawImage(itemImage, 1850 + (int) (x*slotItemSpacingX), 2110 - slotItemSize, slotItemSize, slotItemSize, null);
+
+            int iconX = 1850 + (int) (x*slotItemSpacingX);
+            int iconY = 2122 - slotItemSize;
+
+            g2d.setColor(new Color(36, 36, 36, 96));
+            g2d.fillRoundRect(iconX, iconY, slotItemSize, slotItemSize, 36, 36);
+            g2d.drawImage(itemImage, iconX, iconY, slotItemSize, slotItemSize, null);
         }
 
         // output and return image
