@@ -25,6 +25,7 @@ public class FontRenderer {
             new Color(0xFF55FF), // d, 13
             new Color(0xFFFF55), // e, 14
             new Color(0xFFFFFF), // f, 15
+            new Color(0xFFFFFF), // r, 16 (default)
     };
 
     public static int color_default = defaultColors.length - 1;
