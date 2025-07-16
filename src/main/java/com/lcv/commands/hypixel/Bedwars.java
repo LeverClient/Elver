@@ -165,6 +165,8 @@ public class Bedwars implements Command
     }
 
     public BufferedImage generateStatsImage(HypixelPlayerData hypixelData) throws IllegalArgumentException {
+        long startTime = System.nanoTime();
+
         if (!hypixelData.valid)
         {
             throw new IllegalArgumentException("Hypixel: No player data found");
@@ -337,7 +339,7 @@ public class Bedwars implements Command
         fontRenderer.switchFont(2);
         fontRenderer.drawString(formattedLevel, image.getWidth()/2, 1275, FontRenderer.CenterXAligned); // 1350
         fontRenderer.drawString(String.format("§a%s", levelProgressBarString), image.getWidth()/2, 1275+148, FontRenderer.CenterXAligned);
-        fontRenderer.drawString(String.format("§a%d §f/ §c%d", xpPastLevel, xpReq), image.getWidth()/2, 1275+148*2, FontRenderer.CenterXAligned);
+        fontRenderer.drawString(String.format("§a%d §r/ §c%d", xpPastLevel, xpReq), image.getWidth()/2, 1275+148*2, FontRenderer.CenterXAligned);
         //fontRenderer.drawString(formattedNextLevel, image.getWidth()/2, 1275+148*2, FontRenderer.CenterXAligned);
 
 
@@ -345,7 +347,7 @@ public class Bedwars implements Command
         fontRenderer.drawString("§c" + networkLevel, 1440, 1890);
 
         // progress bar
-        fontRenderer.drawString(String.format("§a%s  §f>>>  %s", prestigeProgressBarString, formattedNextPrestige), 540, 1625-9, FontRenderer.CenterXAligned);
+        fontRenderer.drawString(String.format("§a%s  §r>>>  %s", prestigeProgressBarString, formattedNextPrestige), 540, 1625-9, FontRenderer.CenterXAligned);
 
         Function<Double, String> numAbbrev = num ->
         {
@@ -373,8 +375,8 @@ public class Bedwars implements Command
         // 980/9 = 108.8889px per quick buy item
 
         // 20px padding between each item?
-        String[] quickBuys = quickBuy.split(",");
-        String[] favoriteSlots = favoriteSlotsString.split(",");
+        String[] quickBuys = quickBuy != null ? quickBuy.split(",")  : null;
+        String[] favoriteSlots = favoriteSlotsString != null ? favoriteSlotsString.split(",") : null;
 
         double quickBuyItemSpacingX = 141.42;
         double quickBuyItemSpacingY = 140;
@@ -385,72 +387,79 @@ public class Bedwars implements Command
 
         System.out.println("I wanna die");
 
-        for (int y = 0; y < 3; y++) {
-            for (int x = 0; x < 7; x++) {
-                int i = y*7 + x;
-                String item = quickBuys[i];
-                String itemIcon = switch(item) {
-                    case "stick_(knockback_i)" -> "stick";
-                    case "bow_(power_i)" -> "bow_POW1";
-                    case "bow_(power_i__punch_i)" -> "bow_PUN1";
+        if (quickBuys != null) {
+            for (int y = 0; y < 3; y++) {
+                for (int x = 0; x < 7; x++) {
+                    int i = y * 7 + x;
+                    String item = quickBuys[i];
+                    String itemIcon = switch (item) {
+                        case "stick_(knockback_i)" -> "stick";
+                        case "bow_(power_i)" -> "bow_POW1";
+                        case "bow_(power_i__punch_i)" -> "bow_PUN1";
 
-                    case "wooden_pickaxe" -> "wood_pickaxe";
-                    case "wooden_axe" -> "wood_axe";
+                        case "wooden_pickaxe" -> "wood_pickaxe";
+                        case "wooden_axe" -> "wood_axe";
 
-                    case "wool" -> "wool_colored_white";
-                    case "oak_wood_planks" -> "planks_oak";
-                    case "blast-proof_glass" -> "glass_white";
+                        case "wool" -> "wool_colored_white";
+                        case "oak_wood_planks" -> "planks_oak";
+                        case "blast-proof_glass" -> "glass_white";
+                        case "hardened_clay" -> "hardened_clay_stained_white";
 
-                    case "speed_ii_potion_(45_seconds)" -> "potion_bottle_speed";
-                    case "jump_v_potion_(45_seconds)" -> "potion_bottle_jump";
-                    case "invisibility_potion_(30_seconds)" -> "potion_bottle_invis";
+                        case "speed_ii_potion_(45_seconds)" -> "potion_bottle_speed";
+                        case "jump_v_potion_(45_seconds)" -> "potion_bottle_jump";
+                        case "invisibility_potion_(30_seconds)" -> "potion_bottle_invis";
 
-                    case "bridge_egg" -> "egg";
-                    case "water_bucket" -> "bucket_water";
-                    case "magic_milk" -> "bucket_milk";
-                    case "golden_apple" -> "apple_golden";
-                    case "dream_defender" -> "golem_egg";
-                    case "compact_pop-up_tower" -> "popup_tower";
+                        case "bridge_egg" -> "egg";
+                        case "water_bucket" -> "bucket_water";
+                        case "magic_milk" -> "bucket_milk";
+                        case "golden_apple" -> "apple_golden";
+                        case "dream_defender" -> "golem_egg";
+                        case "compact_pop-up_tower" -> "popup_tower";
 
-                    case "", " ", "null" -> "no_item";
-                    default -> item;
-                };
+                        case "", " ", "null" -> "no_item";
+                        default -> item;
+                    };
 
-                BufferedImage itemImage = loadItemImage(itemIcon);
+                    BufferedImage itemImage = loadItemImage(itemIcon);
 
-                int iconX = 1850 + (int) (x*quickBuyItemSpacingX);
-                int iconY = 1562 + (int) (y*quickBuyItemSpacingY);
+                    int iconX = 1850 + (int) (x * quickBuyItemSpacingX);
+                    int iconY = 1562 + (int) (y * quickBuyItemSpacingY);
 
-                g2d.setColor(new Color(36, 36, 36, 128));
-                g2d.fillRoundRect(iconX, iconY, quickBuyItemSize, quickBuyItemSize, 36, 36);
-                g2d.drawImage(itemImage, iconX, iconY, quickBuyItemSize, quickBuyItemSize, null);
+                    g2d.setColor(new Color(36, 36, 36, 128));
+                    g2d.fillRoundRect(iconX, iconY, quickBuyItemSize, quickBuyItemSize, 36, 36);
+                    g2d.drawImage(itemImage, iconX, iconY, quickBuyItemSize, quickBuyItemSize, null);
+                }
             }
         }
 
-        for (int x = 0; x < 9; x++) {
-            String slotType = favoriteSlots[x];
-            String slotIcon = switch(slotType) {
-                case "Melee" -> "wood_sword";
-                case "Ranged" -> "bow";
-                case "Utility" -> "fireball";
-                case "Tools" -> "wood_pickaxe";
-                case "Blocks" -> "wool_colored_white";
+        if (favoriteSlots != null) {
+            for (int x = 0; x < favoriteSlots.length; x++) {
+                String slotType = favoriteSlots[x];
+                String slotIcon = switch (slotType) {
+                    case "Melee" -> "wood_sword";
+                    case "Ranged" -> "bow";
+                    case "Utility" -> "fireball";
+                    case "Tools" -> "wood_pickaxe";
+                    case "Blocks" -> "wool_colored_white";
 
-                default -> "no_Slot";
-            };
+                    default -> "no_Slot";
+                };
 
-            BufferedImage itemImage = loadItemImage(slotIcon);
+                BufferedImage itemImage = loadItemImage(slotIcon);
 
-            int iconX = 1850 + (int) (x*slotItemSpacingX);
-            int iconY = 2122 - slotItemSize;
+                int iconX = 1850 + (int) (x * slotItemSpacingX);
+                int iconY = 2122 - slotItemSize;
 
-            g2d.setColor(new Color(36, 36, 36, 96));
-            g2d.fillRoundRect(iconX, iconY, slotItemSize, slotItemSize, 36, 36);
-            g2d.drawImage(itemImage, iconX, iconY, slotItemSize, slotItemSize, null);
+                g2d.setColor(new Color(36, 36, 36, 96));
+                g2d.fillRoundRect(iconX, iconY, slotItemSize, slotItemSize, 36, 36);
+                g2d.drawImage(itemImage, iconX, iconY, slotItemSize, slotItemSize, null);
+            }
         }
 
         // output and return image
         g2d.dispose();
+
+        System.out.printf("generated bedwars stats image in %dms%n", (System.nanoTime()-startTime)/1000000);
 
         return image;
     }

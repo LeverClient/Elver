@@ -53,6 +53,8 @@ public class StatsSkins {
     }
 
     static {
+        long startTime = System.nanoTime();
+
         JSONObject skinsJson;
         try (InputStream skinsStream = Main.class.getResourceAsStream("/Skins.json")) {
             assert skinsStream != null;
@@ -63,19 +65,17 @@ public class StatsSkins {
             throw new RuntimeException(e);
         }
 
-        ArrayList<Skin> skins = new ArrayList<>();
         for (String key : skinsJson.keySet()) {
             JSONObject skinJson = skinsJson.getJSONObject(key);
 
             Skin skin = parseSkin(skinJson);
-            skins.add(skin);
         }
 
-        System.out.println("skins done!");
+        System.out.printf("skins done! took %dms%n", (System.nanoTime()-startTime)/1000000);
     }
 
     public static class Skin {
-        public Color[] colors = new Color[16];
+        public Color[] colors = new Color[FontRenderer.defaultColors.length];
 
         public Skin() {}
 
@@ -87,7 +87,7 @@ public class StatsSkins {
         public Skin(Object main, Object secondary, Object def) {
             colors[color_main] = getColorFromGeneric(main);
             colors[color_secondary] = getColorFromGeneric(secondary);
-            colors[colors.length-1] = getColorFromGeneric(def);
+            colors[FontRenderer.color_default] = getColorFromGeneric(def);
         }
 
         private Color getColorFromGeneric(Object gen) {
