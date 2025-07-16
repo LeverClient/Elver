@@ -58,6 +58,16 @@ public class FontRenderer {
 
     private int selectedFontIndex;
 
+    public boolean useDefaultColors = false;
+
+    public Color getColor(int index) {
+        return getColor(index, useDefaultColors);
+    }
+
+    public Color getColor(int index, boolean useDefault) {
+        return useDefault ? defaultColors[index] : appliedColors[index];
+    }
+
     public static Color getShadowColor(Color c) {
         if (shadowCache.containsKey(c))  {
             return shadowCache.get(c);
@@ -153,22 +163,23 @@ public class FontRenderer {
     }
 
     public void drawString(String txt, int x, int y) {
-        drawString(txt, x, y,  true, appliedColors[color_default], 0);
+        drawString(txt, x, y,  true, null, 0);
     }
 
     public void drawString(String txt, int x, int y, int alignment) {
-        drawString(txt, x, y,  true, appliedColors[color_default], alignment);
+        drawString(txt, x, y,  true, null, alignment);
     }
 
     // draws a string with minecraft formatting, and aligned to the top left by default
     public void drawString(String txt, int x, int y, boolean shadow, Color col, int alignment) {
         if (g2d == null) throw new IllegalStateException("Attempt to DrawString without Graphics set");
 
-        if (col == null) col = appliedColors[color_default];
+        if (col == null) col = getColor(color_default);
 
         Color originalColor = g2d.getColor();
         g2d.setColor(col);
 
+        boolean wasUsingDefaultColors = useDefaultColors;
         String[] segments = txt.split("§");
         FontRenderSegment[] renderSegments = new FontRenderSegment[segments.length];
         renderSegments[0] = new FontRenderSegment(segments[0], col, selectedFont);
@@ -234,10 +245,18 @@ public class FontRenderer {
                     renderSegment.strikethrough = true;
                 }
 
+                case '!' -> {
+                    useDefaultColors = true;
+                }
+
+                case '?' -> {
+                    useDefaultColors = false;
+                }
+
                 default -> {
                     int colorCode = "0123456789abcdef".indexOf(code);
                     if (colorCode != -1) {
-                        renderSegment.color = appliedColors[colorCode];
+                        renderSegment.color = getColor(colorCode);
                     }
                 }
             }
@@ -270,6 +289,9 @@ public class FontRenderer {
         }
 
         g2d.setColor(originalColor);
+
+        // reset use default color
+        useDefaultColors = wasUsingDefaultColors;
     }
 
     public class FontRenderSegment {
