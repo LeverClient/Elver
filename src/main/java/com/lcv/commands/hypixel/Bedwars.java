@@ -33,7 +33,7 @@ public class Bedwars implements Command
 
     public static final int PRESTIGE_PROGRESS_BAR_LENGTH = 20;
     public static final int LEVEL_PROGRESS_BAR_LENGTH = 30;
-    public static double xpPerPrestige = getXpForPrestige(1);
+    public static final double XP_PER_PRESTIGE = 487000;
 
     private static final String API_KEY_HYPIXEL = System.getenv("API_KEY_HYPIXEL");
 
@@ -210,7 +210,7 @@ public class Bedwars implements Command
         String levelProgressBarString = "|".repeat(levelProgressBars) + "§c" + "|".repeat(Math.max(0, LEVEL_PROGRESS_BAR_LENGTH - levelProgressBars));
 
         double xpUntilPrestige = getXpForPrestige(level_d - currentPrestige);
-        int prestigeProgressBars = (int) ((xpPerPrestige - xpUntilPrestige) / (xpPerPrestige / PRESTIGE_PROGRESS_BAR_LENGTH));
+        int prestigeProgressBars = (int) ((XP_PER_PRESTIGE - xpUntilPrestige) / (XP_PER_PRESTIGE / PRESTIGE_PROGRESS_BAR_LENGTH));
         String prestigeProgressBarString = "|".repeat(prestigeProgressBars) + "§c" + "|".repeat(Math.max(0, PRESTIGE_PROGRESS_BAR_LENGTH - prestigeProgressBars));
 
         String formattedLevel = getFormattedLevel(level);
@@ -242,60 +242,37 @@ public class Bedwars implements Command
         // draw bot profile
         g2d.drawImage(Main.botProfileScaled, 25, 25, 226, 226, null);
 
-        try
+        BufferedImage player = ImageUtil.getPlayerSkinFull(hypixelData.uuid);
+
+        double playerWidth = player.getWidth();
+        double playerHeight = player.getHeight();
+        double areaWidth = 670;
+        double areaHeight = 850;
+        double ratio;
+
+        if ((areaWidth / playerWidth) * playerHeight < areaHeight)
         {
-            String[] renderList = {"default", "marching", "walking", "crouching", "crossed", "criss_cross", "ultimate", "cheering", "relaxing", "trudging", "cowering", "pointing", "lunging", "dungeons", "facepalm", "sleeping", "archer", "kicking", "mojavatar", "reading"};
-            String renderType = renderList[rand.nextInt(0, renderList.length)];
-            if (hypixelData.uuid.equals("ddf13e436ccc4790bb49912913bf7d77")) {
-                renderType = "mojavatar";
-            }
-
-            BufferedImage player = ImageIO.read(new URL(String.format("https://starlightskins.lunareclipse.studio/render/%s/%s/full", renderType, hypixelData.uuid)));
-
-            double playerWidth = player.getWidth();
-            double playerHeight = player.getHeight();
-            double areaWidth = 670;
-            double areaHeight = 850;
-            double ratio;
-
-            if ((areaWidth / playerWidth) * playerHeight < areaHeight)
-            {
-                ratio = (areaWidth / playerWidth);
-            }
-            else
-            {
-                ratio = (areaHeight / playerHeight);
-            }
-
-            int width = (int) (playerWidth * ratio);
-            int height = (int) (playerHeight * ratio);
-            g2d.drawImage(player, 1440 - (width / 2), 325 + ((850 - height) / 2), width, height, null);
+            ratio = (areaWidth / playerWidth);
         }
-        catch (IOException e)
+        else
         {
-            throw new RuntimeException(e);
+            ratio = (areaHeight / playerHeight);
         }
 
-        try
-        {
-            String[] renderList = {"default", "crossed", "ultimate", "dungeons"};
-            String renderType = renderList[rand.nextInt(0, renderList.length)];
+        int width = (int) (playerWidth * ratio);
+        int height = (int) (playerHeight * ratio);
+        g2d.drawImage(player, 1440 - (width / 2), 325 + ((850 - height) / 2), width, height, null);
 
-            BufferedImage player = ImageIO.read(new URL(String.format("https://starlightskins.lunareclipse.studio/render/%s/%s/bust", renderType, hypixelData.uuid)));
+         player = ImageUtil.getPlayerSkinTop(hypixelData.uuid);
 
-            double playerWidth = player.getWidth();
-            double playerHeight = player.getHeight();
-            double areaHeight = 300;
-            double ratio = areaHeight / playerHeight;
-            int width = (int) (playerWidth * ratio);
-            int height = (int) (playerHeight * ratio);
+         playerWidth = player.getWidth();
+         playerHeight = player.getHeight();
+         areaHeight = 300;
+         ratio = areaHeight / playerHeight;
+         width = (int) (playerWidth * ratio);
+         height = (int) (playerHeight * ratio);
 
-            g2d.drawImage(player, 1155, 1785, width, height, null);
-        }
-        catch (IOException e)
-        {
-            throw new RuntimeException(e);
-        }
+        g2d.drawImage(player, 1155, 1785, width, height, null);
 
         // draw player name
         String nameWithRank = hypixelData.getPlayerNameRankFormat();
@@ -606,8 +583,6 @@ public class Bedwars implements Command
     // actually i might've found it on the hypixel forums, but it's originally from here. i don't remember if i ported it to java myself
     // https://github.com/Plancke/hypixel-php/blob/2303c4bdedb650acc8315393885284dba59fdd79/src/util/games/bedwars/ExpCalculator.php
     public static final int EASY_LEVELS = 4;
-    public static final int EASY_LEVELS_XP = 7000;
-    public static final int XP_PER_PRESTIGE = 96 * 5000 + EASY_LEVELS_XP;
     public static final int LEVELS_PER_PRESTIGE = 100;
     public static final int HIGHEST_PRESTIGE = 10;
     public static int getBWExpForLevel(int level) {
@@ -635,9 +610,9 @@ public class Bedwars implements Command
     }
 
     public static double getLevelForExp(int exp) {
-        int prestiges = exp / XP_PER_PRESTIGE;
+        int prestiges = (int) (exp / XP_PER_PRESTIGE);
         int level = prestiges * LEVELS_PER_PRESTIGE;
-        int expWithoutPrestiges = exp - (prestiges * XP_PER_PRESTIGE);
+        int expWithoutPrestiges = (int) (exp - (prestiges * XP_PER_PRESTIGE));
 
         for (int i = 1; i <= EASY_LEVELS; i++) {
             int expForEasyLevel = getBWExpForLevel(i);
