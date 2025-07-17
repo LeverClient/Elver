@@ -1,10 +1,8 @@
-package com.lcv.commands.hypixel;
+package com.lcv.util;
 
-import com.lcv.commands.Embed;
 import org.json.JSONObject;
 
 import java.util.HashMap;
-import java.util.function.Function;
 
 public class HypixelPlayerData
 {
@@ -14,9 +12,9 @@ public class HypixelPlayerData
 
     public String rank = "UNKNOWN";
 
-    public String plusColor = "DARK_GRAY";
+    public String plusColor = "null";
 
-    public String monthlyRankColor = "DARK_GRAY";
+    public String monthlyRankColor = "null";
 
     public String name;
 
@@ -24,7 +22,7 @@ public class HypixelPlayerData
 
     public String rankPrefix;
 
-    boolean valid = true;
+    public boolean valid = true;
 
     public static HashMap<String, String> colorLookup = new HashMap<>();
 
@@ -95,7 +93,8 @@ public class HypixelPlayerData
         if (rank.equals("YOUTUBER") || rank.equals("STAFF")) nameFormatted.append("§c");
         nameFormatted.append('[');
         if (rank.equals("YOUTUBER")) nameFormatted.append("§f");
-        if (rank.equals("STAFF")) nameFormatted.append("§6");
+        else if (rank.equals("STAFF")) nameFormatted.append("§6");
+        else if (rank.equals("VIP_PLUS")) plusColor = "GOLD";
 
         nameFormatted.append(rankName[0]);
         if (rankName.length > 1) {
@@ -107,8 +106,6 @@ public class HypixelPlayerData
         if (rank.equals("YOUTUBER") || rank.equals("STAFF")) nameFormatted.append("§c");
         nameFormatted.append("] ");
         nameFormatted.append(name);
-
-        System.out.println(nameFormatted);
 
         return nameFormatted.toString();
     }
