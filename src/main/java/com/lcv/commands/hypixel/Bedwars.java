@@ -299,8 +299,9 @@ public class Bedwars implements Command
 
         // draw player name
         String nameWithRank = hypixelData.getPlayerNameRankFormat();
+        fontRenderer.useDefaultColors = true;
         fontRenderer.drawString(nameWithRank, 1440 - (g2d.getFontMetrics().stringWidth((FontRenderer.removeFormatting(nameWithRank))) / 2), 75);
-        fontRenderer.drawString(formattedLevel, image.getWidth()/2, 1275, FontRenderer.CenterXAligned); // 1350
+        fontRenderer.useDefaultColors = false;
 
 
         fontRenderer.switchFont(1);
@@ -323,6 +324,7 @@ public class Bedwars implements Command
         // level info
         fontRenderer.switchFont(2);
 
+        fontRenderer.drawString(formattedLevel, image.getWidth()/2, 1275, FontRenderer.CenterXAligned); // 1350
         fontRenderer.drawString(String.format("§a%s", levelProgressBarString), image.getWidth()/2, 1275+148, FontRenderer.CenterXAligned);
         fontRenderer.drawString(String.format("§a%d §r/ §c%d", xpPastLevel, xpReq), image.getWidth()/2, 1275+148*2, FontRenderer.CenterXAligned);
         //fontRenderer.drawString(formattedNextLevel, image.getWidth()/2, 1275+148*2, FontRenderer.CenterXAligned);
@@ -332,7 +334,7 @@ public class Bedwars implements Command
         fontRenderer.drawString("§c" + networkLevel, 1440, 1890);
 
         // progress bar
-        fontRenderer.drawString(String.format("§a%s  §r>>>  %s", prestigeProgressBarString, formattedNextPrestige), 540, 1625-9, FontRenderer.CenterXAligned);
+        fontRenderer.drawString(String.format("§a%s  §r>>>  §!%s", prestigeProgressBarString, formattedNextPrestige), 540, 1625-9, FontRenderer.CenterXAligned);
 
         Function<Double, String> numAbbrev = num ->
         {
