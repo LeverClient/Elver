@@ -10,12 +10,22 @@
     "Default": null
   },
 
+  "unfortunate": {
+    "Users": [
+      ["f66a25c8c57a42dbb6779bdd702be243", "Unfortune"]
+    ],
+
+    "Primary": [130, 200, 249],
+    "Secondary": [250, 190, 210],
+    "Default": 15
+  },
+
   "blue": {
     "Users": [
       ["c57dd50dab654726a5e3cbae94cc7b53", "ds105"]
     ],
 
-    "Primary": [7, 211, 242],
+    "Primary": [130, 200, 249],
     "Secondary": 15
   },
 
@@ -26,6 +36,26 @@
 
     "Primary": 11,
     "Secondary": 8
+  },
+
+  "gaming console": {
+    "Users": [
+      ["186ab2b5474e4274981452b6033afab4", "NeedAGudUsername"],
+      ["242f66432c104e6cad43bf3a0600232b", "AlternateUser"]
+    ],
+
+    "Primary": 11,
+    "Secondary": 15,
+    "Default": 0
+  },
+
+  "corrupted": {
+    "Users": [
+      ["5fb6afd0ce9247aba4af1093f82243a2", "JnJokes"]
+    ],
+
+    "Primary": 15,
+    "Secondary": 0
   },
 
   "why yellow sob sob :sob: \uD83D\uDE2D": {
