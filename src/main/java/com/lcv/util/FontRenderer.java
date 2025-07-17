@@ -73,6 +73,10 @@ public class FontRenderer {
             return shadowCache.get(c);
         }
 
+        if (c.equals(Color.black)) {
+            return Color.white; // this doesn't work!
+        }
+
         Color shadow = new Color(c.getRed()/4, c.getGreen()/4, c.getBlue()/4);
         shadowCache.put(c, shadow);
         return shadow;
