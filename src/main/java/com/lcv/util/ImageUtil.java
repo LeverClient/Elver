@@ -117,6 +117,7 @@ public class ImageUtil
         }
     }
 
+    public static HashMap<String, BufferedImage> overlayCache = new HashMap<>();
     public static int getBackgrounds(ArrayList<BufferedImage> backgrounds, String overlay, Consumer<Graphics2D> action)
     {
         int availableBackgrounds = 0;
@@ -130,10 +131,16 @@ public class ImageUtil
 
                 BufferedImage image = ImageIO.read(resource);
 
+                BufferedImage overlayImg = overlayCache.get(overlay);
+                if (overlayImg == null) {
+                    overlayImg = ImageIO.read(Main.class.getResource("/images/" + overlay + ".png"));
+                    overlayCache.put(overlay, overlayImg);
+                } // TODO: purge cache after we're done?
+
                 // draw overlay on background
                 Graphics2D g2d = image.createGraphics();
 
-                g2d.drawImage(ImageIO.read(Main.class.getResource("/images/" + overlay + ".png")), 0, 0, null);
+                g2d.drawImage(overlayImg, 0, 0, null);
 
                 action.accept(g2d);
 

@@ -37,16 +37,6 @@ public class Bedwars implements Command
 
     private static final Random rand = new Random();
     ArrayList<BufferedImage> backgroundImages = new ArrayList<>();
-    int availableBackgrounds = ImageUtil.getBackgrounds(backgroundImages, "overlay_separate_hotbar", (g2d) -> {
-        try {
-            g2d.drawImage(ImageIO.read(Main.class.getResource("/images/Resources/iron_ingot.png")), 100, 1830, null);
-            g2d.drawImage(ImageIO.read(Main.class.getResource("/images/Resources/gold_ingot.png")), 355, 1830, null);
-            g2d.drawImage(ImageIO.read(Main.class.getResource("/images/Resources/diamond.png")), 610, 1820, null);
-            g2d.drawImage(ImageIO.read(Main.class.getResource("/images/Resources/emerald.png")), 850, 1830, null);
-        } catch (IOException e) {
-            throw new RuntimeException(e);
-        }
-    });
     static FontRenderer fontRenderer = new FontRenderer(null, new Font[]{
             Main.minecraftFont.deriveFont(144f),
             Main.minecraftFont.deriveFont(96f),
@@ -54,6 +44,20 @@ public class Bedwars implements Command
             Main.minecraftFont.deriveFont(40f)
     });
 
+    // cache backgrounds
+    BufferedImage resourceIronIngot = ImageIO.read(Main.class.getResource("/images/Resources/iron_ingot.png"));
+    BufferedImage resourceGoldIngot = ImageIO.read(Main.class.getResource("/images/Resources/gold_ingot.png"));
+    BufferedImage resourceDiamond = ImageIO.read(Main.class.getResource("/images/Resources/diamond.png"));
+    BufferedImage resourceEmerald = ImageIO.read(Main.class.getResource("/images/Resources/emerald.png"));
+    int availableBackgrounds = ImageUtil.getBackgrounds(backgroundImages, "overlay_separate_hotbar", (g2d) -> {
+        g2d.drawImage(resourceIronIngot, 100, 1830, null);
+        g2d.drawImage(resourceGoldIngot, 355, 1830, null);
+        g2d.drawImage(resourceDiamond, 610, 1820, null);
+        g2d.drawImage(resourceEmerald, 850, 1830, null);
+    });
+
+    public Bedwars() throws IOException {
+    }
 
     @Override
     public String getName()
