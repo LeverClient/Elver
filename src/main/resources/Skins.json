@@ -58,6 +58,16 @@
     "Secondary": 0
   },
 
+  "uranium": {
+    "Users": [
+      ["4ed6f98b52f146ccad2b5be94ae6d90a", "GetDivorced"]
+    ],
+
+    "Primary": [18, 48, 12],
+    "Secondary": [18, 48, 12],
+    "Default": [18, 48, 12]
+  },
+
   "why yellow sob sob :sob: \uD83D\uDE2D": {
     "Users": [
       ["008affcfb0a9472da8589fbcd17a13e3", "buttonclient"],
