@@ -3,10 +3,7 @@ package com.lcv.commands.hypixel;
 import com.lcv.Main;
 import com.lcv.commands.Command;
 import com.lcv.commands.Embed;
-import com.lcv.util.FontRenderer;
-import com.lcv.util.HTTPRequest;
-import com.lcv.util.ImageUtil;
-import com.lcv.util.StatsSkins;
+import com.lcv.util.*;
 import net.dv8tion.jda.api.events.interaction.command.SlashCommandInteractionEvent;
 import net.dv8tion.jda.api.interactions.InteractionHook;
 import net.dv8tion.jda.api.interactions.commands.build.SlashCommandData;
@@ -25,6 +22,7 @@ import java.text.DecimalFormat;
 import java.util.*;
 import java.util.function.Function;
 
+import static com.lcv.util.ImageUtil.loadItemImage;
 import static net.dv8tion.jda.api.interactions.commands.OptionType.STRING;
 
 public class Bedwars implements Command
@@ -38,7 +36,17 @@ public class Bedwars implements Command
     private static final String API_KEY_HYPIXEL = System.getenv("API_KEY_HYPIXEL");
 
     private static final Random rand = new Random();
-    ArrayList<BufferedImage> backgroundImages = getBackgrounds();
+    ArrayList<BufferedImage> backgroundImages = new ArrayList<>();
+    int availableBackgrounds = ImageUtil.getBackgrounds(backgroundImages, "overlay_separate_hotbar", (g2d) -> {
+        try {
+            g2d.drawImage(ImageIO.read(Main.class.getResource("/images/Resources/iron_ingot.png")), 100, 1830, null);
+            g2d.drawImage(ImageIO.read(Main.class.getResource("/images/Resources/gold_ingot.png")), 355, 1830, null);
+            g2d.drawImage(ImageIO.read(Main.class.getResource("/images/Resources/diamond.png")), 610, 1820, null);
+            g2d.drawImage(ImageIO.read(Main.class.getResource("/images/Resources/emerald.png")), 850, 1830, null);
+        } catch (IOException e) {
+            throw new RuntimeException(e);
+        }
+    });
     static FontRenderer fontRenderer = new FontRenderer(null, new Font[]{
             Main.minecraftFont.deriveFont(144f),
             Main.minecraftFont.deriveFont(96f),
@@ -46,43 +54,6 @@ public class Bedwars implements Command
             Main.minecraftFont.deriveFont(40f)
     });
 
-    int availableBackgrounds = 0;
-    public ArrayList<BufferedImage> getBackgrounds()
-    {
-        ArrayList<BufferedImage> backgrounds = new ArrayList<>(8);
-        try
-        {
-            for (;;availableBackgrounds++)
-            {
-                URL resource = Main.class.getResource(String.format("/images/Backgrounds/bedwarsBackground%s.png", availableBackgrounds));
-                if (resource == null) break;
-
-                BufferedImage image = ImageIO.read(resource);
-
-                // draw overlay on background
-                Graphics2D g2d = image.createGraphics();
-
-                g2d.drawImage(ImageIO.read(Main.class.getResource("/images/overlay_separate_hotbar.png")), 0, 0, null);
-
-                g2d.drawImage(ImageIO.read(Main.class.getResource("/images/Resources/iron_ingot.png")), 100, 1830, null);
-                g2d.drawImage(ImageIO.read(Main.class.getResource("/images/Resources/gold_ingot.png")), 355, 1830, null);
-                g2d.drawImage(ImageIO.read(Main.class.getResource("/images/Resources/diamond.png")), 610, 1820, null);
-                g2d.drawImage(ImageIO.read(Main.class.getResource("/images/Resources/emerald.png")), 850, 1830, null);
-
-                g2d.dispose();
-
-                // save background
-                backgrounds.add(image);
-            }
-        }
-        catch (Exception e)
-        {
-            throw new RuntimeException(e);
-        }
-
-        System.out.printf("Loaded %d backgrounds%n", availableBackgrounds);
-        return backgrounds;
-    }
 
     @Override
     public String getName()
@@ -243,36 +214,14 @@ public class Bedwars implements Command
         g2d.drawImage(Main.botProfileScaled, 25, 25, 226, 226, null);
 
         BufferedImage player = ImageUtil.getPlayerSkinFull(hypixelData.uuid);
+        int[] playerSize = ImageUtil.fitToArea(player, 670, 850);
 
-        double playerWidth = player.getWidth();
-        double playerHeight = player.getHeight();
-        double areaWidth = 670;
-        double areaHeight = 850;
-        double ratio;
+        g2d.drawImage(player, 1440 - (playerSize[0] / 2), 325 + ((850 - playerSize[1]) / 2), playerSize[0], playerSize[1], null);
 
-        if ((areaWidth / playerWidth) * playerHeight < areaHeight)
-        {
-            ratio = (areaWidth / playerWidth);
-        }
-        else
-        {
-            ratio = (areaHeight / playerHeight);
-        }
+        BufferedImage playerTop = ImageUtil.getPlayerSkinTop(hypixelData.uuid);
+        int[] playerTopSize = ImageUtil.fitToArea(playerTop, Integer.MAX_VALUE, 300);
 
-        int width = (int) (playerWidth * ratio);
-        int height = (int) (playerHeight * ratio);
-        g2d.drawImage(player, 1440 - (width / 2), 325 + ((850 - height) / 2), width, height, null);
-
-         player = ImageUtil.getPlayerSkinTop(hypixelData.uuid);
-
-         playerWidth = player.getWidth();
-         playerHeight = player.getHeight();
-         areaHeight = 300;
-         ratio = areaHeight / playerHeight;
-         width = (int) (playerWidth * ratio);
-         height = (int) (playerHeight * ratio);
-
-        g2d.drawImage(player, 1155, 1785, width, height, null);
+        g2d.drawImage(playerTop, 1155, 1785, playerTopSize[0], playerTopSize[1], null);
 
         // draw player name
         String nameWithRank = hypixelData.getPlayerNameRankFormat();
@@ -426,34 +375,6 @@ public class Bedwars implements Command
         System.out.printf("generated bedwars stats image in %dms%n", (System.nanoTime()-startTime)/1000000);
 
         return image;
-    }
-
-    public HashMap<String, BufferedImage> itemIconCache = new HashMap<>();
-    public BufferedImage loadItemImage(String item) {
-        if (itemIconCache.containsKey(item)) return itemIconCache.get(item);
-
-        URL itemIconResource = Main.class.getResource("/images/Items/" + item + ".png");
-        if (itemIconResource == null) {
-            itemIconResource = Main.class.getResource("/images/Blocks/" + item + ".png");
-            if (itemIconResource == null) {
-                itemIconResource = Main.class.getResource("/images/" + item + ".png");
-                if (itemIconResource == null)
-                {
-                    System.err.println("Couldn't find texture for " + item);
-                    return Main.nullTexture;
-                }
-            }
-        }
-
-        try {
-            BufferedImage image = ImageIO.read(new File(itemIconResource.toURI()));
-            itemIconCache.put(item, image);
-
-            return image;
-        } catch (IOException | URISyntaxException e) {
-            e.printStackTrace(System.err);
-            return Main.nullTexture;
-        }
     }
 
     // bedwars stars. %x$s = (x+3)th character of the level. including star. 0 = full string, 1 = full level, 2 = star. (i think)

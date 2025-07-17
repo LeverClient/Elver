@@ -1,11 +1,19 @@
 package com.lcv.util;
 
+import com.lcv.Main;
+
 import javax.imageio.ImageIO;
 import java.awt.*;
 import java.awt.image.BufferedImage;
+import java.io.File;
 import java.io.IOException;
+import java.net.URISyntaxException;
 import java.net.URL;
+import java.util.ArrayList;
+import java.util.HashMap;
 import java.util.Random;
+import java.util.concurrent.Callable;
+import java.util.function.Consumer;
 
 public class ImageUtil
 {
@@ -26,6 +34,7 @@ public class ImageUtil
     {
         String skinType = PLAYER_SKIN_FULL[rand.nextInt(0, PLAYER_SKIN_FULL.length)];
         if (uuid.equals("ddf13e436ccc4790bb49912913bf7d77")) skinType = "mojavatar";
+
         for (int i = 0; i < 3; i++)
         {
             try
@@ -55,5 +64,91 @@ public class ImageUtil
             }
         }
         throw new RuntimeException("Failed to get top player skin (probably a 502 from the api)");
+    }
+
+    public static int[] fitToArea(BufferedImage image, int areaWidth, int areaHeight) {
+        double imgWidth = image.getWidth();
+        double imgHeight = image.getHeight();
+        double ratio;
+
+        if ((areaHeight / imgHeight) * imgWidth < areaWidth)
+        {
+            ratio = (areaHeight / imgHeight);
+        }
+        else
+        {
+            ratio = (areaWidth / imgWidth);
+        }
+
+        int width = (int) (imgWidth * ratio);
+        int height = (int) (imgHeight * ratio);
+
+        return new int[]{width, height};
+    }
+
+    public static HashMap<String, BufferedImage> itemIconCache = new HashMap<>();
+    public static String[] itemIconDirectories = new String[]{
+            "/images/Items/",
+            "/images/Blocks/",
+            "/images/"
+    };
+    public static BufferedImage loadItemImage(String item) {
+        if (itemIconCache.containsKey(item)) return itemIconCache.get(item);
+
+        URL itemIconResource = null;
+        for (String directory : itemIconDirectories) {
+            itemIconResource = Main.class.getResource(directory + item + ".png");
+            if (itemIconResource != null) break;
+        }
+
+        if (itemIconResource == null) {
+            System.err.println("Couldn't find texture for " + item);
+            return Main.nullTexture;
+        }
+
+        try {
+            BufferedImage image = ImageIO.read(itemIconResource);
+            itemIconCache.put(item, image);
+
+            return image;
+        } catch (IOException e) {
+            e.printStackTrace(System.err);
+            return Main.nullTexture;
+        }
+    }
+
+    public static int getBackgrounds(ArrayList<BufferedImage> backgrounds, String overlay, Consumer<Graphics2D> action)
+    {
+        int availableBackgrounds = 0;
+
+        try
+        {
+            for (;;availableBackgrounds++)
+            {
+                URL resource = Main.class.getResource(String.format("/images/Backgrounds/bedwarsBackground%s.png", availableBackgrounds));
+                if (resource == null) break;
+
+                BufferedImage image = ImageIO.read(resource);
+
+                // draw overlay on background
+                Graphics2D g2d = image.createGraphics();
+
+                g2d.drawImage(ImageIO.read(Main.class.getResource("/images/" + overlay + ".png")), 0, 0, null);
+
+                action.accept(g2d);
+
+                g2d.dispose();
+
+                // save background
+                backgrounds.add(image);
+            }
+        }
+        catch (Exception e)
+        {
+            throw new RuntimeException(e);
+        }
+
+        System.out.printf("Loaded %d backgrounds%n", availableBackgrounds);
+        return availableBackgrounds;
     }
 }
