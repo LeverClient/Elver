@@ -74,7 +74,7 @@ public class FontRenderer {
         }
 
         if (c.equals(Color.black)) {
-            return Color.white; // this doesn't work!
+            return new Color(0, 0, 0, 192);
         }
 
         Color shadow = new Color(c.getRed()/4, c.getGreen()/4, c.getBlue()/4);
