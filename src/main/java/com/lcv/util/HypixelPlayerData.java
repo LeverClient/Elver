@@ -149,6 +149,8 @@ public class HypixelPlayerData
 
         if (player.has("rankPlusColor") && !player.isNull("rankPlusColor")) {
             plusColor = player.getString("rankPlusColor");
+        } else {
+            plusColor = "RED";
         }
 
         if (player.has("monthlyRankColor") && !player.isNull("monthlyRankColor")) {
