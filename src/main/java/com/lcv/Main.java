@@ -43,7 +43,7 @@ public class Main extends ListenerAdapter
 
     public static void main(String[] args) throws URISyntaxException, IOException, FontFormatException, InterruptedException {
         // null texture
-        nullTexture = ImageIO.read(new File(Objects.requireNonNull(Main.class.getResource("/images/null.png")).toURI()));
+        nullTexture = ImageIO.read(new File(Objects.requireNonNull(Main.class.getResource("/images/Items/null.png")).toURI()));
 
         // cache bot profile for faster image making
         botProfile = ImageIO.read(new File(Objects.requireNonNull(Main.class.getResource("/images/botProfile.png")).toURI()));

@@ -5,21 +5,37 @@ import com.lcv.Main;
 import javax.imageio.ImageIO;
 import java.awt.*;
 import java.awt.image.BufferedImage;
-import java.io.File;
 import java.io.IOException;
-import java.net.URISyntaxException;
 import java.net.URL;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.Random;
-import java.util.concurrent.Callable;
 import java.util.function.Consumer;
 
 public class ImageUtil
 {
     public static final String[] PLAYER_SKIN_FULL = {"default", "marching", "walking", "crouching", "crossed", "criss_cross", "ultimate", "cheering", "relaxing", "trudging", "cowering", "pointing", "lunging", "dungeons", "facepalm", "sleeping", "archer", "kicking", "mojavatar", "reading"};
     public static final String[] PLAYER_SKIN_TOP = {"default", "crossed", "ultimate", "dungeons"};
+    public static final String[] ITEM_ICON_DIRECTORIES = {"/images/Items/", "/images/Blocks/"};
+    public static final BufferedImage RESOURCE_IRON_INGOT = loadImage("/images/Resources/iron_ingot.png");
+    public static final BufferedImage RESOURCE_GOLD_INGOT = loadImage("/images/Resources/gold_ingot.png");
+    public static final BufferedImage RESOURCE_DIAMOND = loadImage("/images/Resources/diamond.png");
+    public static final BufferedImage RESOURCE_EMERALD = loadImage("/images/Resources/emerald.png");
+    public static HashMap<String, BufferedImage> BACKGROUND_OVERLAYS = new HashMap<>();
+    public static final HashMap<String, BufferedImage> ITEM_ICONS = new HashMap<>();
     public static Random rand = new Random();
+
+    public static BufferedImage loadImage(String name)
+    {
+        try
+        {
+            return ImageIO.read(Main.class.getResource(name));
+        }
+        catch (IOException e)
+        {
+            throw new RuntimeException(e);
+        }
+    }
 
     public static BufferedImage copyImage(BufferedImage image)
     {
@@ -86,17 +102,11 @@ public class ImageUtil
         return new int[]{width, height};
     }
 
-    public static HashMap<String, BufferedImage> itemIconCache = new HashMap<>();
-    public static String[] itemIconDirectories = new String[]{
-            "/images/Items/",
-            "/images/Blocks/",
-            "/images/"
-    };
     public static BufferedImage loadItemImage(String item) {
-        if (itemIconCache.containsKey(item)) return itemIconCache.get(item);
+        if (ITEM_ICONS.containsKey(item)) return ITEM_ICONS.get(item);
 
         URL itemIconResource = null;
-        for (String directory : itemIconDirectories) {
+        for (String directory : ITEM_ICON_DIRECTORIES) {
             itemIconResource = Main.class.getResource(directory + item + ".png");
             if (itemIconResource != null) break;
         }
@@ -108,7 +118,7 @@ public class ImageUtil
 
         try {
             BufferedImage image = ImageIO.read(itemIconResource);
-            itemIconCache.put(item, image);
+            ITEM_ICONS.put(item, image);
 
             return image;
         } catch (IOException e) {
@@ -117,11 +127,9 @@ public class ImageUtil
         }
     }
 
-    public static HashMap<String, BufferedImage> overlayCache = new HashMap<>();
     public static int getBackgrounds(ArrayList<BufferedImage> backgrounds, String overlay, Consumer<Graphics2D> action)
     {
         int availableBackgrounds = 0;
-
         try
         {
             for (;;availableBackgrounds++)
@@ -131,19 +139,16 @@ public class ImageUtil
 
                 BufferedImage image = ImageIO.read(resource);
 
-                BufferedImage overlayImg = overlayCache.get(overlay);
+                BufferedImage overlayImg = BACKGROUND_OVERLAYS.get(overlay);
                 if (overlayImg == null) {
                     overlayImg = ImageIO.read(Main.class.getResource("/images/" + overlay + ".png"));
-                    overlayCache.put(overlay, overlayImg);
+                    BACKGROUND_OVERLAYS.put(overlay, overlayImg);
                 } // TODO: purge cache after we're done?
 
                 // draw overlay on background
                 Graphics2D g2d = image.createGraphics();
-
                 g2d.drawImage(overlayImg, 0, 0, null);
-
                 action.accept(g2d);
-
                 g2d.dispose();
 
                 // save background

@@ -16,8 +16,6 @@ import javax.imageio.ImageIO;
 import java.awt.*;
 import java.awt.image.BufferedImage;
 import java.io.*;
-import java.net.URISyntaxException;
-import java.net.URL;
 import java.text.DecimalFormat;
 import java.util.*;
 import java.util.function.Function;
@@ -36,28 +34,20 @@ public class Bedwars implements Command
     private static final String API_KEY_HYPIXEL = System.getenv("API_KEY_HYPIXEL");
 
     private static final Random rand = new Random();
-    ArrayList<BufferedImage> backgroundImages = new ArrayList<>();
-    static FontRenderer fontRenderer = new FontRenderer(null, new Font[]{
+    public static ArrayList<BufferedImage> backgroundImages = new ArrayList<>();
+    public static FontRenderer fontRenderer = new FontRenderer(null, new Font[]{
             Main.minecraftFont.deriveFont(144f),
             Main.minecraftFont.deriveFont(96f),
             Main.minecraftFont.deriveFont(72f),
             Main.minecraftFont.deriveFont(40f)
     });
 
-    // cache backgrounds
-    BufferedImage resourceIronIngot = ImageIO.read(Main.class.getResource("/images/Resources/iron_ingot.png"));
-    BufferedImage resourceGoldIngot = ImageIO.read(Main.class.getResource("/images/Resources/gold_ingot.png"));
-    BufferedImage resourceDiamond = ImageIO.read(Main.class.getResource("/images/Resources/diamond.png"));
-    BufferedImage resourceEmerald = ImageIO.read(Main.class.getResource("/images/Resources/emerald.png"));
-    int availableBackgrounds = ImageUtil.getBackgrounds(backgroundImages, "overlay_separate_hotbar", (g2d) -> {
-        g2d.drawImage(resourceIronIngot, 100, 1830, null);
-        g2d.drawImage(resourceGoldIngot, 355, 1830, null);
-        g2d.drawImage(resourceDiamond, 610, 1820, null);
-        g2d.drawImage(resourceEmerald, 850, 1830, null);
+    public static final int availableBackgrounds = ImageUtil.getBackgrounds(backgroundImages, "overlay_separate_hotbar", (g2d) -> {
+        g2d.drawImage(ImageUtil.RESOURCE_IRON_INGOT, 100, 1830, null);
+        g2d.drawImage(ImageUtil.RESOURCE_GOLD_INGOT, 355, 1830, null);
+        g2d.drawImage(ImageUtil.RESOURCE_DIAMOND, 610, 1820, null);
+        g2d.drawImage(ImageUtil.RESOURCE_EMERALD, 850, 1830, null);
     });
-
-    public Bedwars() throws IOException {
-    }
 
     @Override
     public String getName()
@@ -87,7 +77,6 @@ public class Bedwars implements Command
         }
 
         String UUID = mojangJson.getString("id");
-
         JSONObject hypixelJson = HTTPRequest.getHTTPRequest("https://api.hypixel.net/v2/player?key=" + API_KEY_HYPIXEL + "&uuid=" + UUID);
         if (hypixelJson == null || hypixelJson.isEmpty())
         {
@@ -275,7 +264,7 @@ public class Bedwars implements Command
                 i++;
                 num /= 1000;
             }
-            return String.format("%.2f%s", num, arr[i]);
+            return new DecimalFormat("#.##").format(num) + arr[i];
         };
 
         fontRenderer.switchFont(3);
