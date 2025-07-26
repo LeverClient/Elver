@@ -133,6 +133,8 @@ public class ImageUtil
         int availableBackgrounds = 0;
         ArrayList<Future<BufferedImage>> backgroundFutures = new ArrayList<>();
 
+        long startTime = System.nanoTime();
+
         BufferedImage overlayImg = BACKGROUND_OVERLAYS.get(overlay);
         if (overlayImg == null) {
             System.out.println("Reading background overlay: "  + overlay);
@@ -159,7 +161,7 @@ public class ImageUtil
                     Graphics2D g2d = image.createGraphics();
 
                     g2d.drawImage(overlayImgThreadSafe, 0, 0, null);
-                    action.accept(g2d);
+                    if (action != null) action.accept(g2d);
 
                     g2d.dispose();
 
@@ -185,7 +187,7 @@ public class ImageUtil
             backgrounds.add(img);
         });
 
-        System.out.printf("Loaded %d backgrounds%n", availableBackgrounds);
+        System.out.printf("Loaded %d backgrounds in %dms%n", availableBackgrounds, (System.nanoTime()-startTime)/1000000);
         return availableBackgrounds;
     }
 }

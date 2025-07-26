@@ -44,13 +44,12 @@ public class Bedwars implements Command
             Main.minecraftFont.deriveFont(40f)
     });
 
-    public static final int availableBackgrounds = ImageUtil.getBackgrounds(backgroundImages, "overlay_separate_hotbar", (g2d) -> {
+    public final int availableBackgrounds = ImageUtil.getBackgrounds(backgroundImages, "overlay_separate_hotbar", (g2d) -> {
         g2d.drawImage(ImageUtil.RESOURCE_IRON_INGOT, 100, 1830, null);
         g2d.drawImage(ImageUtil.RESOURCE_GOLD_INGOT, 355, 1830, null);
         g2d.drawImage(ImageUtil.RESOURCE_DIAMOND, 610, 1820, null);
         g2d.drawImage(ImageUtil.RESOURCE_EMERALD, 850, 1830, null);
     });
-
     @Override
     public String getName()
     {
