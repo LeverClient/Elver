@@ -10,6 +10,10 @@ import java.net.URL;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.Random;
+import java.util.concurrent.ExecutionException;
+import java.util.concurrent.ExecutorService;
+import java.util.concurrent.Executors;
+import java.util.concurrent.Future;
 import java.util.function.Consumer;
 
 public class ImageUtil
@@ -24,6 +28,7 @@ public class ImageUtil
     public static HashMap<String, BufferedImage> BACKGROUND_OVERLAYS = new HashMap<>();
     public static final HashMap<String, BufferedImage> ITEM_ICONS = new HashMap<>();
     public static Random rand = new Random();
+    public static ExecutorService asyncExecutorService = Executors.newCachedThreadPool();
 
     public static BufferedImage loadImage(String name)
     {
@@ -46,40 +51,36 @@ public class ImageUtil
         return copy;
     }
 
-    public static BufferedImage getPlayerSkinFull(String uuid)
-    {
-        String skinType = PLAYER_SKIN_FULL[rand.nextInt(0, PLAYER_SKIN_FULL.length)];
-        if (uuid.equals("ddf13e436ccc4790bb49912913bf7d77")) skinType = "mojavatar";
+    public static Future<BufferedImage> getPlayerSkinFull(String uuid) {
+        return asyncExecutorService.submit(() -> {
+            String skinType = PLAYER_SKIN_FULL[rand.nextInt(PLAYER_SKIN_FULL.length)];
+            if (uuid.equals("ddf13e436ccc4790bb49912913bf7d77")) {
+                skinType = "mojavatar";
+            }
 
-        for (int i = 0; i < 3; i++)
-        {
-            try
-            {
-                return ImageIO.read(new URL(String.format("https://starlightskins.lunareclipse.studio/render/%s/%s/full", skinType, uuid)));
+            for (int i = 0; i < 3; i++) {
+                try {
+                    return ImageIO.read(new URL(String.format("https://starlightskins.lunareclipse.studio/render/%s/%s/full", skinType, uuid)));
+                } catch (IOException e) {
+                    e.printStackTrace(System.err);
+                }
             }
-            catch (IOException e)
-            {
-                e.printStackTrace(System.err);
-            }
-        }
-        throw new RuntimeException("Failed to get full player skin (probably a 502 from the api)");
+            throw new RuntimeException("Failed to get full player skin (probably a 502 from the api)");
+        });
     }
 
-    public static BufferedImage getPlayerSkinTop(String uuid)
-    {
-        String skinType = PLAYER_SKIN_TOP[rand.nextInt(0, PLAYER_SKIN_TOP.length)];
-        for (int i = 0; i < 3; i++)
-        {
-            try
-            {
-                return ImageIO.read(new URL(String.format("https://starlightskins.lunareclipse.studio/render/%s/%s/bust", skinType, uuid)));
+    public static Future<BufferedImage> getPlayerSkinTop(String uuid) {
+        return asyncExecutorService.submit(() -> {
+            String skinType = PLAYER_SKIN_TOP[rand.nextInt(PLAYER_SKIN_TOP.length)];
+            for (int i = 0; i < 3; i++) {
+                try {
+                    return ImageIO.read(new URL(String.format("https://starlightskins.lunareclipse.studio/render/%s/%s/bust", skinType, uuid)));
+                } catch (IOException e) {
+                    e.printStackTrace(System.err);
+                }
             }
-            catch (IOException e)
-            {
-                e.printStackTrace(System.err);
-            }
-        }
-        throw new RuntimeException("Failed to get top player skin (probably a 502 from the api)");
+            throw new RuntimeException("Failed to get top player skin (probably a 502 from the api)");
+        });
     }
 
     public static int[] fitToArea(BufferedImage image, int areaWidth, int areaHeight) {
@@ -130,6 +131,20 @@ public class ImageUtil
     public static int getBackgrounds(ArrayList<BufferedImage> backgrounds, String overlay, Consumer<Graphics2D> action)
     {
         int availableBackgrounds = 0;
+        ArrayList<Future<BufferedImage>> backgroundFutures = new ArrayList<>();
+
+        BufferedImage overlayImg = BACKGROUND_OVERLAYS.get(overlay);
+        if (overlayImg == null) {
+            System.out.println("Reading background overlay: "  + overlay);
+            try {
+                overlayImg = ImageIO.read(Main.class.getResource("/images/" + overlay + ".png"));
+            } catch (IOException e) {
+                throw new RuntimeException(e);
+            }
+            BACKGROUND_OVERLAYS.put(overlay, overlayImg);
+        } // TODO: purge cache after we're done? maybe in Main..
+
+        final BufferedImage overlayImgThreadSafe = overlayImg;
         try
         {
             for (;;availableBackgrounds++)
@@ -137,28 +152,38 @@ public class ImageUtil
                 URL resource = Main.class.getResource(String.format("/images/Backgrounds/bedwarsBackground%s.png", availableBackgrounds));
                 if (resource == null) break;
 
-                BufferedImage image = ImageIO.read(resource);
+                backgroundFutures.add(asyncExecutorService.submit(() -> {
+                    BufferedImage image = ImageIO.read(resource);
 
-                BufferedImage overlayImg = BACKGROUND_OVERLAYS.get(overlay);
-                if (overlayImg == null) {
-                    overlayImg = ImageIO.read(Main.class.getResource("/images/" + overlay + ".png"));
-                    BACKGROUND_OVERLAYS.put(overlay, overlayImg);
-                } // TODO: purge cache after we're done?
+                    // draw overlay on background
+                    Graphics2D g2d = image.createGraphics();
 
-                // draw overlay on background
-                Graphics2D g2d = image.createGraphics();
-                g2d.drawImage(overlayImg, 0, 0, null);
-                action.accept(g2d);
-                g2d.dispose();
+                    g2d.drawImage(overlayImgThreadSafe, 0, 0, null);
+                    action.accept(g2d);
 
-                // save background
-                backgrounds.add(image);
+                    g2d.dispose();
+
+                    // save background
+                    return image;
+                }));
             }
         }
         catch (Exception e)
         {
             throw new RuntimeException(e);
         }
+
+        backgroundFutures.forEach((future) -> {
+            BufferedImage img = Main.nullTexture;
+            try {
+                img = future.get();
+            } catch (InterruptedException ignored) {} catch (ExecutionException e) {
+                System.err.println("Failed to load background: " + e.getMessage());
+                e.printStackTrace(System.err);
+            }
+
+            backgrounds.add(img);
+        });
 
         System.out.printf("Loaded %d backgrounds%n", availableBackgrounds);
         return availableBackgrounds;

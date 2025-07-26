@@ -18,6 +18,8 @@ import java.awt.image.BufferedImage;
 import java.io.*;
 import java.text.DecimalFormat;
 import java.util.*;
+import java.util.concurrent.ExecutionException;
+import java.util.concurrent.Future;
 import java.util.function.Function;
 
 import static com.lcv.util.ImageUtil.loadItemImage;
@@ -206,15 +208,9 @@ public class Bedwars implements Command
         // draw bot profile
         g2d.drawImage(Main.botProfileScaled, 25, 25, 226, 226, null);
 
-        BufferedImage player = ImageUtil.getPlayerSkinFull(hypixelData.uuid);
-        int[] playerSize = ImageUtil.fitToArea(player, 670, 850);
-
-        g2d.drawImage(player, 1440 - (playerSize[0] / 2), 325 + ((850 - playerSize[1]) / 2), playerSize[0], playerSize[1], null);
-
-        BufferedImage playerTop = ImageUtil.getPlayerSkinTop(hypixelData.uuid);
-        int[] playerTopSize = ImageUtil.fitToArea(playerTop, Integer.MAX_VALUE, 300);
-
-        g2d.drawImage(playerTop, 1155, 1785, playerTopSize[0], playerTopSize[1], null);
+        // start getting player images
+        Future<BufferedImage> playerFuture = ImageUtil.getPlayerSkinFull(hypixelData.uuid);
+        Future<BufferedImage> playerTopFuture = ImageUtil.getPlayerSkinTop(hypixelData.uuid);
 
         // draw player name
         String nameWithRank = hypixelData.getPlayerNameRankFormat();
@@ -361,6 +357,27 @@ public class Bedwars implements Command
                 g2d.drawImage(itemImage, iconX, iconY, slotItemSize, slotItemSize, null);
             }
         }
+
+        System.out.printf("generated bedwars stats image without player in %dms%n", (System.nanoTime()-startTime)/1000000);
+
+        // draw player images (last cause we were doing this on another thread)
+        BufferedImage player = Main.nullTexture;
+        BufferedImage playerTop = Main.nullTexture;
+
+        try {
+            player = playerFuture.get();
+            playerTop = playerTopFuture.get();
+        } catch (InterruptedException ignored) {}
+        catch (ExecutionException e) {
+            System.err.println("Failed to get player icons: " + e.getMessage());
+            e.printStackTrace(System.err);
+        }
+
+        int[] playerSize = ImageUtil.fitToArea(player, 670, 850);
+        int[] playerTopSize = ImageUtil.fitToArea(playerTop, Integer.MAX_VALUE, 300);
+
+        g2d.drawImage(player, 1440 - (playerSize[0] / 2), 325 + ((850 - playerSize[1]) / 2), playerSize[0], playerSize[1], null);
+        g2d.drawImage(playerTop, 1155, 1785, playerTopSize[0], playerTopSize[1], null);
 
         // output and return image
         g2d.dispose();
