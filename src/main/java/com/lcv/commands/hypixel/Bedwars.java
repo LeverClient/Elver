@@ -18,6 +18,7 @@ import java.awt.image.BufferedImage;
 import java.io.*;
 import java.text.DecimalFormat;
 import java.util.*;
+import java.util.function.BiFunction;
 import java.util.concurrent.ExecutionException;
 import java.util.concurrent.Future;
 import java.util.function.Function;
@@ -44,7 +45,7 @@ public class Bedwars implements Command
             Main.minecraftFont.deriveFont(40f)
     });
 
-    public final int availableBackgrounds = ImageUtil.getBackgrounds(backgroundImages, "overlay_separate_hotbar", (g2d) -> {
+    public static final int availableBackgrounds = ImageUtil.getBackgrounds(backgroundImages, "overlay_separate_hotbar", (g2d) -> {
         g2d.drawImage(ImageUtil.RESOURCE_IRON_INGOT, 100, 1830, null);
         g2d.drawImage(ImageUtil.RESOURCE_GOLD_INGOT, 355, 1830, null);
         g2d.drawImage(ImageUtil.RESOURCE_DIAMOND, 610, 1820, null);
@@ -87,11 +88,13 @@ public class Bedwars implements Command
         }
 
         HypixelPlayerData hypixelData = new HypixelPlayerData(hypixelJson);
-
         BufferedImage statsImage;
-        try {
+        try
+        {
             statsImage = generateStatsImage(hypixelData);
-        } catch (IllegalArgumentException e) {
+        }
+        catch (IllegalArgumentException e)
+        {
             Embed embed = new Embed().setTitle("Failed Operation :(").setDescription(e.getMessage() == null ? "Unsure" : e.getMessage());
             interactionHook.sendMessageEmbeds(embed.get()).queue();
             return;
@@ -124,7 +127,6 @@ public class Bedwars implements Command
             throw new IllegalArgumentException("Hypixel: No player data found");
         }
 
-
         if (!hypixelData.stats.has("Bedwars") || hypixelData.stats.isNull("Bedwars"))
         {
             throw new IllegalArgumentException("Hypixel: No bedwars stats");
@@ -132,58 +134,35 @@ public class Bedwars implements Command
 
         JSONObject bwJson = hypixelData.stats.getJSONObject("Bedwars");
 
-        Function<String, Integer> getInt = s -> bwJson.has(s) && !bwJson.isNull(s) ? bwJson.getInt(s) : 0;
-        Function<String, Double> getDouble = s -> bwJson.has(s) && !bwJson.isNull(s) ? bwJson.getDouble(s) : 0;
-        Function<String, String> getString = s -> bwJson.has(s) && !bwJson.isNull(s) ? bwJson.getString(s) : null;
+        BiFunction<JSONObject, String, String> getString = (json, s) -> json.has(s) && !json.isNull(s) ? json.getString(s) : null;
 
         DecimalFormat bigFormat = new DecimalFormat("###,###");
 
-        double iron = getDouble.apply("iron_resources_collected_bedwars");
-        double gold = getDouble.apply("gold_resources_collected_bedwars");
-        double diamond = getDouble.apply("diamond_resources_collected_bedwars");
-        double emerald = getDouble.apply("emerald_resources_collected_bedwars");
+        Map<String, Double> stats = getStats(hypixelData);
 
-        double losses = getDouble.apply("losses_bedwars");
-        double wins = getDouble.apply("wins_bedwars");
-        double finalKills = getDouble.apply("final_kills_bedwars");
-        double finalDeaths = getDouble.apply("final_deaths_bedwars");
-        double kills = getDouble.apply("kills_bedwars");
-        double deaths = getDouble.apply("deaths_bedwars");
-        double bedsBroken = getDouble.apply("beds_broken_bedwars");
-        double bedsLost = getDouble.apply("beds_lost_bedwars");
+        int networkLevel = (int) (1 + ((Math.sqrt(8750 * 8750 + 5000 * stats.get("networkXP")) - 8750) / 2500));
 
-        double WL = wins / losses;
-        double fkdr = finalKills / finalDeaths;
-        double kdr = kills / deaths;
-        double bblr = bedsBroken / bedsLost;
+        double level_d = getLevelForExp(stats.get("bedwarsXP").intValue());
+        int bedwarsLevel = getBedwarsLevel(stats.get("bedwarsXP").intValue());
+        int currentPrestige = stats.get("bedwarsXP").intValue() / 487000;
+        int nextPrestige = currentPrestige + 100;
 
-        int xp = getInt.apply("Experience");
-        double networkXP = hypixelData.player.has("networkExp") && !hypixelData.player.isNull("networkExp") ? hypixelData.player.getInt("networkExp") : 0;
+        int xpReq = getBWExpForLevel(bedwarsLevel);
+        System.out.println(xpReq);
+        int xpExcess = (int) Math.round(((level_d - bedwarsLevel) * xpReq)/5)*5;
 
-        int networkLevel = (int) (1 + ((-8750 + Math.sqrt(8750 * 8750 + 5000 * networkXP)) / 2500));
-
-        double level_d = getLevelForExp(xp);
-        int level = (int) level_d;
-        int nextLevel = level + 1;
-        int currentPrestige = (int) Math.floor(level_d / 100)*100;
-        int nextPrestige = (int) Math.ceil(level_d / 100)*100;
-
-        int xpReq = getBWExpForLevel(level);
-        int xpPastLevel = (int) Math.round(((level_d - level) * xpReq)/5)*5;
-
-        int levelProgressBars = xpPastLevel / (xpReq / LEVEL_PROGRESS_BAR_LENGTH);
+        int levelProgressBars = xpExcess / (xpReq / LEVEL_PROGRESS_BAR_LENGTH);
         String levelProgressBarString = "|".repeat(levelProgressBars) + "§c" + "|".repeat(Math.max(0, LEVEL_PROGRESS_BAR_LENGTH - levelProgressBars));
 
         double xpUntilPrestige = getXpForPrestige(level_d - currentPrestige);
         int prestigeProgressBars = (int) ((XP_PER_PRESTIGE - xpUntilPrestige) / (XP_PER_PRESTIGE / PRESTIGE_PROGRESS_BAR_LENGTH));
         String prestigeProgressBarString = "|".repeat(prestigeProgressBars) + "§c" + "|".repeat(Math.max(0, PRESTIGE_PROGRESS_BAR_LENGTH - prestigeProgressBars));
 
-        String formattedLevel = getFormattedLevel(level);
-        String formattedNextLevel = getFormattedLevel(nextLevel);
+        String formattedLevel = getFormattedLevel(bedwarsLevel);
         String formattedNextPrestige = getFormattedLevel(nextPrestige);
 
-        String favoriteSlotsString = getString.apply("favorite_slots");
-        String quickBuy = getString.apply("favourites_2"); // favourites! definitely not worrying that this has _2 on it.. (foreshadowing)
+        String favoriteSlotsString = getString.apply(bwJson,"favorite_slots");
+        String quickBuy = getString.apply(bwJson,"favourites_2"); // favourites! definitely not worrying that this has _2 on it.. (foreshadowing)
 
         int chosenBackground = availableBackgrounds <= 1 ? 0 : rand.nextInt(0, availableBackgrounds);
         BufferedImage image = ImageUtil.copyImage(backgroundImages.get(chosenBackground));
@@ -219,28 +198,28 @@ public class Bedwars implements Command
 
 
         fontRenderer.switchFont(1);
-        fontRenderer.drawString(String.format("§aWins: %s", bigFormat.format(wins)), 75, 325);
-        fontRenderer.drawString(String.format("§cLosses: %s", bigFormat.format(losses)), 75, 510);
-        fontRenderer.drawString(String.format("§aW§cL: §r%.2f", WL), 75, 700);
+        fontRenderer.drawString(String.format("§aWins: %s", bigFormat.format(stats.get("wins"))), 75, 325);
+        fontRenderer.drawString(String.format("§cLosses: %s", bigFormat.format(stats.get("losses"))), 75, 510);
+        fontRenderer.drawString(String.format("§aW§cL: §r%.2f", stats.get("wl")), 75, 700);
 
-        fontRenderer.drawString(String.format("§aBB: %s", bigFormat.format(bedsBroken)), 75, 962);
-        fontRenderer.drawString(String.format("§cBL: %s", bigFormat.format(bedsLost)), 75, 1147);
-        fontRenderer.drawString(String.format("§aBB§cLR: §r%.2f", bblr), 75, 1337);
+        fontRenderer.drawString(String.format("§aBB: %s", bigFormat.format(stats.get("bedsBroken"))), 75, 962);
+        fontRenderer.drawString(String.format("§cBL: %s", bigFormat.format(stats.get("bedsLost"))), 75, 1147);
+        fontRenderer.drawString(String.format("§aBB§cLR: §r%.2f", stats.get("bblr")), 75, 1337);
 
-        fontRenderer.drawString(String.format("§aKills: %s", bigFormat.format(kills)), 1875, 325);
-        fontRenderer.drawString(String.format("§cDeaths: %s", bigFormat.format(deaths)), 1875, 510);
-        fontRenderer.drawString(String.format("§aK§cD: §r%.2f", kdr), 1875, 700);
+        fontRenderer.drawString(String.format("§aKills: %s", bigFormat.format(stats.get("kills"))), 1875, 325);
+        fontRenderer.drawString(String.format("§cDeaths: %s", bigFormat.format(stats.get("deaths"))), 1875, 510);
+        fontRenderer.drawString(String.format("§aK§cD: §r%.2f", stats.get("kd")), 1875, 700);
 
-        fontRenderer.drawString(String.format("§aFK: %s", bigFormat.format(finalKills)), 1875, 962);
-        fontRenderer.drawString(String.format("§cFD: %s", bigFormat.format(finalDeaths)), 1875, 1147);
-        fontRenderer.drawString(String.format("§aFK§cDR: §r%.2f", fkdr), 1875, 1337);
+        fontRenderer.drawString(String.format("§aFK: %s", bigFormat.format(stats.get("finalKills"))), 1875, 962);
+        fontRenderer.drawString(String.format("§cFD: %s", bigFormat.format(stats.get("finalDeaths"))), 1875, 1147);
+        fontRenderer.drawString(String.format("§aFK§cDR: §r%.2f", stats.get("fkdr")), 1875, 1337);
 
         // level info
         fontRenderer.switchFont(2);
 
         fontRenderer.drawString(formattedLevel, image.getWidth()/2, 1275, FontRenderer.CenterXAligned); // 1350
         fontRenderer.drawString(String.format("§a%s", levelProgressBarString), image.getWidth()/2, 1275+148, FontRenderer.CenterXAligned);
-        fontRenderer.drawString(String.format("§a%d §r/ §c%d", xpPastLevel, xpReq), image.getWidth()/2, 1275+148*2, FontRenderer.CenterXAligned);
+        fontRenderer.drawString(String.format("§a%d §r/ §c%d", xpExcess, xpReq), image.getWidth()/2, 1275+148*2, FontRenderer.CenterXAligned);
         //fontRenderer.drawString(formattedNextLevel, image.getWidth()/2, 1275+148*2, FontRenderer.CenterXAligned);
 
 
@@ -263,10 +242,10 @@ public class Bedwars implements Command
         };
 
         fontRenderer.switchFont(3);
-        fontRenderer.drawString(numAbbrev.apply(iron), 180, 2025, FontRenderer.CenterXAligned);
-        fontRenderer.drawString(numAbbrev.apply(gold), 435, 2025, FontRenderer.CenterXAligned);
-        fontRenderer.drawString(numAbbrev.apply(diamond), 690, 2025, FontRenderer.CenterXAligned);
-        fontRenderer.drawString(numAbbrev.apply(emerald), 930, 2025, FontRenderer.CenterXAligned);
+        fontRenderer.drawString(numAbbrev.apply(stats.get("iron")), 180, 2025, FontRenderer.CenterXAligned);
+        fontRenderer.drawString(numAbbrev.apply(stats.get("gold")), 435, 2025, FontRenderer.CenterXAligned);
+        fontRenderer.drawString(numAbbrev.apply(stats.get("diamond")), 690, 2025, FontRenderer.CenterXAligned);
+        fontRenderer.drawString(numAbbrev.apply(stats.get("emerald")), 930, 2025, FontRenderer.CenterXAligned);
 
         // quick buy
         // 1850, 1574; Size 980x537 980/(21/3) = 140px per slot horizontal
@@ -384,6 +363,42 @@ public class Bedwars implements Command
         System.out.printf("generated bedwars stats image in %dms%n", (System.nanoTime()-startTime)/1000000);
 
         return image;
+    }
+
+    public static Map<String, Double> getStats(HypixelPlayerData hypixelData)
+    {
+        JSONObject bwJson = hypixelData.stats.getJSONObject("Bedwars");
+
+        BiFunction<JSONObject, String, Double> getDouble = (json, s) -> json.has(s) && !json.isNull(s) ? json.getDouble(s) : 0;
+        BiFunction<Double, Double, Double> getRatio = (num, den) -> den == 0 ? 0 : num / den;
+
+        Map<String, Double> stats = new HashMap<>();
+
+        stats.put("iron", getDouble.apply(bwJson, "iron_resources_collected_bedwars"));
+        stats.put("gold", getDouble.apply(bwJson, "gold_resources_collected_bedwars"));
+        stats.put("diamond", getDouble.apply(bwJson, "diamond_resources_collected_bedwars"));
+        stats.put("emerald", getDouble.apply(bwJson, "emerald_resources_collected_bedwars"));
+
+        stats.put("wins", getDouble.apply(bwJson, "wins_bedwars"));
+        stats.put("losses", getDouble.apply(bwJson, "losses_bedwars"));
+        stats.put("wl", getRatio.apply(stats.get("wins"),stats.get("losses")));
+
+        stats.put("finalKills", getDouble.apply(bwJson, "final_kills_bedwars"));
+        stats.put("finalDeaths", getDouble.apply(bwJson, "final_deaths_bedwars"));
+        stats.put("fkdr", getRatio.apply(stats.get("finalKills"), stats.get("finalDeaths")));
+
+        stats.put("kills", getDouble.apply(bwJson, "kills_bedwars"));
+        stats.put("deaths", getDouble.apply(bwJson, "deaths_bedwars"));
+        stats.put("kd", getRatio.apply(stats.get("kills"), stats.get("deaths")));
+
+        stats.put("bedsBroken", getDouble.apply(bwJson, "beds_broken_bedwars"));
+        stats.put("bedsLost", getDouble.apply(bwJson, "beds_lost_bedwars"));
+        stats.put("bblr", getRatio.apply(stats.get("bedsBroken"), stats.get("bedsLost")));
+
+        stats.put("bedwarsXP", getDouble.apply(bwJson, "Experience"));
+        stats.put("networkXP", getDouble.apply(hypixelData.player, "networkExp"));
+
+        return stats;
     }
 
     // bedwars stars. %x$s = (x+3)th character of the level. including star. 0 = full string, 1 = full level, 2 = star. (i think)
@@ -514,13 +529,9 @@ public class Bedwars implements Command
     // https://github.com/Plancke/hypixel-php/blob/2303c4bdedb650acc8315393885284dba59fdd79/src/util/games/bedwars/ExpCalculator.php
     public static final int EASY_LEVELS = 4;
     public static final int LEVELS_PER_PRESTIGE = 100;
-    public static final int HIGHEST_PRESTIGE = 10;
     public static int getBWExpForLevel(int level) {
-        if (level == 0) return 0;
-
-        int respectedLevel = getLevelRespectingPrestige(level);
-
-        return switch (respectedLevel) {
+        return switch (level % 100) {
+            case 0 -> 0;
             case 1 -> 500;
             case 2 -> 1000;
             case 3 -> 2000;
@@ -530,12 +541,6 @@ public class Bedwars implements Command
     }
 
     public static int getLevelRespectingPrestige(int level) {
-        /*if (level > HIGHEST_PRESTIGE * LEVELS_PER_PRESTIGE) {
-            return level - HIGHEST_PRESTIGE * LEVELS_PER_PRESTIGE;
-        } else {
-            return level % LEVELS_PER_PRESTIGE;
-        }*/
-
         return level % LEVELS_PER_PRESTIGE;
     }
 
@@ -552,5 +557,12 @@ public class Bedwars implements Command
         }
 
         return level + (double) expWithoutPrestiges / 5000;
+    }
+
+    public static int getBedwarsLevel(int xp)
+    {
+        int level = (xp / 487000) * 100;
+        for (int[] easyXP = {500, 1000, 2000, 3500}; (xp %= 487000) >= (level % 100 < 4 ? easyXP[level % 100] : 5000); xp -= level % 100 < 4 ? easyXP[level % 100] : 5000, level++);
+        return level;
     }
 }

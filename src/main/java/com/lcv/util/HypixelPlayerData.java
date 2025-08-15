@@ -32,6 +32,7 @@ public class HypixelPlayerData
 
     static {
         // ranks
+        rankLookup.put("NONE", new String[]{"NONE"});
         rankLookup.put("VIP", new String[]{"VIP"});
         rankLookup.put("VIP_PLUS", new String[]{"VIP", "+"});
         rankLookup.put("MVP", new String[]{"MVP"});
@@ -42,6 +43,7 @@ public class HypixelPlayerData
         rankLookup.put("YOUTUBER", new String[]{"YOUTUBE"});
 
         // rank colors
+        colorLookup.put("NONE", "§7");
         colorLookup.put("VIP", "§a");
         colorLookup.put("VIP_PLUS", "§a");
         colorLookup.put("MVP", "§b");
@@ -69,7 +71,7 @@ public class HypixelPlayerData
         colorLookup.put("WHITE", "§f");
     }
 
-    static public String getPlayerNameRankFormat(String name, String rank, String plusColor, String monthlyRankColor, String prefix) {
+    public static String getPlayerNameRankFormat(String name, String rank, String plusColor, String monthlyRankColor, String prefix) {
         StringBuilder nameFormatted = new StringBuilder();
 
         if (prefix != null) {
@@ -91,12 +93,12 @@ public class HypixelPlayerData
         if (rankName == null) rankName = new String[]{rank};
 
         if (rank.equals("YOUTUBER") || rank.equals("STAFF")) nameFormatted.append("§c");
-        nameFormatted.append('[');
+        if (!rank.equals("NONE")) nameFormatted.append('[');
         if (rank.equals("YOUTUBER")) nameFormatted.append("§f");
         else if (rank.equals("STAFF")) nameFormatted.append("§6");
         else if (rank.equals("VIP_PLUS")) plusColor = "GOLD";
 
-        nameFormatted.append(rankName[0]);
+        if (!rank.equals("NONE")) nameFormatted.append(rankName[0]);
         if (rankName.length > 1) {
             nameFormatted.append(colorLookup.getOrDefault(plusColor, plusColor));
             nameFormatted.append(rankName[1]);
@@ -104,7 +106,7 @@ public class HypixelPlayerData
         }
 
         if (rank.equals("YOUTUBER") || rank.equals("STAFF")) nameFormatted.append("§c");
-        nameFormatted.append("] ");
+        if (!rank.equals("NONE")) nameFormatted.append("] ");
         nameFormatted.append(name);
 
         return nameFormatted.toString();
@@ -132,6 +134,9 @@ public class HypixelPlayerData
         uuid = player.getString("uuid");
 
         rankPrefix = (player.has("prefix") && !player.isNull("prefix")) ? player.getString("prefix") : null;
+
+        if (!player.has("rank"))
+            rank = "NONE";
 
         if (player.has("rank") && !player.isNull("rank")) {
             rank = player.getString("rank"); // staff

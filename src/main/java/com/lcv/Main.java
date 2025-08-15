@@ -78,12 +78,15 @@ public class Main extends ListenerAdapter
                 GatewayIntent.GUILD_MESSAGES)
                 .addEventListeners(new Main())
                 .build();
+        System.out.println("boo boo cat123");
 
         commands = List.of(
                 new Hello(),
                 new Bedwars(),
                 new Image()
         );
+
+        System.out.println("apple bear");
 
         List<SlashCommandData> slashData = new ArrayList<>();
 
@@ -92,49 +95,51 @@ public class Main extends ListenerAdapter
             SlashCommandData data = Commands.slash(command.getName(), command.getDescription());
             command.addFields(data);
             slashData.add(data);
+            System.out.println(data.getName());
         }
 
         jda.updateCommands().addCommands(slashData).queue();
 
-        // debug thing
-        if (System.getenv("debugfile") != null) {
-            String name = System.getenv("debugfile");
-            byte[] debugFileBytes;
-            try (InputStream stream = Main.class.getResourceAsStream("/" + name)) {
-                assert stream != null;
-                debugFileBytes = stream.readAllBytes();
-            }
-
-            JSONObject debugJson = new JSONObject(new String(debugFileBytes));
-
-            String debugName = debugJson.getString("Name");
-            String debugId = debugJson.getString("UUID");
-            JSONObject hypixelJson = debugJson.getJSONObject("Api");
-
-            HypixelPlayerData hypixelData = new HypixelPlayerData(hypixelJson);
-
-            JSONObject bwjson = hypixelData.stats.getJSONObject("Bedwars");
-
-            BufferedImage statsImage;
-            try {
-                statsImage = ((Bedwars) commands.get(1)).generateStatsImage(hypixelData);
-            } catch (IllegalArgumentException e) {
-                throw new RuntimeException(e);
-            }
-
-            ByteArrayOutputStream outputStream = new ByteArrayOutputStream();
-            ImageIO.write(statsImage, "png", outputStream);
-            FileUpload f = FileUpload.fromData(new ByteArrayInputStream(outputStream.toByteArray()), String.format("debug bedwars stats for %s meowmewomemwmeowmemrmrmemwo.png", name));
-
-            jda.awaitReady();
-            Guild testingGuild = jda.getGuildById(System.getenv("debugserver"));
-            assert testingGuild != null;
-
-            TextChannel channel = testingGuild.getTextChannelById(System.getenv("debugchannel"));
-            assert channel != null;
-
-            channel.sendFiles(f).queue();
-        }
+//        // debug thing
+//        if (System.getenv("debugfile") != null) {
+//            String name = System.getenv("debugfile");
+//            byte[] debugFileBytes;
+//            try (InputStream stream = Main.class.getResourceAsStream("/" + name)) {
+//                assert stream != null;
+//                debugFileBytes = stream.readAllBytes();
+//            }
+//
+//            JSONObject debugJson = new JSONObject(new String(debugFileBytes));
+//
+//            String debugName = debugJson.getString("Name");
+//            String debugId = debugJson.getString("UUID");
+//            JSONObject hypixelJson = debugJson.getJSONObject("Api");
+//
+//            HypixelPlayerData hypixelData = new HypixelPlayerData(hypixelJson);
+//
+//            JSONObject bwjson = hypixelData.stats.getJSONObject("Bedwars");
+//
+//            BufferedImage statsImage;
+//            try {
+//                statsImage = ((Bedwars) commands.get(1)).generateStatsImage(hypixelData);
+//            } catch (IllegalArgumentException e) {
+//                throw new RuntimeException(e);
+//            }
+//
+//            ByteArrayOutputStream outputStream = new ByteArrayOutputStream();
+//            ImageIO.write(statsImage, "png", outputStream);
+//            FileUpload f = FileUpload.fromData(new ByteArrayInputStream(outputStream.toByteArray()), String.format("debug bedwars stats for %s meowmewomemwmeowmemrmrmemwo.png", name));
+//
+//            jda.awaitReady();
+//            Guild testingGuild = jda.getGuildById(System.getenv("debugserver"));
+//            assert testingGuild != null;
+//
+//            TextChannel channel = testingGuild.getTextChannelById(System.getenv("debugchannel"));
+//            assert channel != null;
+//
+//            ByteArrayOutputStream baos = new ByteArrayOutputStream();
+//            channel.sendFiles().queue();
+//        }
     }
 
     @Override

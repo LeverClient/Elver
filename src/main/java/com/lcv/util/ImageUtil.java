@@ -146,6 +146,8 @@ public class ImageUtil
             BACKGROUND_OVERLAYS.put(overlay, overlayImg);
         } // TODO: purge cache after we're done? maybe in Main..
 
+        System.out.println("pizza hut");
+
         final BufferedImage overlayImgThreadSafe = overlayImg;
         try
         {
@@ -174,6 +176,7 @@ public class ImageUtil
         {
             throw new RuntimeException(e);
         }
+        System.out.println("i hate java");
 
         backgroundFutures.forEach((future) -> {
             BufferedImage img = Main.nullTexture;
