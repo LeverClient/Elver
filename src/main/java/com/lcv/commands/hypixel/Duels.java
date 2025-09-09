@@ -16,6 +16,7 @@ import java.io.ByteArrayInputStream;
 import java.io.ByteArrayOutputStream;
 import java.io.IOException;
 import java.text.DecimalFormat;
+import java.util.HashMap;
 import java.util.Map;
 import java.util.function.BiFunction;
 
@@ -104,8 +105,22 @@ public class Duels implements Command
 
         DecimalFormat bigFormat = new DecimalFormat("###,###");
 
-
+        Map<String, Double> stats = getStats(hypixelData);
         return null;
+    }
+
+    public static Map<String, Double> getStats(HypixelPlayerData hypixelData)
+    {
+        JSONObject duelsJson = hypixelData.stats.getJSONObject("Duels");
+
+        BiFunction<JSONObject, String, Double> getDouble = (json, s) -> json.has(s) && !json.isNull(s) ? json.getDouble(s) : 0;
+
+        Map<String, Double> stats = new HashMap<>();
+
+        stats.put("deaths", getDouble.apply(duelsJson, "deaths"));
+        stats.put("losses", getDouble.apply(duelsJson, "losses"));
+        stats.put("wins", getDouble.apply(duelsJson,"wins"));
+        return stats;
     }
 
     @Override
