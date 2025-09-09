@@ -45,7 +45,7 @@ public class Bedwars implements Command
             Main.minecraftFont.deriveFont(40f)
     });
 
-    public static final int availableBackgrounds = ImageUtil.getBackgrounds(backgroundImages, "overlay_separate_hotbar", (g2d) -> {
+    public final int availableBackgrounds = ImageUtil.getBackgrounds(backgroundImages, "overlay_separate_hotbar", (g2d) -> {
         g2d.drawImage(ImageUtil.RESOURCE_IRON_INGOT, 100, 1830, null);
         g2d.drawImage(ImageUtil.RESOURCE_GOLD_INGOT, 355, 1830, null);
         g2d.drawImage(ImageUtil.RESOURCE_DIAMOND, 610, 1820, null);
@@ -144,14 +144,12 @@ public class Bedwars implements Command
 
         double level_d = getLevelForExp(stats.get("bedwarsXP").intValue());
         int bedwarsLevel = getBedwarsLevel(stats.get("bedwarsXP").intValue());
-        int currentPrestige = stats.get("bedwarsXP").intValue() / 487000;
+        int currentPrestige = (bedwarsLevel / 100) * 100;
         int nextPrestige = currentPrestige + 100;
 
         int xpReq = getBWExpForLevel(bedwarsLevel);
-        System.out.println(xpReq);
-        int xpExcess = (int) Math.round(((level_d - bedwarsLevel) * xpReq)/5)*5;
-
-        int levelProgressBars = xpExcess / (xpReq / LEVEL_PROGRESS_BAR_LENGTH);
+        int xpUntilLevel = (int) Math.round(((level_d - bedwarsLevel) * xpReq) / 5) * 5;
+        int levelProgressBars = xpUntilLevel / (xpReq / LEVEL_PROGRESS_BAR_LENGTH);
         String levelProgressBarString = "|".repeat(levelProgressBars) + "§c" + "|".repeat(Math.max(0, LEVEL_PROGRESS_BAR_LENGTH - levelProgressBars));
 
         double xpUntilPrestige = getXpForPrestige(level_d - currentPrestige);
@@ -219,9 +217,7 @@ public class Bedwars implements Command
 
         fontRenderer.drawString(formattedLevel, image.getWidth()/2, 1275, FontRenderer.CenterXAligned); // 1350
         fontRenderer.drawString(String.format("§a%s", levelProgressBarString), image.getWidth()/2, 1275+148, FontRenderer.CenterXAligned);
-        fontRenderer.drawString(String.format("§a%d §r/ §c%d", xpExcess, xpReq), image.getWidth()/2, 1275+148*2, FontRenderer.CenterXAligned);
-        //fontRenderer.drawString(formattedNextLevel, image.getWidth()/2, 1275+148*2, FontRenderer.CenterXAligned);
-
+        fontRenderer.drawString(String.format("§a%d §r/ §c%d", xpUntilLevel, xpReq), image.getWidth()/2, 1275+148*2, FontRenderer.CenterXAligned);
 
         fontRenderer.drawString("§aLevel:", 1440, 1785);
         fontRenderer.drawString("§c" + networkLevel, 1440, 1890);
@@ -281,7 +277,7 @@ public class Bedwars implements Command
                         case "wooden_axe" -> "wood_axe";
 
                         case "wool" -> "wool_colored_white";
-                        case "oak_wood_planks" -> "planks_oak";
+                        case "wood", "oak_wood_planks" -> "planks_oak";
                         case "blast-proof_glass" -> "glass_white";
                         case "hardened_clay" -> "hardened_clay_stained_white";
 
@@ -508,7 +504,7 @@ public class Bedwars implements Command
 
     public static int getXpForPrestige(double level) {
         int levelInt = (int) level;
-        int respectPrestige = getLevelRespectingPrestige(levelInt);
+        int respectPrestige = levelInt % 100;
         int levelXp = (int) ((level - levelInt)*5000);
 
         if (respectPrestige > 4) {
@@ -527,8 +523,6 @@ public class Bedwars implements Command
     // stole this code from plancke's github. i don't know how it works
     // actually i might've found it on the hypixel forums, but it's originally from here. i don't remember if i ported it to java myself
     // https://github.com/Plancke/hypixel-php/blob/2303c4bdedb650acc8315393885284dba59fdd79/src/util/games/bedwars/ExpCalculator.php
-    public static final int EASY_LEVELS = 4;
-    public static final int LEVELS_PER_PRESTIGE = 100;
     public static int getBWExpForLevel(int level) {
         return switch (level % 100) {
             case 0 -> 0;
@@ -540,16 +534,12 @@ public class Bedwars implements Command
         };
     }
 
-    public static int getLevelRespectingPrestige(int level) {
-        return level % LEVELS_PER_PRESTIGE;
-    }
-
     public static double getLevelForExp(int exp) {
         int prestiges = (int) (exp / XP_PER_PRESTIGE);
-        int level = prestiges * LEVELS_PER_PRESTIGE;
+        int level = prestiges * 100;
         int expWithoutPrestiges = (int) (exp - (prestiges * XP_PER_PRESTIGE));
 
-        for (int i = 1; i <= EASY_LEVELS; i++) {
+        for (int i = 1; i <= 4; i++) {
             int expForEasyLevel = getBWExpForLevel(i);
             if (expWithoutPrestiges < expForEasyLevel) break;
             level++;

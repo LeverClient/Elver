@@ -78,15 +78,12 @@ public class Main extends ListenerAdapter
                 GatewayIntent.GUILD_MESSAGES)
                 .addEventListeners(new Main())
                 .build();
-        System.out.println("boo boo cat123");
 
         commands = List.of(
                 new Hello(),
                 new Bedwars(),
                 new Image()
         );
-
-        System.out.println("apple bear");
 
         List<SlashCommandData> slashData = new ArrayList<>();
 
@@ -95,7 +92,6 @@ public class Main extends ListenerAdapter
             SlashCommandData data = Commands.slash(command.getName(), command.getDescription());
             command.addFields(data);
             slashData.add(data);
-            System.out.println(data.getName());
         }
 
         jda.updateCommands().addCommands(slashData).queue();
@@ -158,12 +154,12 @@ public class Main extends ListenerAdapter
     @Override
     public void onCommandAutoCompleteInteraction(@NotNull CommandAutoCompleteInteractionEvent event)
     {
-        /*for (Command command : commands)
+        for (Command command : commands)
         {
             if (event.getName().equals("bedwars"))
             {
-                // todo: write thing to access hypixel api maybe?
+                // todo: write thing to access mojang api maybe?
             }
-        }*/
+        }
     }
 }
