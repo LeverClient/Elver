@@ -2,6 +2,7 @@ package com.lcv;
 
 import com.lcv.commands.Command;
 import com.lcv.commands.hypixel.Bedwars;
+import com.lcv.commands.hypixel.Duels;
 import com.lcv.util.HypixelPlayerData;
 import com.lcv.commands.misc.Hello;
 import com.lcv.commands.misc.Image;
@@ -82,7 +83,8 @@ public class Main extends ListenerAdapter
         commands = List.of(
                 new Hello(),
                 new Bedwars(),
-                new Image()
+                new Image(),
+                new Duels()
         );
 
         List<SlashCommandData> slashData = new ArrayList<>();

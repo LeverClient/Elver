@@ -46,6 +46,7 @@ public class Bedwars implements Command
     });
 
     public final int availableBackgrounds = ImageUtil.getBackgrounds(backgroundImages, "overlay_separate_hotbar", (g2d) -> {
+        g2d.drawImage(Main.botProfileScaled, 25, 25, 226, 226, null);
         g2d.drawImage(ImageUtil.RESOURCE_IRON_INGOT, 100, 1830, null);
         g2d.drawImage(ImageUtil.RESOURCE_GOLD_INGOT, 355, 1830, null);
         g2d.drawImage(ImageUtil.RESOURCE_DIAMOND, 610, 1820, null);
@@ -180,9 +181,6 @@ public class Bedwars implements Command
         } else {
             userSpecificSkin.apply(fontRenderer);
         }
-
-        // draw bot profile
-        g2d.drawImage(Main.botProfileScaled, 25, 25, 226, 226, null);
 
         // start getting player images
         Future<BufferedImage> playerFuture = ImageUtil.getPlayerSkinFull(hypixelData.uuid);
