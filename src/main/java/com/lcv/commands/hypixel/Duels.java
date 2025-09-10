@@ -114,12 +114,36 @@ public class Duels implements Command
         JSONObject duelsJson = hypixelData.stats.getJSONObject("Duels");
 
         BiFunction<JSONObject, String, Double> getDouble = (json, s) -> json.has(s) && !json.isNull(s) ? json.getDouble(s) : 0;
+        BiFunction<Double, Double, Double> getRatio = (num, den) -> den == 0 ? 0 : num / den;
+        BiFunction<Double, Double, Double> getPercentage = (num, total) -> {
+            double p = total != 0 ? (num / total) * 100.0 : 0.0;
+            return p < 10.0 ? Math.round(p * 10.0) / 10.0 : Math.round(p);
+        };
 
         Map<String, Double> stats = new HashMap<>();
 
-        stats.put("deaths", getDouble.apply(duelsJson, "deaths"));
-        stats.put("losses", getDouble.apply(duelsJson, "losses"));
         stats.put("wins", getDouble.apply(duelsJson,"wins"));
+        stats.put("losses", getDouble.apply(duelsJson, "losses"));
+        stats.put("wl", getRatio.apply(stats.get("wins"), stats.get("losses")));
+
+        stats.put("kills", getDouble.apply(duelsJson, "kills"));
+        stats.put("deaths", getDouble.apply(duelsJson, "deaths"));
+        stats.put("kd", getRatio.apply(stats.get("kills"), stats.get("deaths")));
+
+        stats.put("bow_shot", getDouble.apply(duelsJson, "bow_shots"));
+        stats.put("bow_hit", getDouble.apply(duelsJson, "bow_hits"));
+        stats.put("bow_accuracy", getPercentage.apply(stats.get("bow_hit"), stats.get("bow_hit") + stats.get("bow_shot")));
+
+        stats.put("sword_swing", getDouble.apply(duelsJson, "melee_swings"));
+        stats.put("sword_hit", getDouble.apply(duelsJson, "melee_hits"));
+        stats.put("sword_accuracy", getPercentage.apply(stats.get("sword_hit"), stats.get("sword_hit") + stats.get("sword_swing")));
+
+        stats.put("heal", getDouble.apply(duelsJson, "health_regenerated"));
+        stats.put("damage", getDouble.apply(duelsJson, "damage_dealt"));
+        stats.put("coins", getDouble.apply(duelsJson, "coins"));
+
+        stats.put("ping", getDouble.apply(duelsJson, "pingPreference"));
+        stats.put("networkXP", getDouble.apply(hypixelData.player, "networkExp"));
         return stats;
     }
 
