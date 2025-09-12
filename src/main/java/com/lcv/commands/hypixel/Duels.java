@@ -188,11 +188,11 @@ public class Duels implements Command
         fontRenderer.drawString(String.format("§cDeaths: %s", bigFormat.format(stats.get("deaths"))), 75, 1147);
         fontRenderer.drawString(String.format("§aK§cD: §r%.2f", stats.get("kd")), 75, 1337);
 
-        /* leave this for bow/sword stats (top right)
-        fontRenderer.drawString(String.format("§aKills: %s", bigFormat.format(stats.get("kills"))), 1875, 325);
-        fontRenderer.drawString(String.format("§cDeaths: %s", bigFormat.format(stats.get("deaths"))), 1875, 510);
-        fontRenderer.drawString(String.format("§aK§cD: §r%.2f", stats.get("kd")), 1875, 700);
-        */
+        fontRenderer.switchFont(3);
+        fontRenderer.drawString(String.format("§a %s%%", stats.get("bow_accuracy")), 1875, 325);
+        fontRenderer.switchFont(2);
+        fontRenderer.drawString(String.format("§cShots: %s", bigFormat.format(stats.get("bow_shot"))), 1875, 510);
+        fontRenderer.drawString(String.format("§aHits: %s", bigFormat.format(stats.get("bow_hit"))), 1875, 700);
 
         /* leave this for recent played / favorite games (bottom right)
         fontRenderer.drawString(String.format("§aFK: %s", bigFormat.format(stats.get("finalKills"))), 1875, 962);
