@@ -43,8 +43,10 @@ public class Duels implements Command
             "all_modes_iron_title_prestige",
             "all_modes_rookie_title_prestige",
     };
-    public final int availableBackgrounds = ImageUtil.getBackgrounds(backgroundImages, "overlayNoText", (g2d) -> {
+    public final int availableBackgrounds = ImageUtil.getBackgrounds(backgroundImages, "duelOverlay", (g2d) -> {
         g2d.drawImage(Main.botProfileScaled, 25, 25, 226, 226, null);
+        g2d.drawImage(ImageUtil.ITEM_BOW, 1915, 300, 100, 100, null);
+        g2d.drawImage(ImageUtil.ITEM_SWORD, 2455, 300, 100, 100, null);
     });
     public static ArrayList<BufferedImage> backgroundImages = new ArrayList<>();
     public static FontRenderer fontRenderer = new FontRenderer(null, new Font[]{
@@ -189,10 +191,20 @@ public class Duels implements Command
         fontRenderer.drawString(String.format("§aK§cD: §r%.2f", stats.get("kd")), 75, 1337);
 
         fontRenderer.switchFont(3);
-        fontRenderer.drawString(String.format("§a %s%%", stats.get("bow_accuracy")), 1875, 325);
+        fontRenderer.drawString(String.format("§a%s%%", stats.get("bow_accuracy")), 2035, 325);
+
+        fontRenderer.drawString(String.format("§a%s%%", stats.get("sword_accuracy")), 2580, 325);
+
         fontRenderer.switchFont(2);
-        fontRenderer.drawString(String.format("§cShots: %s", bigFormat.format(stats.get("bow_shot"))), 1875, 510);
-        fontRenderer.drawString(String.format("§aHits: %s", bigFormat.format(stats.get("bow_hit"))), 1875, 700);
+        fontRenderer.drawString("§cShots:", 2070, 425, FontRenderer.CenterXAligned);
+        fontRenderer.drawString(String.format("§c%s", bigFormat.format(stats.get("bow_shot"))), 2070, 525, FontRenderer.CenterXAligned);
+        fontRenderer.drawString("§aHits:", 2070, 650, FontRenderer.CenterXAligned);
+        fontRenderer.drawString(String.format("§a%s", bigFormat.format(stats.get("bow_hit"))), 2070, 750, FontRenderer.CenterXAligned);
+
+        fontRenderer.drawString("§cSwings:", 2610, 425, FontRenderer.CenterXAligned);
+        fontRenderer.drawString(String.format("§c%s", bigFormat.format(stats.get("sword_swing"))), 2610, 525, FontRenderer.CenterXAligned);
+        fontRenderer.drawString("§aHits:", 2610, 650, FontRenderer.CenterXAligned);
+        fontRenderer.drawString(String.format("§a%s", bigFormat.format(stats.get("sword_hit"))), 2610, 750, FontRenderer.CenterXAligned);
 
         /* leave this for recent played / favorite games (bottom right)
         fontRenderer.drawString(String.format("§aFK: %s", bigFormat.format(stats.get("finalKills"))), 1875, 962);

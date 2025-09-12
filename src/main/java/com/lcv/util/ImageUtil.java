@@ -25,6 +25,8 @@ public class ImageUtil
     public static final BufferedImage RESOURCE_GOLD_INGOT = loadImage("/images/Resources/gold_ingot.png");
     public static final BufferedImage RESOURCE_DIAMOND = loadImage("/images/Resources/diamond.png");
     public static final BufferedImage RESOURCE_EMERALD = loadImage("/images/Resources/emerald.png");
+    public static final BufferedImage ITEM_SWORD = loadImage("/images/Items/iron_sword.png");
+    public static final BufferedImage ITEM_BOW = loadImage("/images/Items/bow.png");
     public static HashMap<String, BufferedImage> BACKGROUND_OVERLAYS = new HashMap<>();
     public static final HashMap<String, BufferedImage> ITEM_ICONS = new HashMap<>();
     public static Random rand = new Random();
