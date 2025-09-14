@@ -3,6 +3,7 @@ package com.lcv;
 import com.lcv.commands.Command;
 import com.lcv.commands.hypixel.Bedwars;
 import com.lcv.commands.hypixel.Duels;
+import com.lcv.elverapi.ElverAPI;
 import com.lcv.util.HypixelPlayerData;
 import com.lcv.commands.misc.Hello;
 import com.lcv.commands.misc.Image;

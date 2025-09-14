@@ -30,7 +30,9 @@ import static net.dv8tion.jda.api.interactions.commands.OptionType.STRING;
 public class Duels implements Command
 {
     private static final String API_KEY_HYPIXEL = System.getenv("API_KEY_HYPIXEL");
-    private static final String[] rankList = {
+    private static final int LEVEL_PROGRESS_BAR_LENGTH = 30;
+    private static final int PRESTIGE_PROGRESS_BAR_LENGTH = 20;
+    private static final String[] prestigeList = {
             "all_modes_ascended_title_prestige",
             "all_modes_divine_title_prestige",
             "all_modes_celestial_title_prestige",
@@ -42,6 +44,47 @@ public class Duels implements Command
             "all_modes_gold_title_prestige",
             "all_modes_iron_title_prestige",
             "all_modes_rookie_title_prestige",
+    };
+    private static final String[] prestigeColorList = {
+            "§7", // none?
+            "§7", // rookie
+            "§f", // iron
+            "§6", // gold
+            "§2", // master
+            "§4", // legend
+            "§e", // grandmaster
+            "§5", // godlike
+            "§b", // celestial
+            "§d", // divine
+            "§c", // ascended
+    };
+    private static final int[] nextRankAmountList = {
+            100, // none?
+            20, // rookie
+            60, // iron
+            100, // gold
+            200, // diamond
+            400, // master
+            1200, // legend
+            2000, // grandmaster
+            6000, // godlike
+            10000, // celestial
+            20000, // divine
+            20000, // ascended
+    };
+    private static final int[] nextPrestigeAmountList = {
+            100, // none?
+            200, // rookie
+            500, // iron
+            1000, // gold
+            2000, // diamond
+            4000, // master
+            10000, // legend
+            20000, // grandmaster
+            50000, // godlike
+            100000, // celestial
+            200000, // divine
+            1180000, // ascended
     };
     public final int availableBackgrounds = ImageUtil.getBackgrounds(backgroundImages, "duelOverlay", (g2d) -> {
         g2d.drawImage(Main.botProfileScaled, 25, 25, 226, 226, null);
@@ -140,16 +183,31 @@ public class Duels implements Command
 
         int networkLevel = (int) (1 + ((Math.sqrt(8750 * 8750 + 5000 * stats.get("networkXP")) - 8750) / 2500));
 
+        String nameWithRank = hypixelData.getPlayerNameRankFormat();
+
         String prestige = "";
         String nextPrestige = "";
-        int rank = 0;
+        String rank = "";
+
+        int rankWinReq = nextRankAmountList[stats.get("rank").intValue() / 5];
+        System.out.println(rankWinReq);
+
         for (int i = 0; i < 11; i++)
         {
             if (stats.get("rank") - (5 * i) > 5)
                 continue;
-            prestige = rankList[10 - i].split("_")[2].toUpperCase();
-            nextPrestige = i == 10 ? "NONE" : rankList[9 - i].split("_")[2].toUpperCase();
-            rank = stats.get("rank").intValue() - (5 * i);
+            prestige = prestigeList[10 - i].split("_")[2];
+            prestige = prestigeColorList[stats.get("rank").intValue() / 5] + prestige.substring(0, 1).toUpperCase() + prestige.substring(1);
+            nextPrestige = i == 10 ? "L" : prestigeList[9 - i].split("_")[2].toUpperCase();
+            rank = switch (stats.get("rank").intValue() - (5 * i))
+            {
+                case 1 -> "I";
+                case 2 -> "II";
+                case 3 -> "III";
+                case 4 -> "IV";
+                case 5 -> "V";
+                default -> "rank died :(";
+            };
             break;
         }
 
@@ -176,7 +234,6 @@ public class Duels implements Command
         Future<BufferedImage> playerFuture = ImageUtil.getPlayerSkinFull(hypixelData.uuid);
         Future<BufferedImage> playerTopFuture = ImageUtil.getPlayerSkinTop(hypixelData.uuid);
 
-        String nameWithRank = hypixelData.getPlayerNameRankFormat();
         fontRenderer.useDefaultColors = true;
         fontRenderer.drawString(nameWithRank, 1440 - (g2d.getFontMetrics().stringWidth((FontRenderer.removeFormatting(nameWithRank))) / 2), 75);
         fontRenderer.useDefaultColors = false;
@@ -196,12 +253,12 @@ public class Duels implements Command
         fontRenderer.drawString(String.format("§a%s%%", stats.get("sword_accuracy")), 2580, 325);
 
         fontRenderer.switchFont(2);
-        fontRenderer.drawString("§cShots:", 2070, 425, FontRenderer.CenterXAligned);
+        fontRenderer.drawString("§cShots:", 2070, 435, FontRenderer.CenterXAligned);
         fontRenderer.drawString(String.format("§c%s", bigFormat.format(stats.get("bow_shot"))), 2070, 525, FontRenderer.CenterXAligned);
         fontRenderer.drawString("§aHits:", 2070, 650, FontRenderer.CenterXAligned);
         fontRenderer.drawString(String.format("§a%s", bigFormat.format(stats.get("bow_hit"))), 2070, 750, FontRenderer.CenterXAligned);
 
-        fontRenderer.drawString("§cSwings:", 2610, 425, FontRenderer.CenterXAligned);
+        fontRenderer.drawString("§cSwings:", 2610, 435, FontRenderer.CenterXAligned);
         fontRenderer.drawString(String.format("§c%s", bigFormat.format(stats.get("sword_swing"))), 2610, 525, FontRenderer.CenterXAligned);
         fontRenderer.drawString("§aHits:", 2610, 650, FontRenderer.CenterXAligned);
         fontRenderer.drawString(String.format("§a%s", bigFormat.format(stats.get("sword_hit"))), 2610, 750, FontRenderer.CenterXAligned);
@@ -215,8 +272,14 @@ public class Duels implements Command
         // level info
         fontRenderer.switchFont(2);
 
+        fontRenderer.drawString(prestige + " " + rank, 1440, 1275, FontRenderer.CenterXAligned);
+        //fontRenderer.drawString(String.format("§a%s", levelProgressBarString), image.getWidth()/2, 1275+148, FontRenderer.CenterXAligned);
+        //fontRenderer.drawString(String.format("§a%d §r/ §c%d", xpUntilLevel, xpReq), image.getWidth()/2, 1275+148*2, FontRenderer.CenterXAligned);
+
         fontRenderer.drawString("§aLevel:", 1440, 1785);
         fontRenderer.drawString("§c" + networkLevel, 1440, 1890);
+
+        //fontRenderer.drawString(String.format("§a%s  §r>>>  §!%s", prestigeProgressBarString, formattedNextPrestige), 540, 1625-9, FontRenderer.CenterXAligned);
 
         // ping
         fontRenderer.switchFont(3);
@@ -258,11 +321,11 @@ public class Duels implements Command
             double p = total != 0 ? (num / total) * 100.0 : 0.0;
             return p < 10.0 ? Math.round(p * 10.0) / 10.0 : Math.round(p);
         };
-        for (int i = rankList.length - 1; i >= 0; i--)
+        for (int i = 0; i < prestigeList.length; i++)
         {
-            if (getDouble.apply(duelsJson, rankList[i]) == 0)
+            if (!duelsJson.has(prestigeList[i]))
                 continue;
-            rank = (5 * i) + getDouble.apply(duelsJson, rankList[i]);
+            rank = (5 * (10 - i)) + getDouble.apply(duelsJson, prestigeList[i]);
             break;
         }
 
