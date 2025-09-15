@@ -77,7 +77,7 @@
         <dependency>
             <groupId>com.github.LeverClient</groupId>
             <artifactId>ElverAPI</artifactId>
-            <version>v1.0.0</version>
+            <version>1.0.1</version>
         </dependency>
 
         <!-- LWJGL -->

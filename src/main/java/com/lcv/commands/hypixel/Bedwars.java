@@ -3,6 +3,8 @@ package com.lcv.commands.hypixel;
 import com.lcv.Main;
 import com.lcv.commands.Command;
 import com.lcv.commands.Embed;
+import com.lcv.elverapi.apis.hypixelplayer.BedwarsAPI;
+import com.lcv.elverapi.apis.hypixelplayer.HypixelPlayerAPI;
 import com.lcv.util.*;
 import net.dv8tion.jda.api.events.interaction.command.SlashCommandInteractionEvent;
 import net.dv8tion.jda.api.interactions.InteractionHook;
@@ -89,10 +91,11 @@ public class Bedwars implements Command
         }
 
         HypixelPlayerData hypixelData = new HypixelPlayerData(hypixelJson);
+        HypixelPlayerAPI player = new HypixelPlayerAPI(UUID, API_KEY_HYPIXEL);
         BufferedImage statsImage;
         try
         {
-            statsImage = generateStatsImage(hypixelData);
+            statsImage = generateStatsImage(hypixelData, player);
         }
         catch (IllegalArgumentException e)
         {
@@ -120,7 +123,7 @@ public class Bedwars implements Command
         data.addOption(STRING, "name", "Name of Player", true);
     }
 
-    public BufferedImage generateStatsImage(HypixelPlayerData hypixelData) throws IllegalArgumentException {
+    public BufferedImage generateStatsImage(HypixelPlayerData hypixelData, HypixelPlayerAPI player) throws IllegalArgumentException {
         long startTime = System.nanoTime();
 
         if (!hypixelData.valid)
@@ -132,6 +135,8 @@ public class Bedwars implements Command
         {
             throw new IllegalArgumentException("Hypixel: No bedwars stats");
         }
+
+        BedwarsAPI bedwars = player.getBedwarsApi();
 
         JSONObject bwJson = hypixelData.stats.getJSONObject("Bedwars");
 
@@ -333,11 +338,11 @@ public class Bedwars implements Command
         System.out.printf("generated bedwars stats image without player in %dms%n", (System.nanoTime()-startTime)/1000000);
 
         // draw player images (last cause we were doing this on another thread)
-        BufferedImage player = Main.nullTexture;
+        BufferedImage playerFull = Main.nullTexture;
         BufferedImage playerTop = Main.nullTexture;
 
         try {
-            player = playerFuture.get();
+            playerFull = playerFuture.get();
             playerTop = playerTopFuture.get();
         } catch (InterruptedException ignored) {}
         catch (ExecutionException e) {
@@ -345,10 +350,10 @@ public class Bedwars implements Command
             e.printStackTrace(System.err);
         }
 
-        int[] playerSize = ImageUtil.fitToArea(player, 670, 850);
+        int[] playerSize = ImageUtil.fitToArea(playerFull, 670, 850);
         int[] playerTopSize = ImageUtil.fitToArea(playerTop, Integer.MAX_VALUE, 300);
 
-        g2d.drawImage(player, 1440 - (playerSize[0] / 2), 325 + ((850 - playerSize[1]) / 2), playerSize[0], playerSize[1], null);
+        g2d.drawImage(playerFull, 1440 - (playerSize[0] / 2), 325 + ((850 - playerSize[1]) / 2), playerSize[0], playerSize[1], null);
         g2d.drawImage(playerTop, 1155, 1785, playerTopSize[0], playerTopSize[1], null);
 
         // output and return image
