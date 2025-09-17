@@ -5,6 +5,7 @@ import com.lcv.commands.Command;
 import com.lcv.commands.Embed;
 import com.lcv.elverapi.apis.hypixelplayer.BedwarsAPI;
 import com.lcv.elverapi.apis.hypixelplayer.HypixelPlayerAPI;
+import com.lcv.elverapi.apis.mojang.MojangProfileLookupAPI;
 import com.lcv.util.*;
 import net.dv8tion.jda.api.events.interaction.command.SlashCommandInteractionEvent;
 import net.dv8tion.jda.api.interactions.InteractionHook;
@@ -73,29 +74,34 @@ public class Bedwars implements Command
         InteractionHook interactionHook = event.getHook();
 
         String name = event.getOption("name").getAsString();
-        JSONObject mojangJson = HTTPRequest.getHTTPRequest("https://api.mojang.com/users/profiles/minecraft/" + name);
-        if (mojangJson == null || mojangJson.isEmpty())
-        {
-            Embed embed = new Embed().setTitle("Failed Operation :(").setDescription("Mojang: No player found");
-            interactionHook.sendMessageEmbeds(embed.get()).queue();
-            return;
-        }
 
-        String UUID = mojangJson.getString("id");
-        JSONObject hypixelJson = HTTPRequest.getHTTPRequest("https://api.hypixel.net/v2/player?key=" + API_KEY_HYPIXEL + "&uuid=" + UUID);
-        if (hypixelJson == null || hypixelJson.isEmpty())
-        {
-            Embed embed = new Embed().setTitle("Failed Operation :(").setDescription("Hypixel: No player found");
-            interactionHook.sendMessageEmbeds(embed.get()).queue();
-            return;
-        }
+        MojangProfileLookupAPI mojang = new MojangProfileLookupAPI(name);
+        HypixelPlayerAPI player = new HypixelPlayerAPI(mojang.getId(), API_KEY_HYPIXEL);
 
-        HypixelPlayerData hypixelData = new HypixelPlayerData(hypixelJson);
-        HypixelPlayerAPI player = new HypixelPlayerAPI(UUID, API_KEY_HYPIXEL);
+//        JSONObject mojangJson = HTTPRequest.getHTTPRequest("https://api.mojang.com/users/profiles/minecraft/" + name);
+//        if (mojangJson == null || mojangJson.isEmpty())
+//        {
+//            Embed embed = new Embed().setTitle("Failed Operation :(").setDescription("Mojang: No player found");
+//            interactionHook.sendMessageEmbeds(embed.get()).queue();
+//            return;
+//        }
+//
+//        String UUID = mojangJson.getString("id");
+//        JSONObject hypixelJson = HTTPRequest.getHTTPRequest("https://api.hypixel.net/v2/player?key=" + API_KEY_HYPIXEL + "&uuid=" + UUID);
+//        if (hypixelJson == null || hypixelJson.isEmpty())
+//        {
+//            Embed embed = new Embed().setTitle("Failed Operation :(").setDescription("Hypixel: No player found");
+//            interactionHook.sendMessageEmbeds(embed.get()).queue();
+//            return;
+//        }
+//
+//        HypixelPlayerData hypixelData = new HypixelPlayerData(hypixelJson);
+//        HypixelPlayerAPI player = new HypixelPlayerAPI(UUID, API_KEY_HYPIXEL);
+
         BufferedImage statsImage;
         try
         {
-            statsImage = generateStatsImage(hypixelData, player);
+            statsImage = generateStatsImage(player);
         }
         catch (IllegalArgumentException e)
         {
@@ -123,47 +129,34 @@ public class Bedwars implements Command
         data.addOption(STRING, "name", "Name of Player", true);
     }
 
-    public BufferedImage generateStatsImage(HypixelPlayerData hypixelData, HypixelPlayerAPI player) throws IllegalArgumentException {
+    public BufferedImage generateStatsImage(HypixelPlayerAPI player) throws IllegalArgumentException {
         long startTime = System.nanoTime();
 
-        if (!hypixelData.valid)
-        {
-            throw new IllegalArgumentException("Hypixel: No player data found");
-        }
-
-        if (!hypixelData.stats.has("Bedwars") || hypixelData.stats.isNull("Bedwars"))
-        {
-            throw new IllegalArgumentException("Hypixel: No bedwars stats");
-        }
+        // should probably figure out how to handle this eventually
+//        if (!hypixelData.valid)
+//        {
+//            throw new IllegalArgumentException("Hypixel: No player data found");
+//        }
+//
+//        if (!hypixelData.stats.has("Bedwars") || hypixelData.stats.isNull("Bedwars"))
+//        {
+//            throw new IllegalArgumentException("Hypixel: No bedwars stats");
+//        }
 
         BedwarsAPI bedwars = player.getBedwarsApi();
-
-        JSONObject bwJson = hypixelData.stats.getJSONObject("Bedwars");
 
         BiFunction<JSONObject, String, String> getString = (json, s) -> json.has(s) && !json.isNull(s) ? json.getString(s) : null;
 
         DecimalFormat bigFormat = new DecimalFormat("###,###");
 
-        Map<String, Double> stats = getStats(hypixelData);
+        int xpRankOverflow = bedwars.getXp() - BedwarsAPI.calculateXp(bedwars.getLevel());
+        int xpRankReq = BedwarsAPI.calculateXp(bedwars.getLevel() + 1) - BedwarsAPI.calculateXp(bedwars.getLevel());
 
-        int networkLevel = (int) (1 + ((Math.sqrt(8750 * 8750 + 5000 * stats.get("networkXP")) - 8750) / 2500));
+        int levelProgressBarCompletion = (int) (LEVEL_PROGRESS_BAR_LENGTH * bedwars.getLevelPercentage());
+        String levelProgressBar = "|".repeat(levelProgressBarCompletion) + "§c" + "|".repeat(LEVEL_PROGRESS_BAR_LENGTH - levelProgressBarCompletion);
 
-        double level_d = getLevelForExp(stats.get("bedwarsXP").intValue());
-        int bedwarsLevel = getBedwarsLevel(stats.get("bedwarsXP").intValue());
-        int currentPrestige = (bedwarsLevel / 100) * 100;
-        int nextPrestige = currentPrestige + 100;
-
-        int xpReq = getBWExpForLevel(bedwarsLevel);
-        int xpUntilLevel = (int) Math.round(((level_d - bedwarsLevel) * xpReq) / 5) * 5;
-        int levelProgressBars = xpUntilLevel / (xpReq / LEVEL_PROGRESS_BAR_LENGTH);
-        String levelProgressBarString = "|".repeat(levelProgressBars) + "§c" + "|".repeat(Math.max(0, LEVEL_PROGRESS_BAR_LENGTH - levelProgressBars));
-
-        double xpUntilPrestige = getXpForPrestige(level_d - currentPrestige);
-        int prestigeProgressBars = (int) ((XP_PER_PRESTIGE - xpUntilPrestige) / (XP_PER_PRESTIGE / PRESTIGE_PROGRESS_BAR_LENGTH));
-        String prestigeProgressBarString = "|".repeat(prestigeProgressBars) + "§c" + "|".repeat(Math.max(0, PRESTIGE_PROGRESS_BAR_LENGTH - prestigeProgressBars));
-
-        String formattedLevel = getFormattedLevel(bedwarsLevel);
-        String formattedNextPrestige = getFormattedLevel(nextPrestige);
+        int prestigeProgressBarCompletion = (int) (PRESTIGE_PROGRESS_BAR_LENGTH * bedwars.getPrestigePercentage());
+        String prestigeProgressBar = "|".repeat(prestigeProgressBarCompletion) + "§c" + "|".repeat(PRESTIGE_PROGRESS_BAR_LENGTH - prestigeProgressBarCompletion);
 
         String favoriteSlotsString = getString.apply(bwJson,"favorite_slots");
         String quickBuy = getString.apply(bwJson,"favourites_2"); // favourites! definitely not worrying that this has _2 on it.. (foreshadowing)
@@ -180,7 +173,7 @@ public class Bedwars implements Command
         fontRenderer.setGraphics(g2d);
 
         // apply skin (if we should)
-        StatsSkins.Skin userSpecificSkin = StatsSkins.userSkins.get(hypixelData.uuid);
+        StatsSkins.Skin userSpecificSkin = StatsSkins.userSkins.get(player.getUUID());
         if (userSpecificSkin == null) {
             StatsSkins.none.apply(fontRenderer);
         } else {
@@ -188,47 +181,45 @@ public class Bedwars implements Command
         }
 
         // start getting player images
-        Future<BufferedImage> playerFuture = ImageUtil.getPlayerSkinFull(hypixelData.uuid);
-        Future<BufferedImage> playerTopFuture = ImageUtil.getPlayerSkinTop(hypixelData.uuid);
+        Future<BufferedImage> playerFuture = ImageUtil.getPlayerSkinFull(player.getUUID());
+        Future<BufferedImage> playerTopFuture = ImageUtil.getPlayerSkinTop(player.getUUID());
 
-        // draw player name
-        String nameWithRank = hypixelData.getPlayerNameRankFormat();
         fontRenderer.useDefaultColors = true;
-        fontRenderer.drawString(nameWithRank, 1440 - (g2d.getFontMetrics().stringWidth((FontRenderer.removeFormatting(nameWithRank))) / 2), 75);
+        fontRenderer.drawString(player.getNameFormatted(), 1440 - (g2d.getFontMetrics().stringWidth((FontRenderer.removeFormatting(player.getNameFormatted()))) / 2), 75);
         fontRenderer.useDefaultColors = false;
 
 
         fontRenderer.switchFont(1);
-        fontRenderer.drawString(String.format("§aWins: %s", bigFormat.format(stats.get("wins"))), 75, 325);
-        fontRenderer.drawString(String.format("§cLosses: %s", bigFormat.format(stats.get("losses"))), 75, 510);
-        fontRenderer.drawString(String.format("§aW§cL: §r%.2f", stats.get("wl")), 75, 700);
+        fontRenderer.drawString(String.format("§aWins: %s", bigFormat.format(bedwars.getWins())), 75, 325);
+        fontRenderer.drawString(String.format("§cLosses: %s", bigFormat.format(bedwars.getLosses())), 75, 510);
+        fontRenderer.drawString(String.format("§aW§cL: §r%.2f", bedwars.getWLR()), 75, 700);
 
-        fontRenderer.drawString(String.format("§aBB: %s", bigFormat.format(stats.get("bedsBroken"))), 75, 962);
-        fontRenderer.drawString(String.format("§cBL: %s", bigFormat.format(stats.get("bedsLost"))), 75, 1147);
-        fontRenderer.drawString(String.format("§aBB§cLR: §r%.2f", stats.get("bblr")), 75, 1337);
+        fontRenderer.drawString(String.format("§aBB: %s", bigFormat.format(bedwars.getBedsBroken())), 75, 962);
+        fontRenderer.drawString(String.format("§cBL: %s", bigFormat.format(bedwars.getBedsLost())), 75, 1147);
+        fontRenderer.drawString(String.format("§aBB§cLR: §r%.2f", bedwars.getBBLR()), 75, 1337);
 
-        fontRenderer.drawString(String.format("§aKills: %s", bigFormat.format(stats.get("kills"))), 1875, 325);
-        fontRenderer.drawString(String.format("§cDeaths: %s", bigFormat.format(stats.get("deaths"))), 1875, 510);
-        fontRenderer.drawString(String.format("§aK§cD: §r%.2f", stats.get("kd")), 1875, 700);
+        fontRenderer.drawString(String.format("§aKills: %s", bigFormat.format(bedwars.getKills())), 1875, 325);
+        fontRenderer.drawString(String.format("§cDeaths: %s", bigFormat.format(bedwars.getDeaths())), 1875, 510);
+        fontRenderer.drawString(String.format("§aK§cD: §r%.2f", bedwars.getKDR()), 1875, 700);
 
-        fontRenderer.drawString(String.format("§aFK: %s", bigFormat.format(stats.get("finalKills"))), 1875, 962);
-        fontRenderer.drawString(String.format("§cFD: %s", bigFormat.format(stats.get("finalDeaths"))), 1875, 1147);
-        fontRenderer.drawString(String.format("§aFK§cDR: §r%.2f", stats.get("fkdr")), 1875, 1337);
+        fontRenderer.drawString(String.format("§aFK: %s", bigFormat.format(bedwars.getFinalKills())), 1875, 962);
+        fontRenderer.drawString(String.format("§cFD: %s", bigFormat.format(bedwars.getFinalDeaths())), 1875, 1147);
+        fontRenderer.drawString(String.format("§aFK§cDR: §r%.2f", bedwars.getFKDR()), 1875, 1337);
 
         // level info
         fontRenderer.switchFont(2);
 
-        fontRenderer.drawString(formattedLevel, image.getWidth()/2, 1275, FontRenderer.CenterXAligned); // 1350
-        fontRenderer.drawString(String.format("§a%s", levelProgressBarString), image.getWidth()/2, 1275+148, FontRenderer.CenterXAligned);
-        fontRenderer.drawString(String.format("§a%d §r/ §c%d", xpUntilLevel, xpReq), image.getWidth()/2, 1275+148*2, FontRenderer.CenterXAligned);
+        fontRenderer.drawString(bedwars.getLevelFormatted(), image.getWidth()/2, 1275, FontRenderer.CenterXAligned); // 1350
+        fontRenderer.drawString(String.format("§a%s", levelProgressBar), image.getWidth()/2, 1275+148, FontRenderer.CenterXAligned);
+        fontRenderer.drawString(String.format("§a%d §r/ §c%d", xpRankOverflow, xpRankReq), image.getWidth()/2, 1275+148*2, FontRenderer.CenterXAligned);
 
         fontRenderer.drawString("§aLevel:", 1440, 1785);
-        fontRenderer.drawString("§c" + networkLevel, 1440, 1890);
+        fontRenderer.drawString("§c" + (int) player.getLevel(), 1440, 1890);
 
         // progress bar
-        fontRenderer.drawString(String.format("§a%s  §r>>>  §!%s", prestigeProgressBarString, formattedNextPrestige), 540, 1625-9, FontRenderer.CenterXAligned);
+        fontRenderer.drawString(String.format("§a%s  §r>>>  §!%s", prestigeProgressBar, bedwars.getNextPrestigeFormatted()), 540, 1625-9, FontRenderer.CenterXAligned);
 
-        Function<Double, String> numAbbrev = num ->
+        Function<Integer, String> numAbbrev = num ->
         {
             String[] arr = {"", "K", "M", "B", "T"};
             int i = 0;
@@ -241,10 +232,10 @@ public class Bedwars implements Command
         };
 
         fontRenderer.switchFont(3);
-        fontRenderer.drawString(numAbbrev.apply(stats.get("iron")), 180, 2025, FontRenderer.CenterXAligned);
-        fontRenderer.drawString(numAbbrev.apply(stats.get("gold")), 435, 2025, FontRenderer.CenterXAligned);
-        fontRenderer.drawString(numAbbrev.apply(stats.get("diamond")), 690, 2025, FontRenderer.CenterXAligned);
-        fontRenderer.drawString(numAbbrev.apply(stats.get("emerald")), 930, 2025, FontRenderer.CenterXAligned);
+        fontRenderer.drawString(numAbbrev.apply(bedwars.getIron()), 180, 2025, FontRenderer.CenterXAligned);
+        fontRenderer.drawString(numAbbrev.apply(bedwars.getGold()), 435, 2025, FontRenderer.CenterXAligned);
+        fontRenderer.drawString(numAbbrev.apply(bedwars.getDiamond()), 690, 2025, FontRenderer.CenterXAligned);
+        fontRenderer.drawString(numAbbrev.apply(bedwars.getEmerald()), 930, 2025, FontRenderer.CenterXAligned);
 
         // quick buy
         // 1850, 1574; Size 980x537 980/(21/3) = 140px per slot horizontal
