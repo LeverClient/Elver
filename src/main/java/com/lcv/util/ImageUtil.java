@@ -20,15 +20,17 @@ public class ImageUtil
 {
     public static final String[] PLAYER_SKIN_FULL = {"default", "marching", "walking", "crouching", "crossed", "criss_cross", "ultimate", "cheering", "relaxing", "trudging", "cowering", "pointing", "lunging", "dungeons", "facepalm", "sleeping", "archer", "kicking", "mojavatar", "reading"};
     public static final String[] PLAYER_SKIN_TOP = {"default", "crossed", "ultimate", "dungeons"};
-    public static final String[] ITEM_ICON_DIRECTORIES = {"/images/Items/", "/images/Blocks/"};
-    public static final BufferedImage RESOURCE_IRON_INGOT = loadImage("/images/Resources/iron_ingot.png");
-    public static final BufferedImage RESOURCE_GOLD_INGOT = loadImage("/images/Resources/gold_ingot.png");
-    public static final BufferedImage RESOURCE_DIAMOND = loadImage("/images/Resources/diamond.png");
-    public static final BufferedImage RESOURCE_EMERALD = loadImage("/images/Resources/emerald.png");
-    public static final BufferedImage ITEM_SWORD = loadImage("/images/Items/iron_sword.png");
-    public static final BufferedImage ITEM_BOW = loadImage("/images/Items/bow.png");
+
+    public static final BufferedImage BEDWARS_IRON_INGOT = loadImage("/images/bedwars/icons/iron_ingot.png");
+    public static final BufferedImage BEDWARS_GOLD_INGOT = loadImage("/images/bedwars/icons/gold_ingot.png");
+    public static final BufferedImage BEDWARS_DIAMOND = loadImage("/images/bedwars/icons/diamond.png");
+    public static final BufferedImage BEDWARS_EMERALD = loadImage("/images/bedwars/icons/emerald.png");
+
+    public static final BufferedImage DUELS_SWORD = loadImage("/images/duels/icons/sword.png");
+    public static final BufferedImage DUELS_BOW = loadImage("/images/duels/icons/bow.png");
+
     public static HashMap<String, BufferedImage> BACKGROUND_OVERLAYS = new HashMap<>();
-    public static final HashMap<String, BufferedImage> ITEM_ICONS = new HashMap<>();
+    public static final HashMap<String, BufferedImage> IMAGE_MAP = new HashMap<>();
     public static Random rand = new Random();
     public static ExecutorService asyncExecutorService = Executors.newCachedThreadPool();
 
@@ -105,25 +107,34 @@ public class ImageUtil
         return new int[]{width, height};
     }
 
-    public static BufferedImage loadItemImage(String item) {
-        if (ITEM_ICONS.containsKey(item)) return ITEM_ICONS.get(item);
+    public static BufferedImage loadImage(String path, String image, String[] subdirectory) {
+        if (IMAGE_MAP.containsKey(image)) return IMAGE_MAP.get(image);
 
-        URL itemIconResource = null;
-        for (String directory : ITEM_ICON_DIRECTORIES) {
-            itemIconResource = Main.class.getResource(directory + item + ".png");
-            if (itemIconResource != null) break;
+        URL imageResource = null;
+        if (subdirectory != null)
+        {
+            for (String directory : subdirectory)
+            {
+                imageResource = Main.class.getResource("/images/" + path + directory + image + ".png");
+                if (imageResource != null)
+                    break;
+            }
+        }
+        else
+        {
+            imageResource = Main.class.getResource("/images/" + path + image + ".png");
         }
 
-        if (itemIconResource == null) {
-            System.err.println("Couldn't find texture for " + item);
+        if (imageResource == null) {
+            System.err.println("Couldn't find texture for " + image);
             return Main.nullTexture;
         }
 
         try {
-            BufferedImage image = ImageIO.read(itemIconResource);
-            ITEM_ICONS.put(item, image);
+            BufferedImage bufferedImage = ImageIO.read(imageResource);
+            IMAGE_MAP.put(image, bufferedImage);
 
-            return image;
+            return bufferedImage;
         } catch (IOException e) {
             e.printStackTrace(System.err);
             return Main.nullTexture;
@@ -136,7 +147,6 @@ public class ImageUtil
         ArrayList<Future<BufferedImage>> backgroundFutures = new ArrayList<>();
 
         long startTime = System.nanoTime();
-
         BufferedImage overlayImg = BACKGROUND_OVERLAYS.get(overlay);
         if (overlayImg == null) {
             System.out.println("Reading background overlay: "  + overlay);
@@ -153,7 +163,7 @@ public class ImageUtil
         {
             for (;;availableBackgrounds++)
             {
-                URL resource = Main.class.getResource(String.format("/images/Backgrounds/bedwarsBackground%s.png", availableBackgrounds));
+                URL resource = Main.class.getResource(String.format("/images/bedwars/backgrounds/background%s.png", availableBackgrounds));
                 if (resource == null) break;
 
                 backgroundFutures.add(asyncExecutorService.submit(() -> {

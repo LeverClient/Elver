@@ -42,7 +42,7 @@ public class Image implements Command
     {
         try
         {
-            File image = new File(Main.class.getClassLoader().getResource("images/Backgrounds/bedwarsBackground0.png").toURI());
+            File image = new File(Main.class.getClassLoader().getResource("images/bedwars/backgrounds/background0.png").toURI());
             Font minecraftFont = Font.createFont(Font.TRUETYPE_FONT, Main.class.getClassLoader().getResourceAsStream("fonts/minecraft.ttf"));
             BufferedImage bufferedImage = ImageIO.read(image);
             Graphics2D g2d = bufferedImage.createGraphics();

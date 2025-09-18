@@ -86,10 +86,10 @@ public class Duels implements Command
             200000, // divine
             1180000, // ascended
     };
-    public final int availableBackgrounds = ImageUtil.getBackgrounds(backgroundImages, "duelOverlay", (g2d) -> {
+    public final int availableBackgrounds = ImageUtil.getBackgrounds(backgroundImages, "duels/duels_overlay", (g2d) -> {
         g2d.drawImage(Main.botProfileScaled, 25, 25, 226, 226, null);
-        g2d.drawImage(ImageUtil.ITEM_BOW, 1915, 300, 100, 100, null);
-        g2d.drawImage(ImageUtil.ITEM_SWORD, 2455, 300, 100, 100, null);
+        g2d.drawImage(ImageUtil.DUELS_BOW, 1915, 300, 100, 100, null);
+        g2d.drawImage(ImageUtil.DUELS_SWORD, 2455, 300, 100, 100, null);
     });
     public static ArrayList<BufferedImage> backgroundImages = new ArrayList<>();
     public static FontRenderer fontRenderer = new FontRenderer(null, new Font[]{
