@@ -27,8 +27,7 @@ import java.util.function.Function;
 import static com.lcv.util.ImageUtil.loadImage;
 import static net.dv8tion.jda.api.interactions.commands.OptionType.STRING;
 
-public class Bedwars implements Command
-{
+public class Bedwars implements Command {
     private static final Logger log = LoggerFactory.getLogger(Bedwars.class);
 
     public static final int PRESTIGE_PROGRESS_BAR_LENGTH = 20;
@@ -40,7 +39,7 @@ public class Bedwars implements Command
     public static ArrayList<BufferedImage> backgroundImages = new ArrayList<>();
     public static FontRenderer fontRenderer = new FontRenderer(null, new Font[]{Main.minecraftFont.deriveFont(144f), Main.minecraftFont.deriveFont(96f), Main.minecraftFont.deriveFont(72f), Main.minecraftFont.deriveFont(40f)});
 
-    public final int availableBackgrounds = ImageUtil.getBackgrounds(backgroundImages,"bedwars/bedwars_overlay", (g2d) ->
+    public final int availableBackgrounds = ImageUtil.getBackgrounds(backgroundImages, "bedwars/bedwars_overlay", (g2d) ->
     {
         g2d.drawImage(Main.botProfileScaled, 25, 25, 226, 226, null);
         g2d.drawImage(ImageUtil.BEDWARS_IRON_INGOT, 100, 1830, null);
@@ -50,20 +49,17 @@ public class Bedwars implements Command
     });
 
     @Override
-    public String getName()
-    {
+    public String getName() {
         return "bedwars";
     }
 
     @Override
-    public String getDescription()
-    {
+    public String getDescription() {
         return "Gets Bedwars Stats";
     }
 
     @Override
-    public void execute(SlashCommandInteractionEvent event)
-    {
+    public void execute(SlashCommandInteractionEvent event) {
         event.deferReply().queue();
         InteractionHook interactionHook = event.getHook();
 
@@ -72,62 +68,41 @@ public class Bedwars implements Command
         MojangProfileLookupAPI mojang = new MojangProfileLookupAPI(name);
         HypixelPlayerAPI player = new HypixelPlayerAPI(mojang.getUUID(), API_KEY_HYPIXEL);
 
-        //        if (mojangJson == null || mojangJson.isEmpty())
-        //        {
-        //            Embed embed = new Embed().setTitle("Failed Operation :(").setDescription("Mojang: No player found");
-        //            interactionHook.sendMessageEmbeds(embed.get()).queue();
-        //            return;
-        //        }
-        //
-        //        String UUID = mojangJson.getString("id");
-        //        JSONObject hypixelJson = HTTPRequest.getHTTPRequest("https://api.hypixel.net/v2/player?key=" + API_KEY_HYPIXEL + "&uuid=" + UUID);
-        //        if (hypixelJson == null || hypixelJson.isEmpty())
-        //        {
-        //            Embed embed = new Embed().setTitle("Failed Operation :(").setDescription("Hypixel: No player found");
-        //            interactionHook.sendMessageEmbeds(embed.get()).queue();
-        //            return;
-        //        }
-        if (player.hasData());
-
-        BufferedImage statsImage;
-        try
-        {
-            statsImage = generateStatsImage(player);
-        }
-        catch (IllegalArgumentException e)
-        {
-            Embed embed = new Embed().setTitle("Failed Operation :( hihaawdiawdaw").setDescription(e.getMessage() == null ? "Unsure" : e.getMessage());
+        if (!player.hasData()) {
+            Embed embed = new Embed().setTitle("Failed Operation :(").setDescription("Hypixel: No player found");
             interactionHook.sendMessageEmbeds(embed.get()).queue();
-            e.printStackTrace();
             return;
         }
 
-        try
-        {
+        BufferedImage statsImage;
+        try {
+            statsImage = generateStatsImage(player);
+        } catch (IllegalArgumentException e) {
+            Embed embed = new Embed().setTitle("Failed Operation :(").setDescription(e.getMessage() == null ? "Unsure" : e.getMessage());
+            interactionHook.sendMessageEmbeds(embed.get()).queue();
+            return;
+        }
+
+        try {
             ByteArrayOutputStream baos = new ByteArrayOutputStream();
             ImageIO.write(statsImage, "png", baos);
             FileUpload file = FileUpload.fromData(new ByteArrayInputStream(baos.toByteArray()), String.format("bedwars stats for %s meow.png", name));
             interactionHook.sendFiles(file).queue();
-        }
-        catch (IOException e)
-        {
+        } catch (IOException e) {
             throw new RuntimeException(e);
         }
     }
 
     @Override
-    public void addFields(SlashCommandData data)
-    {
+    public void addFields(SlashCommandData data) {
         data.addOption(STRING, "name", "Name of Player", true);
     }
 
-    public BufferedImage generateStatsImage(HypixelPlayerAPI player) throws IllegalArgumentException
-    {
+    public BufferedImage generateStatsImage(HypixelPlayerAPI player) throws IllegalArgumentException {
         long startTime = System.nanoTime();
 
         BedwarsAPI bedwars = player.getBedwarsApi();
-        if (!bedwars.exists())
-        {
+        if (!bedwars.exists()) {
             throw new IllegalArgumentException("Hypixel: No bedwars stats");
         }
 
@@ -155,12 +130,9 @@ public class Bedwars implements Command
 
         // apply skin (if we should)
         StatsSkins.Skin userSpecificSkin = StatsSkins.userSkins.get(player.getUUID());
-        if (userSpecificSkin == null)
-        {
+        if (userSpecificSkin == null) {
             StatsSkins.none.apply(fontRenderer);
-        }
-        else
-        {
+        } else {
             userSpecificSkin.apply(fontRenderer);
         }
 
@@ -207,8 +179,7 @@ public class Bedwars implements Command
         {
             String[] arr = {"", "K", "M", "B", "T"};
             int i = 0;
-            while (num > 999)
-            {
+            while (num > 999) {
                 i++;
                 num /= 1000;
             }
@@ -239,13 +210,10 @@ public class Bedwars implements Command
         double slotItemSpacingX = 110;
         int slotItemSize = (int) slotItemSpacingX - 10;
 
-        if (quickBuys != null)
-        {
+        if (quickBuys != null) {
             String[] subdirectory = {"armor/", "blocks/", "melee/", "potions/", "ranged/", "tools/", "utility/"};
-            for (int y = 0; y < 3; y++)
-            {
-                for (int x = 0; x < 7; x++)
-                {
+            for (int y = 0; y < 3; y++) {
+                for (int x = 0; x < 7; x++) {
                     int i = y * 7 + x;
                     BufferedImage itemImage = loadImage("bedwars/quickbuy/", quickBuys[i], subdirectory);
 
@@ -259,10 +227,8 @@ public class Bedwars implements Command
             }
         }
 
-        if (favoriteSlots != null)
-        {
-            for (int x = 0; x < favoriteSlots.length; x++)
-            {
+        if (favoriteSlots != null) {
+            for (int x = 0; x < favoriteSlots.length; x++) {
                 BufferedImage itemImage = loadImage("bedwars/favorite_slots/", favoriteSlots[x], null);
 
                 int iconX = 1850 + (int) (x * slotItemSpacingX);
@@ -280,16 +246,11 @@ public class Bedwars implements Command
         BufferedImage playerFull = Main.nullTexture;
         BufferedImage playerTop = Main.nullTexture;
 
-        try
-        {
+        try {
             playerFull = playerFuture.get();
             playerTop = playerTopFuture.get();
-        }
-        catch (InterruptedException ignored)
-        {
-        }
-        catch (ExecutionException e)
-        {
+        } catch (InterruptedException ignored) {
+        } catch (ExecutionException e) {
             System.err.println("Failed to get player icons: " + e.getMessage());
             e.printStackTrace(System.err);
         }
