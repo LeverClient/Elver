@@ -1,7 +1,7 @@
 package com.lcv.commands.hypixel;
 
 import com.lcv.Main;
-import com.lcv.commands.Command;
+import com.lcv.commands.ICommand;
 import com.lcv.commands.Embed;
 import com.lcv.elverapi.apis.hypixelplayer.BedwarsAPI;
 import com.lcv.elverapi.apis.hypixelplayer.HypixelPlayerAPI;
@@ -27,7 +27,8 @@ import java.util.function.Function;
 import static com.lcv.util.ImageUtil.loadImage;
 import static net.dv8tion.jda.api.interactions.commands.OptionType.STRING;
 
-public class Bedwars implements Command {
+public class Bedwars implements ICommand
+{
     private static final Logger log = LoggerFactory.getLogger(Bedwars.class);
 
     public static final int PRESTIGE_PROGRESS_BAR_LENGTH = 20;
@@ -166,11 +167,11 @@ public class Bedwars implements Command {
         fontRenderer.switchFont(2);
 
         fontRenderer.drawString(bedwars.getLevelFormatted(), image.getWidth() / 2, 1275, FontRenderer.CenterXAligned); // 1350
-        fontRenderer.drawString(String.format("§a%s", levelProgressBar), image.getWidth() / 2, 1275 + 148, FontRenderer.CenterXAligned);
+        fontRenderer.drawString(String.format("§a%s", levelProgressBar), image.getWidth() / 2, 1275 + 143, FontRenderer.CenterXAligned);
         fontRenderer.drawString(String.format("§a%d §r/ §c%d", xpRankOverflow, xpRankReq), image.getWidth() / 2, 1275 + 148 * 2, FontRenderer.CenterXAligned);
 
-        fontRenderer.drawString("§aLevel:", 1440, 1785);
-        fontRenderer.drawString("§c" + (int) player.getLevel(), 1440, 1890);
+        fontRenderer.drawString("§aLevel:", 1450, 1785);
+        fontRenderer.drawString("§c" + (int) player.getLevel(), 1450, 1890);
 
         // progress bar
         fontRenderer.drawString(String.format("§a%s  §r>>>  §!%s", prestigeProgressBar, bedwars.getNextPrestigeFormatted()), 540, 1625 - 9, FontRenderer.CenterXAligned);

@@ -3,7 +3,7 @@ package com.lcv.commands;
 import net.dv8tion.jda.api.events.interaction.command.SlashCommandInteractionEvent;
 import net.dv8tion.jda.api.interactions.commands.build.SlashCommandData;
 
-public interface Command
+public interface ICommand
 {
     String getName();
     String getDescription();

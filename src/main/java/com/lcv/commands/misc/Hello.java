@@ -1,10 +1,10 @@
 package com.lcv.commands.misc;
 
-import com.lcv.commands.Command;
+import com.lcv.commands.ICommand;
 import net.dv8tion.jda.api.events.interaction.command.SlashCommandInteractionEvent;
 import net.dv8tion.jda.api.interactions.commands.build.SlashCommandData;
 
-public class Hello implements Command
+public class Hello implements ICommand
 {
     @Override
     public String getName()

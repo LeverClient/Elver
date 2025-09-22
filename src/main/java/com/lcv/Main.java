@@ -1,6 +1,6 @@
 package com.lcv;
 
-import com.lcv.commands.Command;
+import com.lcv.commands.ICommand;
 import com.lcv.commands.hypixel.Bedwars;
 import com.lcv.commands.hypixel.Duels;
 import com.lcv.commands.misc.Hello;
@@ -27,7 +27,7 @@ import java.util.Objects;
 
 public class Main extends ListenerAdapter
 {
-    private static List<Command> commands;
+    private static List<ICommand> commands;
 
     public static BufferedImage botProfile;
 
@@ -82,7 +82,7 @@ public class Main extends ListenerAdapter
 
         List<SlashCommandData> slashData = new ArrayList<>();
 
-        for (Command command : commands)
+        for (ICommand command : commands)
         {
             SlashCommandData data = Commands.slash(command.getName(), command.getDescription());
             command.addFields(data);
@@ -95,7 +95,7 @@ public class Main extends ListenerAdapter
     @Override
     public void onSlashCommandInteraction(@NotNull SlashCommandInteractionEvent event)
     {
-        for (Command command : commands)
+        for (ICommand command : commands)
         {
             if (event.getName().equals(command.getName()))
             {
@@ -108,7 +108,7 @@ public class Main extends ListenerAdapter
     @Override
     public void onCommandAutoCompleteInteraction(@NotNull CommandAutoCompleteInteractionEvent event)
     {
-        for (Command command : commands)
+        for (ICommand command : commands)
         {
             if (event.getName().equals("bedwars"))
             {

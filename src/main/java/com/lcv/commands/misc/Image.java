@@ -1,7 +1,7 @@
 package com.lcv.commands.misc;
 
 import com.lcv.Main;
-import com.lcv.commands.Command;
+import com.lcv.commands.ICommand;
 import net.dv8tion.jda.api.events.interaction.command.SlashCommandInteractionEvent;
 import net.dv8tion.jda.api.interactions.commands.build.SlashCommandData;
 import net.dv8tion.jda.api.utils.FileUpload;
@@ -15,7 +15,7 @@ import java.io.File;
 import java.io.IOException;
 import java.net.URISyntaxException;
 
-public class Image implements Command
+public class Image implements ICommand
 {
 
     @Override
