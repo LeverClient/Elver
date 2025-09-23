@@ -20,10 +20,12 @@ import java.io.ByteArrayOutputStream;
 import java.io.IOException;
 import java.text.DecimalFormat;
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.Random;
 import java.util.concurrent.ExecutionException;
 import java.util.concurrent.Future;
 
+import static com.lcv.util.ImageUtil.loadImage;
 import static net.dv8tion.jda.api.interactions.commands.OptionType.STRING;
 
 public class Duels implements ICommand
@@ -36,6 +38,9 @@ public class Duels implements ICommand
         g2d.drawImage(Main.botProfileScaled, 25, 25, 226, 226, null);
         g2d.drawImage(ImageUtil.DUELS_BOW, 1915, 300, 100, 100, null);
         g2d.drawImage(ImageUtil.DUELS_SWORD, 2455, 300, 100, 100, null);
+        g2d.drawImage(ImageUtil.DUELS_HEALTH, 75, 1600, 150, 150, null);
+        g2d.drawImage(ImageUtil.DUELS_DAMAGE, 65, 1765, 175, 175, null);
+        g2d.drawImage(ImageUtil.DUELS_COIN, 75, 1935, 150, 150, null);
     });
     public static ArrayList<BufferedImage> backgroundImages = new ArrayList<>();
     public static FontRenderer fontRenderer = new FontRenderer(null, new Font[]{Main.minecraftFont.deriveFont(144f), Main.minecraftFont.deriveFont(96f), Main.minecraftFont.deriveFont(64f), Main.minecraftFont.deriveFont(56f)});
@@ -106,8 +111,8 @@ public class Duels implements ICommand
 
         DecimalFormat bigFormat = new DecimalFormat("###,###");
 
-        int winRankOverflow = 0;
-        int winRankReq = 0;
+        int winRankOverflow = duels.getWins();
+        int winRankReq = DuelsAPI.PRESTIGE_WIN_LIST[0];
         for (int i = 0; i < DuelsAPI.PRESTIGE_LIST.length; i++)
         {
             if (duels.getWins() < DuelsAPI.PRESTIGE_WIN_LIST[i])
@@ -164,7 +169,7 @@ public class Duels implements ICommand
         fontRenderer.switchFont(3);
         fontRenderer.drawString(String.format("§a%.1f%%", duels.getBowAccuracy()), 2035, 325);
 
-        fontRenderer.drawString(String.format("§a%.1f%%", duels.getBowAccuracy()), 2580, 325);
+        fontRenderer.drawString(String.format("§a%.1f%%", duels.getSwordAccuracy()), 2580, 325);
 
         fontRenderer.switchFont(2);
         fontRenderer.drawString("§cShots:", 2070, 435, FontRenderer.CenterXAligned);
@@ -177,25 +182,35 @@ public class Duels implements ICommand
         fontRenderer.drawString("§aHits:", 2610, 650, FontRenderer.CenterXAligned);
         fontRenderer.drawString(String.format("§a%s", bigFormat.format(duels.getSwordHit())), 2610, 750, FontRenderer.CenterXAligned);
 
-        /* leave this for recent played / favorite games (bottom right)
-        fontRenderer.drawString(String.format("§aFK: %s", bigFormat.format(stats.get("finalKills"))), 1875, 962);
-        fontRenderer.drawString(String.format("§cFD: %s", bigFormat.format(stats.get("finalDeaths"))), 1875, 1147);
-        fontRenderer.drawString(String.format("§aFK§cDR: §r%.2f", stats.get("fkdr")), 1875, 1337);
-        */
+        fontRenderer.switchFont(1);
+        fontRenderer.useDefaultColors = true;
+        fontRenderer.drawString(String.format("§a%s", bigFormat.format(duels.getHealthHealed())), 275, 1625);
+        fontRenderer.drawString(String.format("§c%s", bigFormat.format(duels.getDamageDealt())), 275, 1800);
+        fontRenderer.drawString(String.format("§e%s", bigFormat.format(duels.getCoins())), 275, 1975);
+        fontRenderer.useDefaultColors = false;
+
+        fontRenderer.switchFont(2);
+        for (int i = 0; i < duels.getRecentlyPlayed().length; i++)
+        {
+            String[] arr = duels.getRecentlyPlayed()[i].split("_");
+            for (int j = 0; j < arr.length; j++)
+                arr[j] = arr[j].charAt(0) + arr[j].substring(1).toLowerCase();
+            BufferedImage duelImage = loadImage("/duels/recently_played/", arr[0], null);
+            g2d.drawImage(duelImage, 1900, 800 + 750 * (i + 1) / duels.getRecentlyPlayed().length, 100, 100, null);
+            fontRenderer.drawString(Arrays.toString(arr), 2050, 800 + 750 * (i + 1) / duels.getRecentlyPlayed().length);
+        }
 
         // level info
         fontRenderer.drawString(duels.getRankFormatted(), 1440, 1275, FontRenderer.CenterXAligned);
-        fontRenderer.drawString(String.format("§a%s", rankProgressBar), image.getWidth() / 2, 1275 + 143, FontRenderer.CenterXAligned);
-        fontRenderer.drawString(String.format("§a%d §r/ §c%d", winRankOverflow, winRankReq), image.getWidth() / 2, 1275 + 148 * 2, FontRenderer.CenterXAligned);
+        fontRenderer.drawString(String.format("§a%s", rankProgressBar), 1440, 1418, FontRenderer.CenterXAligned);
+        fontRenderer.drawString(String.format("§a%d §r/ §c%d", winRankOverflow, winRankReq), 1440, 1275 + 148 * 2, FontRenderer.CenterXAligned);
 
         fontRenderer.drawString("§aLevel:", 1450, 1785);
-        fontRenderer.drawString("§c" + (int) player.getLevel(), 1450, 1890);
+        fontRenderer.drawString("§c" + player.getLevel(), 1450, 1890);
 
         fontRenderer.switchFont(1);
-        fontRenderer.drawString(String.format("§a%s", prestigeProgressBar), 540, 1625, FontRenderer.CenterXAligned);
-        fontRenderer.drawString("|", 540, 1625 + 155, FontRenderer.CenterXAligned);
-        fontRenderer.drawString("v", 540, 1625 + 175, FontRenderer.CenterXAligned);
-        fontRenderer.drawString(duels.getNextPrestigeFormatted(), 540, 1625 + 350, FontRenderer.CenterXAligned);
+        fontRenderer.drawString(String.format("§a%s", prestigeProgressBar), 2344, 1800, FontRenderer.CenterXAligned);
+        fontRenderer.drawString(duels.getNextPrestigeFormatted(), 2344, 1975, FontRenderer.CenterXAligned);
 
         // ping
         fontRenderer.switchFont(3);

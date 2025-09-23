@@ -28,6 +28,9 @@ public class ImageUtil
 
     public static final BufferedImage DUELS_SWORD = loadImage("/images/duels/icons/sword.png");
     public static final BufferedImage DUELS_BOW = loadImage("/images/duels/icons/bow.png");
+    public static final BufferedImage DUELS_COIN = loadImage("/images/duels/icons/coin.png");
+    public static final BufferedImage DUELS_HEALTH = loadImage("/images/duels/icons/health.png");
+    public static final BufferedImage DUELS_DAMAGE = loadImage("/images/duels/icons/damage.png");
 
     public static HashMap<String, BufferedImage> BACKGROUND_OVERLAYS = new HashMap<>();
     public static final HashMap<String, BufferedImage> IMAGE_MAP = new HashMap<>();
