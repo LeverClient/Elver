@@ -79,6 +79,11 @@
             <artifactId>ElverAPI</artifactId>
             <version>1.0.12</version>
         </dependency>
+        <dependency>
+            <groupId>ch.qos.logback</groupId>
+            <artifactId>logback-classic</artifactId>
+            <version>1.5.6</version>
+        </dependency>
 
         <!-- LWJGL -->
         <dependency>

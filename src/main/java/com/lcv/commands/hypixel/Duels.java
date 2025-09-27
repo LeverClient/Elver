@@ -192,12 +192,31 @@ public class Duels implements ICommand
         fontRenderer.switchFont(2);
         for (int i = 0; i < duels.getRecentlyPlayed().length; i++)
         {
-            String[] arr = duels.getRecentlyPlayed()[i].split("_");
-            for (int j = 0; j < arr.length; j++)
-                arr[j] = arr[j].charAt(0) + arr[j].substring(1).toLowerCase();
-            BufferedImage duelImage = loadImage("/duels/recently_played/", arr[0], null);
-            g2d.drawImage(duelImage, 1900, 800 + 750 * (i + 1) / duels.getRecentlyPlayed().length, 100, 100, null);
-            fontRenderer.drawString(Arrays.toString(arr), 2050, 800 + 750 * (i + 1) / duels.getRecentlyPlayed().length);
+            String duel = switch (duels.getRecentlyPlayed()[i])
+            {
+                case "BOW_DUEL" -> "Bow";
+                case "CLASSIC_DUEL" -> "Classic";
+                case "OP_DUEL" -> "Op";
+                case "UHC_DUEL" -> "Uhc";
+                case "NODEBUFF_DUEL" -> "NoDebuff";
+                case "MW_DUEL" -> "Mega_Wall";
+                case "BLITZ_DUEL" -> "Blitz";
+                case "SKYWARS_DUEL" -> "Skywars";
+                case "COMBO_DUEL" -> "Combo";
+                case "BOW_SPLEEF_DUEL" -> "Bow_Spleef";
+                case "SPLEEF_DUEL" -> "Spleef";
+                case "SUMO_DUEL" -> "Sumo";
+                case "QUAKE_DUEL" -> "Quakecraft";
+                case "BOXING_DUEL" -> "Boxing";
+                case "BRIDGE_DUEL" -> "Bridge";
+                case "BEDWARS_TWO_ONE_DUELS" -> "Bedwars";
+                case "BEDWARS_TWO_ONE_DUELS_RUSH" -> "Bedrush";
+
+                default -> duels.getRecentlyPlayed()[i];
+            };
+            BufferedImage duelImage = loadImage("/duels/recently_played/", duel.toLowerCase(), null);
+            g2d.drawImage(duelImage, 1900, 800 + 725 * (i + 1) / duels.getRecentlyPlayed().length, 100, 100, null);
+            fontRenderer.drawString(duel, 2065, 825 + 725 * (i + 1) / duels.getRecentlyPlayed().length);
         }
 
         // level info
