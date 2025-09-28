@@ -171,7 +171,7 @@ public class Bedwars implements ICommand
         fontRenderer.drawString(String.format("§a%d §r/ §c%d", xpRankOverflow, xpRankReq), image.getWidth() / 2, 1275 + 148 * 2, FontRenderer.CenterXAligned);
 
         fontRenderer.drawString("§aLevel:", 1450, 1785);
-        fontRenderer.drawString("§c" + (int) player.getLevel(), 1450, 1890);
+        fontRenderer.drawString("§c" + player.getLevel(), 1450, 1890);
 
         // progress bar
         fontRenderer.drawString(String.format("§a%s  §r>>>  §!%s", prestigeProgressBar, bedwars.getNextPrestigeFormatted()), 540, 1625 - 9, FontRenderer.CenterXAligned);
@@ -230,6 +230,7 @@ public class Bedwars implements ICommand
 
         if (favoriteSlots != null) {
             for (int x = 0; x < favoriteSlots.length; x++) {
+
                 BufferedImage itemImage = loadImage("bedwars/favorite_slots/", favoriteSlots[x], null);
 
                 int iconX = 1850 + (int) (x * slotItemSpacingX);

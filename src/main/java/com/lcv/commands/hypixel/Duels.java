@@ -43,7 +43,7 @@ public class Duels implements ICommand
         g2d.drawImage(ImageUtil.DUELS_COIN, 75, 1935, 150, 150, null);
     });
     public static ArrayList<BufferedImage> backgroundImages = new ArrayList<>();
-    public static FontRenderer fontRenderer = new FontRenderer(null, new Font[]{Main.minecraftFont.deriveFont(144f), Main.minecraftFont.deriveFont(96f), Main.minecraftFont.deriveFont(64f), Main.minecraftFont.deriveFont(56f)});
+    public static FontRenderer fontRenderer = new FontRenderer(null, new Font[]{Main.minecraftFont.deriveFont(144f), Main.minecraftFont.deriveFont(96f), Main.minecraftFont.deriveFont(64f), Main.minecraftFont.deriveFont(56f), Main.minecraftFont.deriveFont(40f)});
     private static final Random rand = new Random();
 
     @Override
@@ -192,31 +192,71 @@ public class Duels implements ICommand
         fontRenderer.switchFont(2);
         for (int i = 0; i < duels.getRecentlyPlayed().length; i++)
         {
-            String duel = switch (duels.getRecentlyPlayed()[i])
+            if (duels.getRecentlyPlayed().length == 1 && duels.getRecentlyPlayed()[0].isEmpty())
             {
-                case "BOW_DUEL" -> "Bow";
-                case "CLASSIC_DUEL" -> "Classic";
-                case "OP_DUEL" -> "Op";
-                case "UHC_DUEL" -> "Uhc";
-                case "NODEBUFF_DUEL" -> "NoDebuff";
-                case "MW_DUEL" -> "Mega_Wall";
-                case "BLITZ_DUEL" -> "Blitz";
-                case "SKYWARS_DUEL" -> "Skywars";
-                case "COMBO_DUEL" -> "Combo";
-                case "BOW_SPLEEF_DUEL" -> "Bow_Spleef";
-                case "SPLEEF_DUEL" -> "Spleef";
-                case "SUMO_DUEL" -> "Sumo";
-                case "QUAKE_DUEL" -> "Quakecraft";
-                case "BOXING_DUEL" -> "Boxing";
-                case "BRIDGE_DUEL" -> "Bridge";
-                case "BEDWARS_TWO_ONE_DUELS" -> "Bedwars";
-                case "BEDWARS_TWO_ONE_DUELS_RUSH" -> "Bedrush";
+                fontRenderer.switchFont(2);
+                fontRenderer.drawString("NO RECENTLY PLAYED", 2300, 1200, FontRenderer.CenterXAligned);
+                fontRenderer.switchFont(2);
+                break;
+            }
+            String[] duel = switch(duels.getRecentlyPlayed()[i])
+            {
+                case "BEDWARS_TWO_ONE_DUELS" -> new String[]{"Bedwars", ""};
+                case "BEDWARS_TWO_ONE_DUELS_RUSH" -> new String[]{"Bedrush", ""};
 
-                default -> duels.getRecentlyPlayed()[i];
+                case "BRIDGE_DUEL" -> new String[]{"Bridge", ""};
+                case "BRIDGE_DOUBLES" -> new String[]{"Bridge", "Doubles"};
+                case "BRIDGE_THREES" -> new String[]{"Bridge", "Threes"};
+                case "BRIDGE_TEAMS" -> new String[]{"Bridge", "Teams"};
+
+                case "CLASSIC_DUEL" -> new String[]{"Classic", ""};
+                case "CLASSIC_DOUBLES" -> new String[]{"Classic", "Doubles"};
+
+                case "OP_DUEL" -> new String[]{"Op", ""};
+                case "OP_DOUBLES" -> new String[]{"Op", "Doubles"};
+
+                case "SKYWARS_DUEL" -> new String[]{"Skywars", ""};
+                case "SKYWARS_DOUBLES" -> new String[]{"Skywars", "Doubles"};
+
+                case "UHC_DUEL" -> new String[]{"Uhc", ""};
+                case "UHC_DOUBLES" -> new String[]{"Uhc", "Doubles"};
+                case "UHC_TEAMS" -> new String[]{"Uhc", "Teams"};
+                case "UHC_DEATHMATCH" -> new String[]{"Uhc", "Deathmatch"};
+
+                case "BLITZ_DUEL" -> new String[]{"Blitz", ""};
+                case "BOW_DUEL" -> new String[]{"Bow", ""};
+                case "BOW_SPLEEF_DUEL" -> new String[]{"Bow_Spleef", ""};
+                case "BOXING_DUEL" -> new String[]{"Boxing", ""};
+                case "COMBO_DUEL" -> new String[]{"Combo", ""};
+                case "DUEL_ARENA" -> new String[]{"Duel_Arena", "  "};
+                case "MW_DUEL" -> new String[]{"Mega_Wall", ""};
+                case "NODEBUFF_DUEL" -> new String[]{"NoDebuff", ""};
+                case "PARKOUR_DUEL" -> new String[]{"Parkour", " "};
+                case "QUAKE_DUEL" -> new String[]{"Quakecraft", ""};
+                case "SPLEEF_DUEL" -> new String[]{"Spleef", ""};
+                case "SUMO_DUEL" -> new String[]{"Sumo", ""};
+
+                default -> new String[]{duels.getRecentlyPlayed()[i], ""};
             };
-            BufferedImage duelImage = loadImage("/duels/recently_played/", duel.toLowerCase(), null);
+            BufferedImage duelImage = loadImage("/duels/recently_played/", duel[0].toLowerCase(), null);
             g2d.drawImage(duelImage, 1900, 800 + 725 * (i + 1) / duels.getRecentlyPlayed().length, 100, 100, null);
-            fontRenderer.drawString(duel, 2065, 825 + 725 * (i + 1) / duels.getRecentlyPlayed().length);
+            StringBuilder str = new StringBuilder();
+            for (String s : duel)
+                str.append(s).append(" ");
+            fontRenderer.drawString(str.toString().trim(), 2065, 825 + 725 * (i + 1) / duels.getRecentlyPlayed().length);
+
+            fontRenderer.switchFont(3);
+            String num = switch (duel[1])
+            {
+                case "Doubles" -> "2";
+                case "Threes" -> "3";
+                case "Deathmatch", " " -> "8";
+                case "  " -> "40";
+
+                default -> "";
+            };
+            fontRenderer.drawString(num, 2050, 855 + 725 * (i + 1) / duels.getRecentlyPlayed().length, FontRenderer.RightAligned);
+            fontRenderer.switchFont(2);
         }
 
         // level info
