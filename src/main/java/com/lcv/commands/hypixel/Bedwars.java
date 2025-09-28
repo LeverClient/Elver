@@ -230,8 +230,7 @@ public class Bedwars implements ICommand
 
         if (favoriteSlots != null) {
             for (int x = 0; x < favoriteSlots.length; x++) {
-
-                BufferedImage itemImage = loadImage("bedwars/favorite_slots/", favoriteSlots[x], null);
+                BufferedImage itemImage = loadImage("bedwars/favorite_slots/", favoriteSlots[x].toLowerCase(), null);
 
                 int iconX = 1850 + (int) (x * slotItemSpacingX);
                 int iconY = 2122 - slotItemSize;
