@@ -75,23 +75,25 @@ public class Bedwars implements ICommand
             return;
         }
 
-        BufferedImage statsImage;
-        try {
-            statsImage = generateStatsImage(player);
-        } catch (IllegalArgumentException e) {
-            Embed embed = new Embed().setTitle("Failed Operation :(").setDescription(e.getMessage() == null ? "Unsure" : e.getMessage());
-            interactionHook.sendMessageEmbeds(embed.get()).queue();
-            return;
-        }
+        new Thread(() -> {
+            BufferedImage statsImage;
+            try {
+                statsImage = generateStatsImage(player);
+            } catch (IllegalArgumentException e) {
+                Embed embed = new Embed().setTitle("Failed Operation :(").setDescription(e.getMessage() == null ? "Unsure" : e.getMessage());
+                interactionHook.sendMessageEmbeds(embed.get()).queue();
+                return;
+            }
 
-        try {
-            ByteArrayOutputStream baos = new ByteArrayOutputStream();
-            ImageIO.write(statsImage, "png", baos);
-            FileUpload file = FileUpload.fromData(new ByteArrayInputStream(baos.toByteArray()), String.format("bedwars stats for %s meow.png", name));
-            interactionHook.sendFiles(file).queue();
-        } catch (IOException e) {
-            throw new RuntimeException(e);
-        }
+            try {
+                ByteArrayOutputStream baos = new ByteArrayOutputStream();
+                ImageIO.write(statsImage, "png", baos);
+                FileUpload file = FileUpload.fromData(new ByteArrayInputStream(baos.toByteArray()), String.format("bedwars stats for %s meow.png", name));
+                interactionHook.sendFiles(file).queue();
+            } catch (IOException e) {
+                throw new RuntimeException(e);
+            }
+        }).start();
     }
 
     @Override
