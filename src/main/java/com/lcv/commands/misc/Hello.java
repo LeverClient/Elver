@@ -21,7 +21,7 @@ public class Hello implements ICommand
     @Override
     public void execute(SlashCommandInteractionEvent event)
     {
-        event.reply("Hello!").queue();
+        event.reply("Hewo!").queue();
     }
 
     @Override

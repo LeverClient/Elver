@@ -16,23 +16,24 @@ public class HTTPRequest
     private static final Logger log = LoggerFactory.getLogger(HTTPRequest.class);
     public static HashMap<String, HttpRequestCache> cache = new HashMap<>();
 
-    public static void purgeCache() {
+    public static void purgeCache()
+    {
         cache.clear();
     }
 
-    public static boolean purgeCache(String URL) {
+    public static boolean purgeCache(String URL)
+    {
         return cache.remove(URL) != null;
     }
 
     public static JSONObject getHTTPRequest(String URL)
     {
-        if (cache.containsKey(URL)) {
+        if (cache.containsKey(URL))
+        {
             HttpRequestCache cached = cache.get(URL);
-            if (!cached.tryPurge()) {
+            if (!cached.tryPurge())
                 return cached.result;
-            }
         }
-
 
         try
         {
@@ -46,9 +47,7 @@ public class HTTPRequest
                 StringBuilder stringBuilder = new StringBuilder();
                 String line;
                 while ((line = reader.readLine()) != null)
-                {
                     stringBuilder.append(line);
-                }
                 reader.close();
                 connection.disconnect();
 
@@ -58,14 +57,15 @@ public class HTTPRequest
             }
             return null;
         }
-        catch(IOException e)
+        catch (IOException e)
         {
             log.error("e: ", e);
             return null;
         }
     }
 
-    public static class HttpRequestCache {
+    public static class HttpRequestCache
+    {
         static long cacheTime = 180;
 
         public final JSONObject result;
@@ -74,18 +74,17 @@ public class HTTPRequest
 
         public final long expireAt;
 
-
-        public HttpRequestCache(String URL, JSONObject result) {
+        public HttpRequestCache(String URL, JSONObject result)
+        {
             this.url = URL;
             this.result = result;
-            expireAt = System.currentTimeMillis() + cacheTime*1000;
+            expireAt = System.currentTimeMillis() + cacheTime * 1000;
         }
 
-        public boolean tryPurge() {
-            if (System.currentTimeMillis() < this.expireAt) {
+        public boolean tryPurge()
+        {
+            if (System.currentTimeMillis() < this.expireAt)
                 return false;
-            }
-
             cache.remove(this.url);
             return true;
         }

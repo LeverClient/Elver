@@ -1,15 +1,17 @@
 package com.lcv;
 
+import com.lcv.chat.ChatResponse;
 import com.lcv.commands.ICommand;
 import com.lcv.commands.hypixel.Bedwars;
 import com.lcv.commands.hypixel.Duels;
 import com.lcv.commands.misc.Hello;
-import com.lcv.commands.misc.Image;
 import com.lcv.window.GLFWHandler;
 import net.dv8tion.jda.api.JDA;
 import net.dv8tion.jda.api.JDABuilder;
+import net.dv8tion.jda.api.entities.Member;
 import net.dv8tion.jda.api.events.interaction.command.CommandAutoCompleteInteractionEvent;
 import net.dv8tion.jda.api.events.interaction.command.SlashCommandInteractionEvent;
+import net.dv8tion.jda.api.events.message.MessageReceivedEvent;
 import net.dv8tion.jda.api.hooks.ListenerAdapter;
 import net.dv8tion.jda.api.interactions.commands.build.Commands;
 import net.dv8tion.jda.api.interactions.commands.build.SlashCommandData;
@@ -27,6 +29,8 @@ import java.util.Objects;
 
 public class Main extends ListenerAdapter
 {
+    public static final String ELVER_ID = "1140399630622924971";
+
     private static List<ICommand> commands;
 
     public static BufferedImage botProfile;
@@ -37,7 +41,8 @@ public class Main extends ListenerAdapter
 
     public static BufferedImage nullTexture;
 
-    public static void main(String[] args) throws URISyntaxException, IOException, FontFormatException, InterruptedException {
+    public static void main(String[] args) throws URISyntaxException, IOException, FontFormatException, InterruptedException
+    {
         // null texture
         nullTexture = ImageIO.read(new File(Objects.requireNonNull(Main.class.getResource("/images/null.png")).toURI()));
 
@@ -53,32 +58,27 @@ public class Main extends ListenerAdapter
         // read font
         minecraftFont = Font.createFont(Font.TRUETYPE_FONT, Objects.requireNonNull(Main.class.getResourceAsStream("/fonts/minecraft.ttf")));
 
-        if (true) {
-            new Thread(() -> {
+        if (true)
+        {
+            new Thread(() ->
+            {
                 GLFWHandler glfwHandler = new GLFWHandler();
 
-                try {
+                try
+                {
                     glfwHandler.init(576, 432);
-                } catch (IOException e) {
+                }
+                catch (IOException e)
+                {
                     throw new RuntimeException(e);
                 }
                 glfwHandler.loop();
             }).start();
         }
 
-        JDA jda = JDABuilder.create(
-                System.getenv("BOT_KEY"),
-                GatewayIntent.MESSAGE_CONTENT,
-                GatewayIntent.GUILD_MESSAGES)
-                .addEventListeners(new Main())
-                .build();
+        JDA jda = JDABuilder.create(System.getenv("BOT_KEY"), GatewayIntent.MESSAGE_CONTENT, GatewayIntent.GUILD_MESSAGES).addEventListeners(new Main()).build();
 
-        commands = List.of(
-                new Hello(),
-                new Bedwars(),
-                new Image(),
-                new Duels()
-        );
+        commands = List.of(new Hello(), new Bedwars(), new Duels());
 
         List<SlashCommandData> slashData = new ArrayList<>();
 
@@ -102,6 +102,18 @@ public class Main extends ListenerAdapter
                 command.execute(event);
                 return;
             }
+        }
+    }
+
+    @Override
+    public void onMessageReceived(@NotNull MessageReceivedEvent event)
+    {
+        boolean botMentioned = event.getMessage().getMentions().getUsers().contains(event.getJDA().getSelfUser());
+        boolean botReplied = event.getMessage().getReferencedMessage() != null && event.getMessage().getReferencedMessage().getAuthor().getId().equals(ELVER_ID);
+        if (botMentioned || botReplied)
+        {
+            String response = ChatResponse.getResponse(event.getMessage().getContentRaw().replace(event.getJDA().getSelfUser().getAsMention(), "").trim());
+            event.getMessage().reply(response).queue();
         }
     }
 
