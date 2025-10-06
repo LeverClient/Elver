@@ -8,6 +8,7 @@ import com.lcv.elverapi.apis.hypixelplayer.HypixelPlayerAPI;
 import com.lcv.elverapi.apis.mojang.MojangProfileLookupAPI;
 import com.lcv.util.*;
 import net.dv8tion.jda.api.events.interaction.command.SlashCommandInteractionEvent;
+import net.dv8tion.jda.api.interactions.InteractionContextType;
 import net.dv8tion.jda.api.interactions.InteractionHook;
 import net.dv8tion.jda.api.interactions.commands.build.SlashCommandData;
 import net.dv8tion.jda.api.utils.FileUpload;
@@ -22,9 +23,11 @@ import java.text.DecimalFormat;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Random;
+import java.util.Set;
 import java.util.concurrent.ExecutionException;
 import java.util.concurrent.Future;
 
+import static com.lcv.Main.ALL_CONTEXTS;
 import static com.lcv.util.ImageUtil.loadImage;
 import static net.dv8tion.jda.api.interactions.commands.OptionType.STRING;
 
@@ -56,6 +59,11 @@ public class Duels implements ICommand
     public String getDescription()
     {
         return "Gets Duels Stats";
+    }
+
+    @Override
+    public Set<InteractionContextType> getContexts() {
+        return ALL_CONTEXTS;
     }
 
     @Override
