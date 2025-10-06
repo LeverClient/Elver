@@ -25,11 +25,11 @@ public class ChatResponse
         }
     }
 
-    public static String getResponse(String context, String message)
+    public static String getResponse(String context, String message, User author)
     {
         try (Client client = new Client()) {
             String usedPersonality = PERSONALITY;
-            String response = usedPersonality + "Context: " + context + "Message: " + message;
+            String response = usedPersonality + "Context: " + context + "Message: " + formatMessageRaw(message, null, author);
             GenerateContentResponse generateContentResponse = client.models.generateContent(MODEL, response, null);
 
             return generateContentResponse.text();
@@ -57,10 +57,8 @@ public class ChatResponse
         );
     }
 
-    private static String formatMessage(Message message)
+    private static String formatMessageRaw(String rawMessage, Guild guild, User author)
     {
-        Guild guild = message.getGuild();
-        String rawMessage = message.getContentRaw().trim();
         StringBuilder formattedMessage = new StringBuilder();
         int i = 0;
         while (i < rawMessage.length())
@@ -94,7 +92,15 @@ public class ChatResponse
             }
         }
 
-        return "(Sender(me, my): " + formatUser(message.getAuthor(), guild) + " Content: " + formattedMessage + ")";
+        return (author != null ? "(Sender(me, my): " + formatUser(author, guild) : "") + " Content: " + formattedMessage + ")";
+    }
+
+    private static String formatMessage(Message message)
+    {
+        Guild guild = message.getGuild();
+        String rawMessage = message.getContentRaw().trim();
+
+        return formatMessageRaw(rawMessage, guild, message.getAuthor());
     }
 
     public static class CacheMap<K, V> extends LinkedHashMap<K, V> {

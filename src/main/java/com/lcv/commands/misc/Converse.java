@@ -40,7 +40,7 @@ public class Converse implements ICommand
 
         String context = ChatResponse.formatUser(event.getUser(), event.isGuildCommand() ? event.getGuild() : null);
 
-        event.reply(ChatResponse.getResponse(context, msg))
+        event.reply(ChatResponse.getResponse(context, msg, event.getUser()))
                 .addActionRow(Button.primary("replybutton", "reply"))
                 .queue();
     }

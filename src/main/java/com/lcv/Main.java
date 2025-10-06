@@ -168,7 +168,7 @@ public class Main extends ListenerAdapter
         String context = ChatResponse.formatUser(event.getUser(), null); // TODO: fix guild thingy here (probably do with context)
 
         String replyPrefix = String.format("<@%s>: \"%s\"%n", event.getUser().getId(), msg);
-        event.reply(replyPrefix + ChatResponse.getResponse(context, msg))
+        event.reply(replyPrefix + ChatResponse.getResponse(context, msg, event.getUser()))
                 .addActionRow(Button.primary("replybutton", "reply"))
                 .queue();
     }
