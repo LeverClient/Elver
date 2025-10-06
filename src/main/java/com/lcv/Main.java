@@ -9,6 +9,7 @@ import com.lcv.window.GLFWHandler;
 import net.dv8tion.jda.api.JDA;
 import net.dv8tion.jda.api.JDABuilder;
 import net.dv8tion.jda.api.entities.Member;
+import net.dv8tion.jda.api.entities.Message;
 import net.dv8tion.jda.api.events.interaction.command.CommandAutoCompleteInteractionEvent;
 import net.dv8tion.jda.api.events.interaction.command.SlashCommandInteractionEvent;
 import net.dv8tion.jda.api.events.message.MessageReceivedEvent;
@@ -40,6 +41,8 @@ public class Main extends ListenerAdapter
     public static Font minecraftFont;
 
     public static BufferedImage nullTexture;
+
+    public static JDA jda;
 
     public static void main(String[] args) throws URISyntaxException, IOException, FontFormatException, InterruptedException
     {
@@ -76,7 +79,7 @@ public class Main extends ListenerAdapter
             }).start();
         }
 
-        JDA jda = JDABuilder.create(System.getenv("BOT_KEY"), GatewayIntent.MESSAGE_CONTENT, GatewayIntent.GUILD_MESSAGES).addEventListeners(new Main()).build();
+        jda = JDABuilder.create(System.getenv("BOT_KEY"), GatewayIntent.MESSAGE_CONTENT, GatewayIntent.GUILD_MESSAGES).addEventListeners(new Main()).build();
 
         commands = List.of(new Hello(), new Bedwars(), new Duels());
 
@@ -108,12 +111,12 @@ public class Main extends ListenerAdapter
     @Override
     public void onMessageReceived(@NotNull MessageReceivedEvent event)
     {
-        boolean botMentioned = event.getMessage().getMentions().getUsers().contains(event.getJDA().getSelfUser());
-        boolean botReplied = event.getMessage().getReferencedMessage() != null && event.getMessage().getReferencedMessage().getAuthor().getId().equals(ELVER_ID);
+        Message message = event.getMessage();
+        boolean botMentioned = message.getMentions().getUsers().contains(event.getJDA().getSelfUser());
+        boolean botReplied = message.getReferencedMessage() != null && message.getReferencedMessage().getAuthor().getId().equals(ELVER_ID);
         if (botMentioned || botReplied)
         {
-            String response = ChatResponse.getResponse(event.getMessage().getContentRaw().replace(event.getJDA().getSelfUser().getAsMention(), "").trim());
-            event.getMessage().reply(response).queue();
+            message.reply(ChatResponse.getResponse(message)).queue();
         }
     }
 
