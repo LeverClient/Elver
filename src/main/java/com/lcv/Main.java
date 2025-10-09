@@ -2,14 +2,18 @@ package com.lcv;
 
 import com.lcv.chat.ChatResponse;
 import com.lcv.commands.ICommand;
+import com.lcv.commands.audio.PlayAudio;
 import com.lcv.commands.hypixel.Bedwars;
 import com.lcv.commands.hypixel.Duels;
 import com.lcv.commands.misc.Converse;
 import com.lcv.commands.misc.Hello;
 import com.lcv.window.GLFWHandler;
+import com.sedmelluq.discord.lavaplayer.player.AudioPlayerManager;
+import com.sedmelluq.discord.lavaplayer.player.DefaultAudioPlayerManager;
+import com.sedmelluq.discord.lavaplayer.source.AudioSourceManager;
+import com.sedmelluq.discord.lavaplayer.source.AudioSourceManagers;
 import net.dv8tion.jda.api.JDA;
 import net.dv8tion.jda.api.JDABuilder;
-import net.dv8tion.jda.api.entities.Member;
 import net.dv8tion.jda.api.entities.Message;
 import net.dv8tion.jda.api.events.interaction.ModalInteractionEvent;
 import net.dv8tion.jda.api.events.interaction.command.CommandAutoCompleteInteractionEvent;
@@ -59,6 +63,8 @@ public class Main extends ListenerAdapter
 
     public static JDA jda;
 
+    public static AudioPlayerManager audioPlayerManager = new DefaultAudioPlayerManager();
+
     public static void main(String[] args) throws URISyntaxException, IOException, FontFormatException, InterruptedException
     {
         // null texture
@@ -94,8 +100,11 @@ public class Main extends ListenerAdapter
             }).start();
         }
 
-        jda = JDABuilder.create(System.getenv("BOT_KEY"), GatewayIntent.MESSAGE_CONTENT, GatewayIntent.GUILD_MESSAGES, GatewayIntent.GUILD_MEMBERS).addEventListeners(new Main()).build();
-        commands = List.of(new Hello(), new Bedwars(), new Duels(), new Converse());
+        AudioSourceManagers.registerRemoteSources(audioPlayerManager);
+        AudioSourceManagers.registerLocalSource(audioPlayerManager);
+
+        jda = JDABuilder.create(System.getenv("BOT_KEY"), GatewayIntent.MESSAGE_CONTENT, GatewayIntent.GUILD_MESSAGES, GatewayIntent.GUILD_MEMBERS, GatewayIntent.GUILD_VOICE_STATES).addEventListeners(new Main()).build();
+        commands = List.of(new Hello(), new Bedwars(), new Duels(), new Converse(), new PlayAudio());
 
         List<SlashCommandData> slashData = new ArrayList<>();
 
@@ -131,8 +140,7 @@ public class Main extends ListenerAdapter
     public void onMessageReceived(@NotNull MessageReceivedEvent event)
     {
         Message message = event.getMessage();
-
-        // is this a bad check?
+        // is this a bad check? (nah its fine for the most part, id rewrite it diff tho)
         if (message.getAuthor() != jda.getSelfUser()) {
             boolean botMentioned = message.getMentions().getUsers().contains(event.getJDA().getSelfUser());
             boolean botReplied = message.getReferencedMessage() != null && message.getReferencedMessage().getAuthor().getId().equals(ELVER_ID);

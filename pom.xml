@@ -89,6 +89,11 @@
             <artifactId>google-genai</artifactId>
             <version>1.0.0</version>
         </dependency>
+        <dependency>
+            <groupId>dev.arbjerg</groupId>
+            <artifactId>lavaplayer</artifactId>
+            <version>2.2.4</version>
+        </dependency>
 
         <!-- LWJGL -->
         <dependency>
