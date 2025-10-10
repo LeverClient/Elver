@@ -1,29 +1,29 @@
 package com.lcv.commands.audio;
 
-import com.lcv.Main;
 import com.lcv.commands.ICommand;
+import com.sedmelluq.discord.lavaplayer.player.AudioLoadResultHandler;
 import com.sedmelluq.discord.lavaplayer.player.AudioPlayer;
+import com.sedmelluq.discord.lavaplayer.player.AudioPlayerManager;
+import com.sedmelluq.discord.lavaplayer.player.DefaultAudioPlayerManager;
+import com.sedmelluq.discord.lavaplayer.source.AudioSourceManagers;
+import com.sedmelluq.discord.lavaplayer.tools.FriendlyException;
+import com.sedmelluq.discord.lavaplayer.track.AudioPlaylist;
 import com.sedmelluq.discord.lavaplayer.track.AudioTrack;
 import net.dv8tion.jda.api.entities.channel.concrete.VoiceChannel;
 import net.dv8tion.jda.api.events.interaction.command.SlashCommandInteractionEvent;
 import net.dv8tion.jda.api.interactions.commands.build.SlashCommandData;
 import net.dv8tion.jda.api.managers.AudioManager;
 
-import javax.sound.sampled.UnsupportedAudioFileException;
-import java.io.BufferedReader;
-import java.io.IOException;
-import java.io.InputStreamReader;
+import java.io.*;
 import java.net.HttpURLConnection;
-import java.net.MalformedURLException;
 import java.net.URL;
 import java.net.URLEncoder;
 import java.nio.charset.StandardCharsets;
 import java.nio.file.Files;
-import java.nio.file.Path;
 
 import static net.dv8tion.jda.api.interactions.commands.OptionType.STRING;
 
-public class PlayAudio implements ICommand
+public class Say implements ICommand
 {
     @Override
     public String getName()
@@ -40,25 +40,61 @@ public class PlayAudio implements ICommand
     @Override
     public void execute(SlashCommandInteractionEvent event)
     {
-        if (!event.getMember().getId().equals("585958966232875018"))
+        try
         {
-            event.reply("no you're not leverclient").queue();
-            return;
+            event.deferReply().queue();
+            String audioQuery = getAudioQuery(event.getOption("text").getAsString());
+            byte[] audioBytes = synthesizeAudio(audioQuery);
+
+            File tempFile = File.createTempFile("voicevox", ".wav");
+            tempFile.deleteOnExit();
+            Files.write(tempFile.toPath(), audioBytes);
+
+            AudioManager audioManager = event.getGuild().getAudioManager();
+            VoiceChannel channel = event.getMember().getVoiceState().getChannel().asVoiceChannel();
+
+            AudioPlayerManager playerManager = new DefaultAudioPlayerManager();
+            AudioSourceManagers.registerLocalSource(playerManager);
+
+            AudioPlayer player = playerManager.createPlayer();
+            audioManager.openAudioConnection(channel);
+            audioManager.setSendingHandler(new AudioHandler(player));
+
+            playerManager.loadItem(tempFile.getAbsolutePath(), new AudioLoadResultHandler()
+            {
+                @Override
+                public void trackLoaded(AudioTrack audioTrack)
+                {
+                    player.playTrack(audioTrack);
+                }
+
+                @Override
+                public void playlistLoaded(AudioPlaylist audioPlaylist)
+                {
+
+                }
+
+                @Override
+                public void noMatches()
+                {
+
+                }
+
+                @Override
+                public void loadFailed(FriendlyException e)
+                {
+
+                }
+            });
         }
-        String audioQuery = createAudioQuery(event.getOption("text").getAsString());
-        byte[] audioBytes = synthesizeAudio(audioQuery);
-
-        AudioPlayer audioPlayer = Main.audioPlayerManager.createPlayer();
-
-        audioPlayer.playTrack(new AudioTrack());
-        AudioManager audioManager = event.getGuild().getAudioManager();
-        VoiceChannel channel = event.getMember().getVoiceState().getChannel().asVoiceChannel();
-        audioManager.setSendingHandler(new TestHandler(audioPlayer));
-        audioManager.openAudioConnection(channel);
-        event.reply("Joining " + channel.getName()).queue();
+        catch (IOException e)
+        {
+            throw new RuntimeException(e);
+        }
+        event.getHook().sendMessage("playing").queue();
     }
 
-    private String createAudioQuery(String text)
+    private String getAudioQuery(String text)
     {
         try
         {

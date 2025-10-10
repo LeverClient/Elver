@@ -2,7 +2,7 @@ package com.lcv;
 
 import com.lcv.chat.ChatResponse;
 import com.lcv.commands.ICommand;
-import com.lcv.commands.audio.PlayAudio;
+import com.lcv.commands.audio.Say;
 import com.lcv.commands.hypixel.Bedwars;
 import com.lcv.commands.hypixel.Duels;
 import com.lcv.commands.misc.Converse;
@@ -10,7 +10,6 @@ import com.lcv.commands.misc.Hello;
 import com.lcv.window.GLFWHandler;
 import com.sedmelluq.discord.lavaplayer.player.AudioPlayerManager;
 import com.sedmelluq.discord.lavaplayer.player.DefaultAudioPlayerManager;
-import com.sedmelluq.discord.lavaplayer.source.AudioSourceManager;
 import com.sedmelluq.discord.lavaplayer.source.AudioSourceManagers;
 import net.dv8tion.jda.api.JDA;
 import net.dv8tion.jda.api.JDABuilder;
@@ -63,8 +62,6 @@ public class Main extends ListenerAdapter
 
     public static JDA jda;
 
-    public static AudioPlayerManager audioPlayerManager = new DefaultAudioPlayerManager();
-
     public static void main(String[] args) throws URISyntaxException, IOException, FontFormatException, InterruptedException
     {
         // null texture
@@ -100,11 +97,8 @@ public class Main extends ListenerAdapter
             }).start();
         }
 
-        AudioSourceManagers.registerRemoteSources(audioPlayerManager);
-        AudioSourceManagers.registerLocalSource(audioPlayerManager);
-
         jda = JDABuilder.create(System.getenv("BOT_KEY"), GatewayIntent.MESSAGE_CONTENT, GatewayIntent.GUILD_MESSAGES, GatewayIntent.GUILD_MEMBERS, GatewayIntent.GUILD_VOICE_STATES).addEventListeners(new Main()).build();
-        commands = List.of(new Hello(), new Bedwars(), new Duels(), new Converse(), new PlayAudio());
+        commands = List.of(new Hello(), new Bedwars(), new Duels(), new Converse(), new Say());
 
         List<SlashCommandData> slashData = new ArrayList<>();
 
