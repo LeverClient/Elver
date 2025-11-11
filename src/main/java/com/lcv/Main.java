@@ -7,6 +7,7 @@ import com.lcv.commands.hypixel.Bedwars;
 import com.lcv.commands.hypixel.Duels;
 import com.lcv.commands.misc.Converse;
 import com.lcv.commands.misc.Hello;
+import com.lcv.commands.misc.Lever;
 import com.lcv.window.GLFWHandler;
 import com.sedmelluq.discord.lavaplayer.player.AudioPlayerManager;
 import com.sedmelluq.discord.lavaplayer.player.DefaultAudioPlayerManager;
@@ -37,10 +38,9 @@ import java.awt.*;
 import java.awt.image.BufferedImage;
 import java.io.*;
 import java.net.URISyntaxException;
-import java.util.ArrayList;
+import java.util.*;
 import java.util.List;
-import java.util.Objects;
-import java.util.Set;
+import java.util.stream.Collectors;
 
 import static net.dv8tion.jda.api.interactions.InteractionContextType.*;
 
@@ -98,7 +98,7 @@ public class Main extends ListenerAdapter
         }
 
         jda = JDABuilder.create(System.getenv("BOT_KEY"), GatewayIntent.MESSAGE_CONTENT, GatewayIntent.GUILD_MESSAGES, GatewayIntent.GUILD_MEMBERS, GatewayIntent.GUILD_VOICE_STATES).addEventListeners(new Main()).build();
-        commands = List.of(new Hello(), new Bedwars(), new Duels(), new Converse(), new Say());
+        commands = List.of(new Hello(), new Bedwars(), new Duels(), new Converse(), new Say(), new Lever());
 
         List<SlashCommandData> slashData = new ArrayList<>();
 
@@ -106,7 +106,8 @@ public class Main extends ListenerAdapter
         {
             SlashCommandData data = Commands.slash(command.getName(), command.getDescription());
             data.setContexts(command.getContexts());
-            if (command.getContexts().contains(PRIVATE_CHANNEL)) {
+            if (command.getContexts().contains(PRIVATE_CHANNEL))
+            {
                 data.setIntegrationTypes(IntegrationType.ALL);
             }
 
@@ -135,26 +136,25 @@ public class Main extends ListenerAdapter
     {
         Message message = event.getMessage();
         // is this a bad check? (nah its fine for the most part, id rewrite it diff tho)
-        if (message.getAuthor() != jda.getSelfUser()) {
+        if (message.getAuthor() != jda.getSelfUser())
+        {
             boolean botMentioned = message.getMentions().getUsers().contains(event.getJDA().getSelfUser());
             boolean botReplied = message.getReferencedMessage() != null && message.getReferencedMessage().getAuthor().getId().equals(ELVER_ID);
-            if (botMentioned || botReplied) {
+            if (botMentioned || botReplied)
+            {
                 message.reply(ChatResponse.getResponse(message)).queue();
             }
         }
     }
 
     @Override
-    public void onButtonInteraction(ButtonInteractionEvent event) {
-        switch (event.getComponentId()) {
-            case "replybutton": {
-                Modal modal = Modal.create("replymodal", "Reply")
-                        .addActionRow(
-                                TextInput.create("replyfield", "Message", TextInputStyle.PARAGRAPH)
-                                        .setPlaceholder("Message here!! whatever u put here will be shown to everyone btw")
-                                        .setRequired(true)
-                                        .build()
-                        ).build();
+    public void onButtonInteraction(ButtonInteractionEvent event)
+    {
+        switch (event.getComponentId())
+        {
+            case "replybutton":
+            {
+                Modal modal = Modal.create("replymodal", "Reply").addActionRow(TextInput.create("replyfield", "Message", TextInputStyle.PARAGRAPH).setPlaceholder("Message here!! whatever u put here will be shown to everyone btw").setRequired(true).build()).build();
 
                 event.replyModal(modal).queue();
                 break;
@@ -163,26 +163,36 @@ public class Main extends ListenerAdapter
     }
 
     @Override
-    public void onModalInteraction(ModalInteractionEvent event) {
-        if (!event.getModalId().equals("replymodal")) return;
+    public void onModalInteraction(ModalInteractionEvent event)
+    {
+        if (!event.getModalId().equals("replymodal"))
+            return;
 
         String msg = event.getValue("replyfield").getAsString();
         String context = ChatResponse.formatUser(event.getUser(), null); // TODO: fix guild thingy here (probably do with context)
 
         String replyPrefix = String.format("<@%s>: \"%s\"%n", event.getUser().getId(), msg);
-        event.reply(replyPrefix + ChatResponse.getResponse(context, msg, event.getUser()))
-                .addActionRow(Button.primary("replybutton", "reply"))
-                .queue();
+        event.reply(replyPrefix + ChatResponse.getResponse(context, msg, event.getUser())).addActionRow(Button.primary("replybutton", "reply")).queue();
     }
 
     @Override
     public void onCommandAutoCompleteInteraction(@NotNull CommandAutoCompleteInteractionEvent event)
     {
-        for (ICommand command : commands)
+        switch (event.getName())
         {
-            if (event.getName().equals("bedwars"))
+            case "bedwars":
             {
                 // todo: write thing to access mojang api maybe?
+                break;
+            }
+            case "wordle":
+            {
+                event.replyChoiceStrings(Arrays
+                        .stream(new String[]{"Wordle"})
+                        .filter(s -> s.startsWith(event.getFocusedOption().getValue()))
+                        .collect(Collectors.toList()))
+                        .queue();
+                break;
             }
         }
     }
