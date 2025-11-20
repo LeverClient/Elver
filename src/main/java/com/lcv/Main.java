@@ -8,6 +8,7 @@ import com.lcv.commands.hypixel.Duels;
 import com.lcv.commands.misc.Converse;
 import com.lcv.commands.misc.Hello;
 import com.lcv.commands.misc.Lever;
+import com.lcv.commands.misc.lever.Wordle;
 import com.lcv.window.GLFWHandler;
 import com.sedmelluq.discord.lavaplayer.player.AudioPlayerManager;
 import com.sedmelluq.discord.lavaplayer.player.DefaultAudioPlayerManager;
@@ -165,14 +166,19 @@ public class Main extends ListenerAdapter
     @Override
     public void onModalInteraction(ModalInteractionEvent event)
     {
-        if (!event.getModalId().equals("replymodal"))
-            return;
-
-        String msg = event.getValue("replyfield").getAsString();
-        String context = ChatResponse.formatUser(event.getUser(), null); // TODO: fix guild thingy here (probably do with context)
-
-        String replyPrefix = String.format("<@%s>: \"%s\"%n", event.getUser().getId(), msg);
-        event.reply(replyPrefix + ChatResponse.getResponse(context, msg, event.getUser())).addActionRow(Button.primary("replybutton", "reply")).queue();
+        switch (event.getModalId())
+        {
+            case "replymodal":
+                String msg = event.getValue("replyfield").getAsString();
+                String context = ChatResponse.formatUser(event.getUser(), null); // TODO: fix guild thingy here (probably do with context)
+                String replyPrefix = String.format("<@%s>: \"%s\"%n", event.getUser().getId(), msg);
+                event.reply(replyPrefix + ChatResponse.getResponse(context, msg, event.getUser())).addActionRow(Button.primary("replybutton", "reply")).queue();
+                break;
+            case "wordle":
+                event.replyEmbeds(new Wordle(event.getValue("word").getAsString()).getWords()).queue();
+                break;
+            default:
+        }
     }
 
     @Override
@@ -185,7 +191,7 @@ public class Main extends ListenerAdapter
                 // todo: write thing to access mojang api maybe?
                 break;
             }
-            case "wordle":
+            case "lever":
             {
                 event.replyChoiceStrings(Arrays
                         .stream(new String[]{"Wordle"})
