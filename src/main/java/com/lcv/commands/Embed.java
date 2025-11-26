@@ -11,7 +11,6 @@ public class Embed
     protected EmbedBuilder embedBuilder;
     public Embed()
     {
-        // all class does is make a worse embed builder that automatically adds color and footer :sob:
         embedBuilder = new EmbedBuilder();
         setColor(Color.PINK);
         setFooter("Made with ♡ by Lever and syl ✿", "https://i.imgur.com/8NsvrKm.png");
