@@ -9,7 +9,7 @@ import com.lcv.commands.misc.Converse;
 import com.lcv.commands.misc.Hello;
 import com.lcv.commands.misc.Lever;
 import com.lcv.commands.misc.lever.Wordle;
-import com.lcv.commands.tcg.TCG;
+import com.lcv.commands.etcg.ETCG;
 import com.lcv.window.GLFWHandler;
 import net.dv8tion.jda.api.JDA;
 import net.dv8tion.jda.api.JDABuilder;
@@ -31,6 +31,8 @@ import net.dv8tion.jda.api.interactions.modals.Modal;
 import net.dv8tion.jda.api.requests.GatewayIntent;
 import net.dv8tion.jda.internal.utils.Helpers;
 import org.jetbrains.annotations.NotNull;
+import org.mapdb.DB;
+import org.mapdb.DBMaker;
 
 import javax.imageio.ImageIO;
 import java.awt.*;
@@ -96,8 +98,10 @@ public class Main extends ListenerAdapter
             }).start();
         }
 
+        ETCG.setupDB();
+
         jda = JDABuilder.create(System.getenv("BOT_KEY"), GatewayIntent.MESSAGE_CONTENT, GatewayIntent.GUILD_MESSAGES, GatewayIntent.GUILD_MEMBERS, GatewayIntent.GUILD_VOICE_STATES).addEventListeners(new Main()).build();
-        commands = List.of(new Hello(), new Bedwars(), new Duels(), new Converse(), new Say(), new Lever(), new TCG());
+        commands = List.of(new Hello(), new Bedwars(), new Duels(), new Converse(), new Say(), new Lever(), new ETCG());
 
         List<SlashCommandData> slashData = new ArrayList<>();
 
@@ -115,6 +119,8 @@ public class Main extends ListenerAdapter
         }
 
         jda.updateCommands().addCommands(slashData).queue();
+
+
     }
 
     @Override

@@ -1,4 +1,4 @@
-package com.lcv.commands.tcg;
+package com.lcv.commands.etcg;
 
 import com.lcv.commands.Embed;
 

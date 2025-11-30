@@ -1,0 +1,28 @@
+[
+  {
+    "type": "Monster",
+    "id": "blue_eyes_white_dragon",
+    "name": "Blue-Eyes White Dragon",
+    "description": "A legendary dragon with devastating power.",
+    "rarity": "LEGENDARY",
+    "attack": 3000,
+    "defense": 2500,
+    "level": 8
+  },
+  {
+    "type": "Spell",
+    "id": "monster_reborn",
+    "name": "Monster Reborn",
+    "description": "Revive 1 monster from either player's graveyard.",
+    "rarity": "RARE",
+    "spellType": "Normal"
+  },
+  {
+    "type": "Trap",
+    "id": "mirror_force",
+    "name": "Mirror Force",
+    "description": "When an opponent's monster declares an attack: Destroy all Attack Position monsters your opponent controls.",
+    "rarity": "UNCOMMON",
+    "trapType": "Normal"
+  }
+]
