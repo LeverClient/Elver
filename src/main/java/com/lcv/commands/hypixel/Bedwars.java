@@ -26,7 +26,6 @@ import java.util.concurrent.Future;
 import java.util.function.Function;
 
 import static com.lcv.Main.ALL_CONTEXTS;
-import static com.lcv.util.ImageUtil.loadImage;
 import static net.dv8tion.jda.api.interactions.commands.OptionType.STRING;
 
 public class Bedwars implements ICommand
@@ -42,13 +41,13 @@ public class Bedwars implements ICommand
     public static ArrayList<BufferedImage> backgroundImages = new ArrayList<>();
     public static FontRenderer fontRenderer = new FontRenderer(null, new Font[]{Main.minecraftFont.deriveFont(144f), Main.minecraftFont.deriveFont(96f), Main.minecraftFont.deriveFont(72f), Main.minecraftFont.deriveFont(40f)});
 
-    public final int availableBackgrounds = ImageUtil.getBackgrounds(backgroundImages, "bedwars/bedwars_overlay", (g2d) ->
+    public final int availableBackgrounds = HypixelUtil.getBackgrounds(backgroundImages, "bedwars/bedwars_overlay", (g2d) ->
     {
         g2d.drawImage(Main.botProfileScaled, 25, 25, 226, 226, null);
-        g2d.drawImage(ImageUtil.BEDWARS_IRON_INGOT, 100, 1830, null);
-        g2d.drawImage(ImageUtil.BEDWARS_GOLD_INGOT, 355, 1830, null);
-        g2d.drawImage(ImageUtil.BEDWARS_DIAMOND, 610, 1820, null);
-        g2d.drawImage(ImageUtil.BEDWARS_EMERALD, 850, 1830, null);
+        g2d.drawImage(HypixelUtil.BEDWARS_IRON_INGOT, 100, 1830, null);
+        g2d.drawImage(HypixelUtil.BEDWARS_GOLD_INGOT, 355, 1830, null);
+        g2d.drawImage(HypixelUtil.BEDWARS_DIAMOND, 610, 1820, null);
+        g2d.drawImage(HypixelUtil.BEDWARS_EMERALD, 850, 1830, null);
     });
 
     @Override
@@ -147,8 +146,8 @@ public class Bedwars implements ICommand
         }
 
         // start getting player images
-        Future<BufferedImage> playerFuture = ImageUtil.getPlayerSkinFull(player.getUUID());
-        Future<BufferedImage> playerTopFuture = ImageUtil.getPlayerSkinTop(player.getUUID());
+        Future<BufferedImage> playerFuture = HypixelUtil.getPlayerSkinFull(player.getUUID());
+        Future<BufferedImage> playerTopFuture = HypixelUtil.getPlayerSkinTop(player.getUUID());
 
         fontRenderer.useDefaultColors = true;
         fontRenderer.drawString(player.getNameFormatted(), 1440 - (g2d.getFontMetrics().stringWidth((FontRenderer.removeFormatting(player.getNameFormatted()))) / 2), 75);
@@ -225,7 +224,7 @@ public class Bedwars implements ICommand
             for (int y = 0; y < 3; y++) {
                 for (int x = 0; x < 7; x++) {
                     int i = y * 7 + x;
-                    BufferedImage itemImage = loadImage("bedwars/quickbuy/", quickBuys[i], subdirectory);
+                    BufferedImage itemImage = HypixelUtil.loadImage("bedwars/quickbuy/", quickBuys[i], subdirectory);
 
                     int iconX = 1850 + (int) (x * quickBuyItemSpacingX);
                     int iconY = 1562 + (int) (y * quickBuyItemSpacingY);
@@ -239,7 +238,7 @@ public class Bedwars implements ICommand
 
         if (favoriteSlots != null) {
             for (int x = 0; x < favoriteSlots.length; x++) {
-                BufferedImage itemImage = loadImage("bedwars/favorite_slots/", favoriteSlots[x].toLowerCase(), null);
+                BufferedImage itemImage = HypixelUtil.loadImage("bedwars/favorite_slots/", favoriteSlots[x].toLowerCase(), null);
 
                 int iconX = 1850 + (int) (x * slotItemSpacingX);
                 int iconY = 2122 - slotItemSize;

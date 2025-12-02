@@ -165,6 +165,10 @@ public class Main extends ListenerAdapter
                 event.replyModal(modal).queue();
                 break;
             }
+            case "profile":
+            {
+                event.editMessageEmbeds(ETCG.profile(event).get()).queue();
+            }
         }
     }
 

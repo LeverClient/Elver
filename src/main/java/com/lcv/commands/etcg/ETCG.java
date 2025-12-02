@@ -1,8 +1,11 @@
 package com.lcv.commands.etcg;
 
 import com.lcv.Main;
+import com.lcv.commands.Embed;
 import com.lcv.commands.ICommand;
 import com.lcv.commands.etcg.cards.*;
+import net.dv8tion.jda.api.entities.MessageEmbed;
+import net.dv8tion.jda.api.events.interaction.GenericInteractionCreateEvent;
 import net.dv8tion.jda.api.events.interaction.command.SlashCommandInteractionEvent;
 import net.dv8tion.jda.api.interactions.InteractionContextType;
 import net.dv8tion.jda.api.interactions.commands.build.SlashCommandData;
@@ -49,14 +52,26 @@ public class ETCG implements ICommand
     @Override
     public void execute(SlashCommandInteractionEvent event)
     {
-        event.replyEmbeds(new Gui("Main Menu").setDescription("Placeholder Description").get())
-                .addActionRow(
-                        Button.primary("profile", "Profile"),
-                        Button.primary("packs", "Packs"),
-                        Button.primary("quests", "Quests"),
-                        Button.primary("battle", "Battle")
-                )
+        Embed mainMenu = mainMenu(event);
+        event.replyEmbeds(mainMenu.get())
+                .addActionRow(mainMenu.getButtons())
                 .queue();
+    }
+
+    public static Embed mainMenu(GenericInteractionCreateEvent event)
+    {
+        return new Gui("Main Menu")
+                .setDescription("Placeholder Description")
+                .addButton(Button.primary("profile", "Profile"))
+                .addButton(Button.primary("packs", "Packs"))
+                .addButton(Button.primary("quests", "Quests"))
+                .addButton(Button.primary("battle", "Battle"));
+    }
+
+    public static Embed profile(GenericInteractionCreateEvent event)
+    {
+        return new Gui("Profile")
+                .setDescription("Stats will go here probably");
     }
 
     @Override

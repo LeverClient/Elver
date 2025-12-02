@@ -28,7 +28,6 @@ import java.util.concurrent.ExecutionException;
 import java.util.concurrent.Future;
 
 import static com.lcv.Main.ALL_CONTEXTS;
-import static com.lcv.util.ImageUtil.loadImage;
 import static net.dv8tion.jda.api.interactions.commands.OptionType.STRING;
 
 public class Duels implements ICommand
@@ -36,14 +35,14 @@ public class Duels implements ICommand
     private static final String API_KEY_HYPIXEL = System.getenv("API_KEY_HYPIXEL");
     private static final int RANK_PROGRESS_BAR_LENGTH = 30;
     private static final int PRESTIGE_PROGRESS_BAR_LENGTH = 40;
-    public final int availableBackgrounds = ImageUtil.getBackgrounds(backgroundImages, "duels/duels_overlay", (g2d) ->
+    public final int availableBackgrounds = HypixelUtil.getBackgrounds(backgroundImages, "duels/duels_overlay", (g2d) ->
     {
         g2d.drawImage(Main.botProfileScaled, 25, 25, 226, 226, null);
-        g2d.drawImage(ImageUtil.DUELS_BOW, 1915, 300, 100, 100, null);
-        g2d.drawImage(ImageUtil.DUELS_SWORD, 2455, 300, 100, 100, null);
-        g2d.drawImage(ImageUtil.DUELS_HEALTH, 75, 1600, 150, 150, null);
-        g2d.drawImage(ImageUtil.DUELS_DAMAGE, 65, 1765, 175, 175, null);
-        g2d.drawImage(ImageUtil.DUELS_COIN, 75, 1935, 150, 150, null);
+        g2d.drawImage(HypixelUtil.DUELS_BOW, 1915, 300, 100, 100, null);
+        g2d.drawImage(HypixelUtil.DUELS_SWORD, 2455, 300, 100, 100, null);
+        g2d.drawImage(HypixelUtil.DUELS_HEALTH, 75, 1600, 150, 150, null);
+        g2d.drawImage(HypixelUtil.DUELS_DAMAGE, 65, 1765, 175, 175, null);
+        g2d.drawImage(HypixelUtil.DUELS_COIN, 75, 1935, 150, 150, null);
     });
     public static ArrayList<BufferedImage> backgroundImages = new ArrayList<>();
     public static FontRenderer fontRenderer = new FontRenderer(null, new Font[]{Main.minecraftFont.deriveFont(144f), Main.minecraftFont.deriveFont(96f), Main.minecraftFont.deriveFont(64f), Main.minecraftFont.deriveFont(56f), Main.minecraftFont.deriveFont(40f)});
@@ -158,8 +157,8 @@ public class Duels implements ICommand
             userSpecificSkin.apply(fontRenderer);
         }
 
-        Future<BufferedImage> playerFuture = ImageUtil.getPlayerSkinFull(player.getUUID());
-        Future<BufferedImage> playerTopFuture = ImageUtil.getPlayerSkinTop(player.getUUID());
+        Future<BufferedImage> playerFuture = HypixelUtil.getPlayerSkinFull(player.getUUID());
+        Future<BufferedImage> playerTopFuture = HypixelUtil.getPlayerSkinTop(player.getUUID());
 
         fontRenderer.useDefaultColors = true;
         fontRenderer.drawString(player.getNameFormatted(), 1440 - (g2d.getFontMetrics().stringWidth((FontRenderer.removeFormatting(player.getNameFormatted()))) / 2), 75);
@@ -246,7 +245,7 @@ public class Duels implements ICommand
 
                 default -> new String[]{duels.getRecentlyPlayed()[i], ""};
             };
-            BufferedImage duelImage = loadImage("/duels/recently_played/", duel[0].toLowerCase(), null);
+            BufferedImage duelImage = HypixelUtil.loadImage("/duels/recently_played/", duel[0].toLowerCase(), null);
             g2d.drawImage(duelImage, 1900, 800 + 725 * (i + 1) / duels.getRecentlyPlayed().length, 100, 100, null);
             StringBuilder str = new StringBuilder();
             for (String s : duel)

@@ -1,8 +1,6 @@
 package net.syl;
 
 import com.lcv.Main;
-import com.lcv.commands.hypixel.Bedwars;
-import com.lcv.util.HypixelPlayerData;
 import org.json.JSONObject;
 
 import javax.swing.*;
