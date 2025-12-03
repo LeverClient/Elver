@@ -52,10 +52,11 @@ public class ETCG implements ICommand
     @Override
     public void execute(SlashCommandInteractionEvent event)
     {
-        Embed mainMenu = mainMenu(event);
-        event.replyEmbeds(mainMenu.get())
-                .addActionRow(mainMenu.getButtons())
-                .queue();
+//        Embed mainMenu = mainMenu(event);
+//        event.replyEmbeds(mainMenu.get())
+//                .addActionRow(mainMenu.getButtons())
+//                .queue();
+
     }
 
     public static Embed mainMenu(GenericInteractionCreateEvent event)

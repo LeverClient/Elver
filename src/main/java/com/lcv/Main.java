@@ -31,8 +31,6 @@ import net.dv8tion.jda.api.interactions.modals.Modal;
 import net.dv8tion.jda.api.requests.GatewayIntent;
 import net.dv8tion.jda.internal.utils.Helpers;
 import org.jetbrains.annotations.NotNull;
-import org.mapdb.DB;
-import org.mapdb.DBMaker;
 
 import javax.imageio.ImageIO;
 import java.awt.*;

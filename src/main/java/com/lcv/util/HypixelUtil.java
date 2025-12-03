@@ -35,10 +35,9 @@ public class HypixelUtil
     public static HashMap<String, BufferedImage> BACKGROUND_OVERLAYS = new HashMap<>();
     public static HashMap<String, BufferedImage> IMAGE_MAP = new HashMap<>();
     public static Random rand = new Random();
-    public static ExecutorService asyncExecutorService = Executors.newCachedThreadPool();
 
     public static Future<BufferedImage> getPlayerSkinFull(String uuid) {
-        return asyncExecutorService.submit(() -> {
+        return ImageUtil.ASYNC.submit(() -> {
             String skinType = PLAYER_SKIN_FULL[rand.nextInt(PLAYER_SKIN_FULL.length)];
             if (uuid.equals("ddf13e436ccc4790bb49912913bf7d77")) skinType = "mojavatar";
 
@@ -58,7 +57,7 @@ public class HypixelUtil
     }
 
     public static Future<BufferedImage> getPlayerSkinTop(String uuid) {
-        return asyncExecutorService.submit(() -> {
+        return ImageUtil.ASYNC.submit(() -> {
             String skinType = PLAYER_SKIN_TOP[rand.nextInt(PLAYER_SKIN_TOP.length)];
             for (int i = 0; i < 3; i++) {
                 try {
@@ -130,7 +129,7 @@ public class HypixelUtil
                 URL resource = Main.class.getResource(String.format("/images/bedwars/backgrounds/background%s.png", availableBackgrounds));
                 if (resource == null) break;
 
-                backgroundFutures.add(asyncExecutorService.submit(() -> {
+                backgroundFutures.add(ImageUtil.ASYNC.submit(() -> {
                     BufferedImage image = ImageIO.read(resource);
 
                     // draw overlay on background

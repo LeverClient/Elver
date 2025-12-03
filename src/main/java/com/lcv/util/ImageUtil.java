@@ -6,9 +6,13 @@ import javax.imageio.ImageIO;
 import java.awt.*;
 import java.awt.image.BufferedImage;
 import java.io.IOException;
+import java.util.concurrent.ExecutorService;
+import java.util.concurrent.Executors;
 
 public class ImageUtil
 {
+    public static ExecutorService ASYNC = Executors.newCachedThreadPool();
+
     public static BufferedImage loadImage(String name)
     {
         try
