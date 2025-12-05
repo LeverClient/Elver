@@ -25,11 +25,11 @@ public class ETCGUtil {
                 try {
                     BufferedImage image = ImageIO.read(resource);
                     Graphics2D g2d = image.createGraphics();
-                    g2d.drawImage(Main.botProfileScaled, 25, 25, 226, 226, null);
+                    g2d.drawImage(ImageUtil.ELVER_ICON, 25, 25, 226, 226, null);
                     g2d.dispose();
                     return image;
                 } catch (IOException e) {
-                    return Main.nullTexture;
+                    return ImageUtil.NULL_TEXTURE;
                 }
             }));
         }
@@ -38,7 +38,7 @@ public class ETCGUtil {
             try {
                 backgrounds.add(future.get());
             } catch (InterruptedException | ExecutionException e) {
-                backgrounds.add(Main.nullTexture);
+                backgrounds.add(ImageUtil.NULL_TEXTURE);
             }
         }
         return futureList.size();

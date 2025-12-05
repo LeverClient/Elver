@@ -47,7 +47,7 @@ public class Hello implements ICommand
         g2d.drawImage(ImageUtil.loadImage("/ETCG/assets/trap_card.png"), 0, 0, null);
         g2d.drawImage(ImageUtil.loadImage("/ETCG/assets/starter_pack/blue_eyes_white_dragon.png"), 100, 100, null);
 
-        FontRenderer f = new FontRenderer(g2d, new Font[]{Main.minecraftFont.deriveFont(120f)});
+        FontRenderer f = new FontRenderer(g2d, new Font[]{ImageUtil.MINECRAFT_FONT.deriveFont(120f)});
         f.drawString("Blue-Eyes", 150, 3050);
         f.drawString("White Dragon", 150, 3200);
 

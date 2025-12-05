@@ -90,7 +90,7 @@ public class HypixelUtil
 
         if (imageResource == null) {
             System.err.println("Couldn't find texture for " + image);
-            return Main.nullTexture;
+            return ImageUtil.NULL_TEXTURE;
         }
 
         try {
@@ -100,7 +100,7 @@ public class HypixelUtil
             return bufferedImage;
         } catch (IOException e) {
             e.printStackTrace(System.err);
-            return Main.nullTexture;
+            return ImageUtil.NULL_TEXTURE;
         }
     }
 
@@ -151,7 +151,7 @@ public class HypixelUtil
         }
 
         backgroundFutures.forEach((future) -> {
-            BufferedImage img = Main.nullTexture;
+            BufferedImage img = ImageUtil.NULL_TEXTURE;
             try {
                 img = future.get();
             } catch (InterruptedException ignored) {} catch (ExecutionException e) {

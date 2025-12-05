@@ -39,11 +39,11 @@ public class Bedwars implements ICommand
 
     private static final Random rand = new Random();
     public static ArrayList<BufferedImage> backgroundImages = new ArrayList<>();
-    public static FontRenderer fontRenderer = new FontRenderer(null, new Font[]{Main.minecraftFont.deriveFont(144f), Main.minecraftFont.deriveFont(96f), Main.minecraftFont.deriveFont(72f), Main.minecraftFont.deriveFont(40f)});
+    public static FontRenderer fontRenderer = new FontRenderer(null, new Font[]{ImageUtil.MINECRAFT_FONT.deriveFont(144f), ImageUtil.MINECRAFT_FONT.deriveFont(96f), ImageUtil.MINECRAFT_FONT.deriveFont(72f), ImageUtil.MINECRAFT_FONT.deriveFont(40f)});
 
     public final int availableBackgrounds = HypixelUtil.getBackgrounds(backgroundImages, "bedwars/bedwars_overlay", (g2d) ->
     {
-        g2d.drawImage(Main.botProfileScaled, 25, 25, 226, 226, null);
+        g2d.drawImage(ImageUtil.ELVER_ICON, 25, 25, 226, 226, null);
         g2d.drawImage(HypixelUtil.BEDWARS_IRON_INGOT, 100, 1830, null);
         g2d.drawImage(HypixelUtil.BEDWARS_GOLD_INGOT, 355, 1830, null);
         g2d.drawImage(HypixelUtil.BEDWARS_DIAMOND, 610, 1820, null);
@@ -252,8 +252,8 @@ public class Bedwars implements ICommand
         System.out.printf("generated bedwars stats image without player in %dms%n", (System.nanoTime() - startTime) / 1000000);
 
         // draw player images (last cause we were doing this on another thread)
-        BufferedImage playerFull = Main.nullTexture;
-        BufferedImage playerTop = Main.nullTexture;
+        BufferedImage playerFull = ImageUtil.NULL_TEXTURE;
+        BufferedImage playerTop = ImageUtil.NULL_TEXTURE;
 
         try {
             playerFull = playerFuture.get();

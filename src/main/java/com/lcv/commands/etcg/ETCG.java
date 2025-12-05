@@ -35,7 +35,7 @@ public class ETCG implements ICommand
     @Override
     public String getName()
     {
-        return "tcg";
+        return "etcg";
     }
 
     @Override

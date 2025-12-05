@@ -32,9 +32,7 @@ import net.dv8tion.jda.api.requests.GatewayIntent;
 import net.dv8tion.jda.internal.utils.Helpers;
 import org.jetbrains.annotations.NotNull;
 
-import javax.imageio.ImageIO;
 import java.awt.*;
-import java.awt.image.BufferedImage;
 import java.io.*;
 import java.net.URISyntaxException;
 import java.util.*;
@@ -46,38 +44,12 @@ import static net.dv8tion.jda.api.interactions.InteractionContextType.*;
 public class Main extends ListenerAdapter
 {
     public static final String ELVER_ID = "1140399630622924971";
-
     public static final Set<InteractionContextType> ALL_CONTEXTS = Helpers.unmodifiableEnumSet(GUILD, BOT_DM, PRIVATE_CHANNEL);
-
     private static List<ICommand> commands;
-
-    public static BufferedImage botProfile;
-
-    public static BufferedImage botProfileScaled;
-
-    public static Font minecraftFont;
-
-    public static BufferedImage nullTexture;
-
     public static JDA jda;
 
     public static void main(String[] args) throws URISyntaxException, IOException, FontFormatException, InterruptedException
     {
-        // null texture
-        nullTexture = ImageIO.read(new File(Objects.requireNonNull(Main.class.getResource("/images/null.png")).toURI()));
-
-        // cache bot profile for faster image making
-        botProfile = ImageIO.read(new File(Objects.requireNonNull(Main.class.getResource("/images/elver.png")).toURI()));
-        botProfileScaled = new BufferedImage(226, 226, BufferedImage.TYPE_INT_ARGB);
-        {
-            Graphics2D g2d = botProfileScaled.createGraphics();
-            g2d.drawImage(botProfile, 0, 0, 226, 226, null);
-            g2d.dispose();
-        }
-
-        // read font
-        minecraftFont = Font.createFont(Font.TRUETYPE_FONT, Objects.requireNonNull(Main.class.getResourceAsStream("/fonts/minecraft.ttf")));
-
         if (true)
         {
             new Thread(() ->
@@ -117,8 +89,6 @@ public class Main extends ListenerAdapter
         }
 
         jda.updateCommands().addCommands(slashData).queue();
-
-
     }
 
     @Override

@@ -37,7 +37,7 @@ public class Duels implements ICommand
     private static final int PRESTIGE_PROGRESS_BAR_LENGTH = 40;
     public final int availableBackgrounds = HypixelUtil.getBackgrounds(backgroundImages, "duels/duels_overlay", (g2d) ->
     {
-        g2d.drawImage(Main.botProfileScaled, 25, 25, 226, 226, null);
+        g2d.drawImage(ImageUtil.ELVER_ICON, 25, 25, 226, 226, null);
         g2d.drawImage(HypixelUtil.DUELS_BOW, 1915, 300, 100, 100, null);
         g2d.drawImage(HypixelUtil.DUELS_SWORD, 2455, 300, 100, 100, null);
         g2d.drawImage(HypixelUtil.DUELS_HEALTH, 75, 1600, 150, 150, null);
@@ -45,7 +45,7 @@ public class Duels implements ICommand
         g2d.drawImage(HypixelUtil.DUELS_COIN, 75, 1935, 150, 150, null);
     });
     public static ArrayList<BufferedImage> backgroundImages = new ArrayList<>();
-    public static FontRenderer fontRenderer = new FontRenderer(null, new Font[]{Main.minecraftFont.deriveFont(144f), Main.minecraftFont.deriveFont(96f), Main.minecraftFont.deriveFont(64f), Main.minecraftFont.deriveFont(56f), Main.minecraftFont.deriveFont(40f)});
+    public static FontRenderer fontRenderer = new FontRenderer(null, new Font[]{ImageUtil.MINECRAFT_FONT.deriveFont(144f), ImageUtil.MINECRAFT_FONT.deriveFont(96f), ImageUtil.MINECRAFT_FONT.deriveFont(64f), ImageUtil.MINECRAFT_FONT.deriveFont(56f), ImageUtil.MINECRAFT_FONT.deriveFont(40f)});
     private static final Random rand = new Random();
 
     @Override
@@ -283,8 +283,8 @@ public class Duels implements ICommand
         fontRenderer.drawString("§a±§c" + duels.getPingPreference() + "ms", 1450, 2015);
 
         // draw player images (last cause we were doing this on another thread)
-        BufferedImage playerFull = Main.nullTexture;
-        BufferedImage playerTop = Main.nullTexture;
+        BufferedImage playerFull = ImageUtil.NULL_TEXTURE;
+        BufferedImage playerTop = ImageUtil.NULL_TEXTURE;
 
         try
         {
