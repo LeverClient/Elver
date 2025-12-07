@@ -1,6 +1,7 @@
 package com.lcv.commands.misc;
 
 import com.lcv.chat.ChatResponse;
+import com.lcv.commands.CommandMeta;
 import com.lcv.commands.ICommand;
 import net.dv8tion.jda.api.events.interaction.command.SlashCommandInteractionEvent;
 import net.dv8tion.jda.api.interactions.InteractionContextType;
@@ -9,28 +10,12 @@ import net.dv8tion.jda.api.interactions.components.buttons.Button;
 
 import java.util.Set;
 
-import static com.lcv.Main.ALL_CONTEXTS;
+import static net.dv8tion.jda.api.interactions.InteractionContextType.*;
 import static net.dv8tion.jda.api.interactions.commands.OptionType.STRING;
 
+@CommandMeta(name = "converse", description = "Say something to Elver!", contexts = {GUILD, BOT_DM, PRIVATE_CHANNEL})
 public class Converse implements ICommand
 {
-    @Override
-    public String getName()
-    {
-        return "converse";
-    }
-
-    @Override
-    public String getDescription()
-    {
-        return "Say something to elver!";
-    }
-
-    @Override
-    public Set<InteractionContextType> getContexts() {
-        return ALL_CONTEXTS;
-    }
-
     @Override
     public void execute(SlashCommandInteractionEvent event)
     {

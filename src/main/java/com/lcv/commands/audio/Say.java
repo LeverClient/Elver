@@ -1,5 +1,6 @@
 package com.lcv.commands.audio;
 
+import com.lcv.commands.CommandMeta;
 import com.lcv.commands.ICommand;
 import com.sedmelluq.discord.lavaplayer.player.AudioLoadResultHandler;
 import com.sedmelluq.discord.lavaplayer.player.AudioPlayer;
@@ -23,20 +24,9 @@ import java.nio.file.Files;
 
 import static net.dv8tion.jda.api.interactions.commands.OptionType.STRING;
 
+@CommandMeta(name = "say", description = "Say something cool")
 public class Say implements ICommand
 {
-    @Override
-    public String getName()
-    {
-        return "say";
-    }
-
-    @Override
-    public String getDescription()
-    {
-        return "Say something cool";
-    }
-
     @Override
     public void execute(SlashCommandInteractionEvent event)
     {

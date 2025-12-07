@@ -1,6 +1,6 @@
 package com.lcv.commands.hypixel;
 
-import com.lcv.Main;
+import com.lcv.commands.CommandMeta;
 import com.lcv.commands.ICommand;
 import com.lcv.commands.Embed;
 import com.lcv.elverapi.apis.hypixelplayer.BedwarsAPI;
@@ -25,9 +25,10 @@ import java.util.concurrent.ExecutionException;
 import java.util.concurrent.Future;
 import java.util.function.Function;
 
-import static com.lcv.Main.ALL_CONTEXTS;
+import static net.dv8tion.jda.api.interactions.InteractionContextType.*;
 import static net.dv8tion.jda.api.interactions.commands.OptionType.STRING;
 
+@CommandMeta(name = "bedwars", description = "Gets Bedwars Stats", contexts = {GUILD, BOT_DM, PRIVATE_CHANNEL})
 public class Bedwars implements ICommand
 {
     private static final Logger log = LoggerFactory.getLogger(Bedwars.class);
@@ -49,21 +50,6 @@ public class Bedwars implements ICommand
         g2d.drawImage(HypixelUtil.BEDWARS_DIAMOND, 610, 1820, null);
         g2d.drawImage(HypixelUtil.BEDWARS_EMERALD, 850, 1830, null);
     });
-
-    @Override
-    public String getName() {
-        return "bedwars";
-    }
-
-    @Override
-    public String getDescription() {
-        return "Gets Bedwars Stats";
-    }
-
-    @Override
-    public Set<InteractionContextType> getContexts() {
-        return ALL_CONTEXTS;
-    }
 
     @Override
     public void execute(SlashCommandInteractionEvent event) {
@@ -150,7 +136,7 @@ public class Bedwars implements ICommand
         Future<BufferedImage> playerTopFuture = HypixelUtil.getPlayerSkinTop(player.getUUID());
 
         fontRenderer.useDefaultColors = true;
-        fontRenderer.drawString(player.getNameFormatted(), 1440 - (g2d.getFontMetrics().stringWidth((FontRenderer.removeFormatting(player.getNameFormatted()))) / 2), 75);
+        fontRenderer.drawString(player.getNameFormatted(), 1440 - (g2d.getFontMetrics().stringWidth(FontRenderer.removeFormatting(player.getNameFormatted())) / 2), 75);
         fontRenderer.useDefaultColors = false;
 
         fontRenderer.switchFont(1);

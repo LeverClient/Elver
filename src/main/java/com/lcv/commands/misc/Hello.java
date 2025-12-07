@@ -1,6 +1,6 @@
 package com.lcv.commands.misc;
 
-import com.lcv.Main;
+import com.lcv.commands.CommandMeta;
 import com.lcv.commands.ICommand;
 import com.lcv.util.FontRenderer;
 import com.lcv.util.ImageUtil;
@@ -14,31 +14,14 @@ import java.awt.*;
 import java.awt.image.BufferedImage;
 import java.io.ByteArrayInputStream;
 import java.io.ByteArrayOutputStream;
-import java.io.File;
 import java.io.IOException;
 import java.util.Set;
 
-import static com.lcv.Main.ALL_CONTEXTS;
+import static net.dv8tion.jda.api.interactions.InteractionContextType.*;
 
+@CommandMeta(name = "hello", description = "Hello!", contexts = {GUILD, BOT_DM, PRIVATE_CHANNEL})
 public class Hello implements ICommand
 {
-    @Override
-    public String getName()
-    {
-        return "hello";
-    }
-
-    @Override
-    public String getDescription()
-    {
-        return "Says hello!";
-    }
-
-    @Override
-    public Set<InteractionContextType> getContexts() {
-        return ALL_CONTEXTS;
-    }
-
     @Override
     public void execute(SlashCommandInteractionEvent event)
     {

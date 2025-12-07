@@ -1,6 +1,6 @@
 package com.lcv.commands.hypixel;
 
-import com.lcv.Main;
+import com.lcv.commands.CommandMeta;
 import com.lcv.commands.ICommand;
 import com.lcv.commands.Embed;
 import com.lcv.elverapi.apis.hypixelplayer.DuelsAPI;
@@ -21,15 +21,15 @@ import java.io.ByteArrayOutputStream;
 import java.io.IOException;
 import java.text.DecimalFormat;
 import java.util.ArrayList;
-import java.util.Arrays;
 import java.util.Random;
 import java.util.Set;
 import java.util.concurrent.ExecutionException;
 import java.util.concurrent.Future;
 
-import static com.lcv.Main.ALL_CONTEXTS;
+import static net.dv8tion.jda.api.interactions.InteractionContextType.*;
 import static net.dv8tion.jda.api.interactions.commands.OptionType.STRING;
 
+@CommandMeta(name = "duels", description = "Gets Duels Stats", contexts = {GUILD, BOT_DM, PRIVATE_CHANNEL})
 public class Duels implements ICommand
 {
     private static final String API_KEY_HYPIXEL = System.getenv("API_KEY_HYPIXEL");
@@ -47,23 +47,6 @@ public class Duels implements ICommand
     public static ArrayList<BufferedImage> backgroundImages = new ArrayList<>();
     public static FontRenderer fontRenderer = new FontRenderer(null, new Font[]{ImageUtil.MINECRAFT_FONT.deriveFont(144f), ImageUtil.MINECRAFT_FONT.deriveFont(96f), ImageUtil.MINECRAFT_FONT.deriveFont(64f), ImageUtil.MINECRAFT_FONT.deriveFont(56f), ImageUtil.MINECRAFT_FONT.deriveFont(40f)});
     private static final Random rand = new Random();
-
-    @Override
-    public String getName()
-    {
-        return "duels";
-    }
-
-    @Override
-    public String getDescription()
-    {
-        return "Gets Duels Stats";
-    }
-
-    @Override
-    public Set<InteractionContextType> getContexts() {
-        return ALL_CONTEXTS;
-    }
 
     @Override
     public void execute(SlashCommandInteractionEvent event)

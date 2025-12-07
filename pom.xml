@@ -99,6 +99,11 @@
             <artifactId>mapdb</artifactId>
             <version>3.1.0</version>
         </dependency>
+        <dependency>
+            <groupId>org.reflections</groupId>
+            <artifactId>reflections</artifactId>
+            <version>0.10.2</version>
+        </dependency>
 
         <!-- LWJGL -->
         <dependency>

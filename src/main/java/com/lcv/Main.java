@@ -1,6 +1,7 @@
 package com.lcv;
 
 import com.lcv.chat.ChatResponse;
+import com.lcv.commands.CommandMeta;
 import com.lcv.commands.ICommand;
 import com.lcv.commands.audio.Say;
 import com.lcv.commands.hypixel.Bedwars;
@@ -10,6 +11,8 @@ import com.lcv.commands.misc.Hello;
 import com.lcv.commands.misc.Lever;
 import com.lcv.commands.misc.lever.Wordle;
 import com.lcv.commands.etcg.ETCG;
+import com.lcv.util.ETCGUtil;
+import com.lcv.util.ImageUtil;
 import com.lcv.window.GLFWHandler;
 import net.dv8tion.jda.api.JDA;
 import net.dv8tion.jda.api.JDABuilder;
@@ -22,6 +25,7 @@ import net.dv8tion.jda.api.events.message.MessageReceivedEvent;
 import net.dv8tion.jda.api.hooks.ListenerAdapter;
 import net.dv8tion.jda.api.interactions.IntegrationType;
 import net.dv8tion.jda.api.interactions.InteractionContextType;
+import net.dv8tion.jda.api.interactions.commands.Command;
 import net.dv8tion.jda.api.interactions.commands.build.Commands;
 import net.dv8tion.jda.api.interactions.commands.build.SlashCommandData;
 import net.dv8tion.jda.api.interactions.components.buttons.Button;
@@ -31,9 +35,12 @@ import net.dv8tion.jda.api.interactions.modals.Modal;
 import net.dv8tion.jda.api.requests.GatewayIntent;
 import net.dv8tion.jda.internal.utils.Helpers;
 import org.jetbrains.annotations.NotNull;
+import org.reflections.Reflections;
+import org.reflections.scanners.Scanners;
 
 import java.awt.*;
 import java.io.*;
+import java.lang.reflect.InvocationTargetException;
 import java.net.URISyntaxException;
 import java.util.*;
 import java.util.List;
@@ -44,8 +51,8 @@ import static net.dv8tion.jda.api.interactions.InteractionContextType.*;
 public class Main extends ListenerAdapter
 {
     public static final String ELVER_ID = "1140399630622924971";
-    public static final Set<InteractionContextType> ALL_CONTEXTS = Helpers.unmodifiableEnumSet(GUILD, BOT_DM, PRIVATE_CHANNEL);
-    private static List<ICommand> commands;
+    public static final List<ICommand> commands = new ArrayList<>();
+
     public static JDA jda;
 
     public static void main(String[] args) throws URISyntaxException, IOException, FontFormatException, InterruptedException
@@ -68,27 +75,38 @@ public class Main extends ListenerAdapter
             }).start();
         }
 
-        ETCG.setupDB();
+        ETCGUtil.setupDB();
+        ETCGUtil.loadBackgrounds();
 
         jda = JDABuilder.create(System.getenv("BOT_KEY"), GatewayIntent.MESSAGE_CONTENT, GatewayIntent.GUILD_MESSAGES, GatewayIntent.GUILD_MEMBERS, GatewayIntent.GUILD_VOICE_STATES).addEventListeners(new Main()).build();
-        commands = List.of(new Hello(), new Bedwars(), new Duels(), new Converse(), new Say(), new Lever(), new ETCG());
+        registerCommands();
+    }
 
-        List<SlashCommandData> slashData = new ArrayList<>();
-
-        for (ICommand command : commands)
+    private static void registerCommands()
+    {
+        Reflections reflections = new Reflections("com.lcv.commands", Scanners.TypesAnnotated);
+        for (Class<?> cls : reflections.getTypesAnnotatedWith(CommandMeta.class))
         {
-            SlashCommandData data = Commands.slash(command.getName(), command.getDescription());
-            data.setContexts(command.getContexts());
-            if (command.getContexts().contains(PRIVATE_CHANNEL))
+            if (!ICommand.class.isAssignableFrom(cls)) continue;
+            try
             {
-                data.setIntegrationTypes(IntegrationType.ALL);
+                ICommand command = (ICommand) cls.getDeclaredConstructor().newInstance();
+                commands.add(command);
             }
-
-            command.addFields(data);
-            slashData.add(data);
+            catch (InstantiationException | IllegalAccessException | InvocationTargetException | NoSuchMethodException e)
+            {
+                throw new RuntimeException(e);
+            }
         }
-
-        jda.updateCommands().addCommands(slashData).queue();
+        List<SlashCommandData> slashCommandData = new ArrayList<>();
+        commands.forEach(command -> {
+            SlashCommandData scd = Commands.slash(command.getName(), command.getDescription());
+            scd.setContexts(command.getContexts());
+            if (command.getContexts().contains(PRIVATE_CHANNEL)) scd.setIntegrationTypes(IntegrationType.ALL);
+            command.addFields(scd);
+            slashCommandData.add(scd);
+        });
+        jda.updateCommands().addCommands(slashCommandData).queue();
     }
 
     @Override

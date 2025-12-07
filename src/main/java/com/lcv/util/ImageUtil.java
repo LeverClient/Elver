@@ -4,6 +4,7 @@ import com.lcv.Main;
 
 import javax.imageio.ImageIO;
 import java.awt.*;
+import java.awt.geom.Ellipse2D;
 import java.awt.image.BufferedImage;
 import java.io.File;
 import java.io.IOException;
@@ -23,8 +24,7 @@ public class ImageUtil
     {
         try
         {
-            BufferedImage image = ImageIO.read(Main.class.getResource(path));
-            System.out.println(image.getWidth() + " " + image.getHeight());
+            BufferedImage image = ImageIO.read(Main.class.getResourceAsStream(path));
             if (image.getType() == BufferedImage.TYPE_INT_ARGB)
                 return image;
             else
@@ -76,5 +76,23 @@ public class ImageUtil
         int height = (int) (imgHeight * ratio);
 
         return new int[]{width, height};
+    }
+
+    public static BufferedImage toCircle(BufferedImage image)
+    {
+        int size = 256;
+        int border = 6;
+        BufferedImage circle = new BufferedImage(size, size, BufferedImage.TYPE_INT_ARGB);
+        Graphics2D g2d = circle.createGraphics();
+        g2d.setRenderingHint(RenderingHints.KEY_ANTIALIASING, RenderingHints.VALUE_ANTIALIAS_ON);
+        g2d.setColor(Color.BLACK);
+        g2d.fillOval(0, 0, size, size);
+        int inner = size - border * 2;
+        Ellipse2D.Double clip = new Ellipse2D.Double(border, border, inner, inner);
+        g2d.setClip(clip);
+        Image scaled = image.getScaledInstance(inner, inner, Image.SCALE_SMOOTH);
+        g2d.drawImage(scaled, border, border, null);
+        g2d.dispose();
+        return circle;
     }
 }
