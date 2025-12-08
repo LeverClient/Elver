@@ -1,6 +1,7 @@
 package com.lcv.util;
 
 import com.lcv.Main;
+import com.lcv.commands.etcg.Player;
 import com.lcv.commands.etcg.cards.*;
 import org.json.JSONArray;
 import org.json.JSONObject;
@@ -14,10 +15,10 @@ import java.awt.*;
 import java.awt.image.BufferedImage;
 import java.io.IOException;
 import java.io.InputStream;
-import java.net.URL;
 import java.nio.charset.StandardCharsets;
 import java.util.ArrayList;
 import java.util.Random;
+import java.util.concurrent.ConcurrentMap;
 import java.util.concurrent.ExecutionException;
 import java.util.concurrent.Future;
 
@@ -27,7 +28,9 @@ public class ETCGUtil {
     private static final Random rand = new Random();
 
     public static DB db;
-    public static HTreeMap<String, CardTemplate> templates;
+    public static HTreeMap<String, CardTemplate> CARDS;
+    public static ConcurrentMap<String, Player> PLAYERS;
+    public static ConcurrentMap<String, Pack> PACKS;
 
     public static void loadBackgrounds() {
         ArrayList<Future<BufferedImage>> futureList = new ArrayList<>();
@@ -66,12 +69,13 @@ public class ETCGUtil {
     {
         db = DBMaker.fileDB("etgc.db").make();
         Runtime.getRuntime().addShutdownHook(new Thread(db::close));
-        templates = db
-                .hashMap("templates", Serializer.STRING, Serializer.JAVA)
+        CARDS = db.hashMap("cards", Serializer.STRING, Serializer.JAVA)
+                .createOrOpen();
+        PLAYERS = db.hashMap("users", Serializer.STRING, Serializer.JAVA)
                 .createOrOpen();
         try
         {
-            registerCardTemplates();
+            registerCards();
         }
         catch (IOException e)
         {
@@ -79,7 +83,7 @@ public class ETCGUtil {
         }
     }
 
-    public static void registerCardTemplates() throws IOException
+    public static void registerCards() throws IOException
     {
         byte[] packBytes = Main.class.getResourceAsStream("/ETCG/cards/packs.json").readAllBytes();
         JSONArray packArr = new JSONArray(new String(packBytes, StandardCharsets.UTF_8));
@@ -132,7 +136,7 @@ public class ETCGUtil {
                             -1
                     );
                 };
-                templates.put(card.getId(), card);
+                CARDS.put(card.getId(), card);
             }
         }
         db.commit();
