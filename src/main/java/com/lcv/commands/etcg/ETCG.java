@@ -63,6 +63,9 @@ public class ETCG implements ICommand
         Graphics2D g2d = background.createGraphics();
         FontRenderer f = new FontRenderer(g2d, new Font[]{ImageUtil.MINECRAFT_FONT.deriveFont(144f)});
         BufferedImage avatar = ImageUtil.toCircle(ImageIO.read(new URL(event.getUser().getEffectiveAvatarUrl() + "?size=512")));
+
+        ETCGUtil.PL
+
         g2d.drawImage(avatar, 25, 300, 512, 512, null);
 
         f.drawString(event.getUser().getName(), 1440 - (g2d.getFontMetrics().stringWidth(event.getUser().getName()) / 2), 75);
